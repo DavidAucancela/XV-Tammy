@@ -38,7 +38,7 @@ function LoginForm() {
   return (
     <div
       style={{
-        minHeight: "100vh", background: "#080808",
+        minHeight: "100vh", background: "#0d0610",
         display: "flex", alignItems: "center", justifyContent: "center",
         padding: 24, fontFamily: "var(--font-lato), system-ui",
       }}
@@ -46,12 +46,12 @@ function LoginForm() {
       <div style={{ width: "100%", maxWidth: 360 }}>
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: 40 }}>
-          <p style={{ fontSize: 11, letterSpacing: "0.3em", textTransform: "uppercase", color: "#c9a96e", marginBottom: 16 }}>
+          <p style={{ fontSize: 11, letterSpacing: "0.3em", textTransform: "uppercase", color: "#e8699a", marginBottom: 16 }}>
             ✦ &nbsp; acceso staff &nbsp; ✦
           </p>
           <h1
             style={{
-              fontSize: 28, color: "#f5ede0",
+              fontSize: 28, color: "#fdf0f8",
               fontFamily: "var(--font-playfair), Georgia, serif",
               fontWeight: 400, margin: 0,
             }}
@@ -79,8 +79,8 @@ function LoginForm() {
                 onChange={e => setEmail(e.target.value)}
                 style={{
                   padding: "14px 16px", borderRadius: 12,
-                  background: "#111", border: "1px solid #1f1a16",
-                  color: "#f5ede0", fontSize: 14, outline: "none",
+                  background: "#160d1e", border: "1px solid #251535",
+                  color: "#fdf0f8", fontSize: 14, outline: "none",
                   fontFamily: "inherit",
                 }}
               />
@@ -96,8 +96,8 @@ function LoginForm() {
                 disabled={loading || !email}
                 style={{
                   padding: "14px", borderRadius: 12, border: "none",
-                  background: loading || !email ? "#2a2420" : "#c9a96e",
-                  color: loading || !email ? "#6b5e57" : "#080808",
+                  background: loading || !email ? "#2a1535" : "#e8699a",
+                  color: loading || !email ? "#7a5870" : "#0d0610",
                   fontSize: 12, letterSpacing: "0.25em", textTransform: "uppercase",
                   cursor: loading || !email ? "not-allowed" : "pointer",
                   transition: "background 0.2s",
@@ -113,21 +113,21 @@ function LoginForm() {
               animate={{ opacity: 1, y: 0 }}
               style={{
                 textAlign: "center", padding: "32px 20px",
-                background: "#111", borderRadius: 16,
-                border: "1px solid #1f1a16",
+                background: "#160d1e", borderRadius: 16,
+                border: "1px solid #251535",
               }}
             >
               <p style={{ fontSize: 24, marginBottom: 12 }}>📩</p>
-              <p style={{ color: "#f5ede0", fontSize: 14, marginBottom: 8 }}>
+              <p style={{ color: "#fdf0f8", fontSize: 14, marginBottom: 8 }}>
                 Revisá tu correo
               </p>
-              <p style={{ color: "#6b5e57", fontSize: 12 }}>
-                Te enviamos un link a <span style={{ color: "#c9a96e" }}>{email}</span>
+              <p style={{ color: "#7a5870", fontSize: 12 }}>
+                Te enviamos un link a <span style={{ color: "#e8699a" }}>{email}</span>
               </p>
               <button
                 onClick={() => setSent(false)}
                 style={{
-                  marginTop: 24, fontSize: 11, color: "#6b5e57",
+                  marginTop: 24, fontSize: 11, color: "#7a5870",
                   background: "none", border: "none", cursor: "pointer",
                   letterSpacing: "0.2em", textTransform: "uppercase",
                 }}

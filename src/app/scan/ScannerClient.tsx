@@ -64,13 +64,13 @@ function saveQueue(q: string[]) { localStorage.setItem(OFFLINE_KEY, JSON.stringi
 
 // ── Status display config ──────────────────────────────────────────────────
 const STATUS_CFG = {
-  ready:       { bg: "rgba(8,8,8,0.82)",   accent: "#c9a96e", label: "Apuntá la cámara al QR" },
-  processing:  { bg: "rgba(8,8,8,0.92)",   accent: "#6b9fc9", label: "Verificando…" },
-  success:     { bg: "rgba(4,22,12,0.96)", accent: "#4caf7d", label: "✓ Acceso permitido" },
-  already_in:  { bg: "rgba(22,17,0,0.96)", accent: "#c9a000", label: "⚠ Ya había ingresado" },
-  invalid:     { bg: "rgba(22,6,6,0.96)",  accent: "#e07070", label: "✗ QR inválido" },
-  offline:     { bg: "rgba(22,12,4,0.96)", accent: "#e09050", label: "Sin señal — guardado en cola" },
-  error:       { bg: "rgba(22,12,4,0.96)", accent: "#e09050", label: "Error" },
+  ready:       { bg: "rgba(13,6,16,0.82)",  accent: "#e8699a", label: "Apuntá la cámara al QR" },
+  processing:  { bg: "rgba(13,6,16,0.92)",  accent: "#b89ae8", label: "Verificando…" },
+  success:     { bg: "rgba(4,22,12,0.96)",  accent: "#4caf7d", label: "✓ Acceso permitido" },
+  already_in:  { bg: "rgba(22,17,0,0.96)",  accent: "#c9a000", label: "⚠ Ya había ingresado" },
+  invalid:     { bg: "rgba(22,6,6,0.96)",   accent: "#e07070", label: "✗ QR inválido" },
+  offline:     { bg: "rgba(22,12,4,0.96)",  accent: "#e09050", label: "Sin señal — guardado en cola" },
+  error:       { bg: "rgba(22,12,4,0.96)",  accent: "#e09050", label: "Error" },
 };
 
 // ── Component ──────────────────────────────────────────────────────────────
@@ -195,7 +195,7 @@ export default function ScannerClient() {
     <div
       style={{
         position: "fixed", inset: 0,
-        background: "#080808",
+        background: "#0d0610",
         display: "flex", flexDirection: "column",
         fontFamily: "var(--font-lato), system-ui, sans-serif",
         overflow: "hidden",
@@ -205,22 +205,22 @@ export default function ScannerClient() {
       <div style={{
         flexShrink: 0, display: "flex", alignItems: "center",
         justifyContent: "space-between", padding: "14px 20px",
-        background: "rgba(8,8,8,0.88)", backdropFilter: "blur(8px)",
+        background: "rgba(13,6,16,0.88)", backdropFilter: "blur(8px)",
         zIndex: 10,
       }}>
-        <span style={{ fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", color: "#c9a96e" }}>
+        <span style={{ fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", color: "#e8699a" }}>
           ✦ Control de acceso
         </span>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           {!isOnline && (
-            <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 999, background: "#2b1a0d", color: "#e09050" }}>
+            <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 999, background: "#1e0d2a", color: "#e09050" }}>
               offline
             </span>
           )}
           {queueCount > 0 && (
             <button
               onClick={syncQueue}
-              style={{ fontSize: 10, padding: "2px 8px", borderRadius: 999, background: "#2b2200", color: "#c9a000", cursor: "pointer", border: "none" }}
+              style={{ fontSize: 10, padding: "2px 8px", borderRadius: 999, background: "#1e0d2a", color: "#c9a000", cursor: "pointer", border: "none" }}
             >
               {queueCount} en cola ↑
             </button>
@@ -244,10 +244,10 @@ export default function ScannerClient() {
             flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24,
           }}>
             <div style={{ textAlign: "center" }}>
-              <p style={{ fontSize: 13, letterSpacing: "0.2em", textTransform: "uppercase", color: "#6b5e57", marginBottom: 8 }}>
+              <p style={{ fontSize: 13, letterSpacing: "0.2em", textTransform: "uppercase", color: "#7a5870", marginBottom: 8 }}>
                 Escáner de QR
               </p>
-              <p style={{ fontSize: 12, color: "#3a3330" }}>
+              <p style={{ fontSize: 12, color: "#3a1e48" }}>
                 Se pedirá permiso de cámara
               </p>
             </div>
@@ -255,7 +255,7 @@ export default function ScannerClient() {
               onClick={startCamera}
               style={{
                 padding: "14px 36px", borderRadius: 14, border: "none", cursor: "pointer",
-                background: "#c9a96e", color: "#080808",
+                background: "#e8699a", color: "#0d0610",
                 fontSize: 12, letterSpacing: "0.25em", textTransform: "uppercase",
               }}
             >
@@ -273,7 +273,7 @@ export default function ScannerClient() {
             <motion.div
               animate={{ opacity: [0.3, 1, 0.3] }}
               transition={{ duration: 1.2, repeat: Infinity }}
-              style={{ fontSize: 12, letterSpacing: "0.25em", textTransform: "uppercase", color: "#c9a96e" }}
+              style={{ fontSize: 12, letterSpacing: "0.25em", textTransform: "uppercase", color: "#e8699a" }}
             >
               Iniciando…
             </motion.div>
@@ -290,7 +290,7 @@ export default function ScannerClient() {
             <button
               onClick={startCamera}
               style={{
-                padding: "12px 28px", borderRadius: 12, border: "1px solid #3a2020", cursor: "pointer",
+                padding: "12px 28px", borderRadius: 12, border: "1px solid #3a1e48", cursor: "pointer",
                 background: "transparent", color: "#e07070",
                 fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase",
               }}
@@ -305,19 +305,19 @@ export default function ScannerClient() {
           <div style={{ position: "absolute", inset: 0, pointerEvents: "none", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <div style={{ position: "relative", width: 220, height: 220 }}>
               {/* TL */ }
-              <div style={{ position: "absolute", top: 0, left: 0, width: 28, height: 28, borderTop: "2px solid #c9a96e", borderLeft: "2px solid #c9a96e" }} />
+              <div style={{ position: "absolute", top: 0, left: 0, width: 28, height: 28, borderTop: "2px solid #e8699a", borderLeft: "2px solid #e8699a" }} />
               {/* TR */}
-              <div style={{ position: "absolute", top: 0, right: 0, width: 28, height: 28, borderTop: "2px solid #c9a96e", borderRight: "2px solid #c9a96e" }} />
+              <div style={{ position: "absolute", top: 0, right: 0, width: 28, height: 28, borderTop: "2px solid #e8699a", borderRight: "2px solid #e8699a" }} />
               {/* BL */}
-              <div style={{ position: "absolute", bottom: 0, left: 0, width: 28, height: 28, borderBottom: "2px solid #c9a96e", borderLeft: "2px solid #c9a96e" }} />
+              <div style={{ position: "absolute", bottom: 0, left: 0, width: 28, height: 28, borderBottom: "2px solid #e8699a", borderLeft: "2px solid #e8699a" }} />
               {/* BR */}
-              <div style={{ position: "absolute", bottom: 0, right: 0, width: 28, height: 28, borderBottom: "2px solid #c9a96e", borderRight: "2px solid #c9a96e" }} />
+              <div style={{ position: "absolute", bottom: 0, right: 0, width: 28, height: 28, borderBottom: "2px solid #e8699a", borderRight: "2px solid #e8699a" }} />
 
               {result.status === "processing" && (
                 <motion.div
                   animate={{ opacity: [0.2, 1, 0.2] }}
                   transition={{ duration: 0.8, repeat: Infinity }}
-                  style={{ position: "absolute", inset: 0, border: "1px solid #6b9fc9", borderRadius: 2 }}
+                  style={{ position: "absolute", inset: 0, border: "1px solid #b89ae8", borderRadius: 2 }}
                 />
               )}
             </div>
@@ -345,7 +345,7 @@ export default function ScannerClient() {
               <p style={{ fontSize: 20, color: cfg.accent, fontFamily: "var(--font-playfair), Georgia, serif", marginBottom: 4 }}>
                 {result.nombre}
               </p>
-              <p style={{ fontSize: 13, color: "#6b7a70" }}>
+              <p style={{ fontSize: 13, color: "#7a5870" }}>
                 {result.pases === 1 ? "1 persona" : `${result.pases} personas`}
               </p>
             </div>
