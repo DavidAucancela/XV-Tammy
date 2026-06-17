@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+/* html5-qrcode — fill the scanner container */
+#qr-reader {
+  border: none !important;
+  padding: 0 !important;
+}
+#qr-reader video,
+#qr-reader canvas {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
