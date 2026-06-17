@@ -9,7 +9,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "token requerido" }, { status: 400 });
   }
 
-  const url = `${req.nextUrl.origin}/i/${token}`;
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? req.nextUrl.origin;
+  const url = `${base}/i/${token}`;
 
   const png = await QRCode.toBuffer(url, {
     type: "png",
@@ -18,10 +19,14 @@ export async function GET(req: NextRequest) {
     color: { dark: "#1a1a1a", light: "#fafafa" },
   });
 
+  const isProd = process.env.NODE_ENV === "production";
+
   return new NextResponse(png as unknown as BodyInit, {
     headers: {
       "Content-Type": "image/png",
-      "Cache-Control": "public, max-age=31536000, immutable",
+      "Cache-Control": isProd
+        ? "public, max-age=31536000, immutable"
+        : "no-store",
     },
   });
 }
