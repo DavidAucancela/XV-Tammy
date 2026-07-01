@@ -1,5 +1,36 @@
 @import "tailwindcss";
 
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #0d0610;
+}
+
+/* ── Animated gradient mesh blobs ── */
+@keyframes mesh-blob-1 {
+  0%,  100% { transform: translate(0,    0)    scale(1);    }
+  25%        { transform: translate(7%,  -5%)  scale(1.08); }
+  50%        { transform: translate(-4%,  7%)  scale(0.95); }
+  75%        { transform: translate(5%,   4%)  scale(1.03); }
+}
+@keyframes mesh-blob-2 {
+  0%,  100% { transform: translate(0,    0)    scale(1);    }
+  30%        { transform: translate(-6%,  5%)  scale(1.10); }
+  70%        { transform: translate(4%,  -8%)  scale(0.92); }
+}
+@keyframes mesh-blob-3 {
+  0%,  100% { transform: translate(0,    0)    scale(1);    }
+  40%        { transform: translate(5%,  -4%)  scale(1.06); }
+  80%        { transform: translate(-3%,  6%)  scale(0.97); }
+}
+
+/* ── Reduce motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .mesh-blob { animation: none !important; }
+}
+
 /* html5-qrcode — fill the scanner container */
 #qr-reader {
   border: none !important;
