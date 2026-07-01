@@ -19,7 +19,7 @@ export default function EventLocation({
   lat: string;
   lng: string;
 }) {
-  const hasMap = Boolean(lat && lng);
+  const hasMap = Boolean(lat.trim() && lng.trim());
   const ref = useRef<HTMLElement>(null);
 
   const { scrollYProgress } = useScroll({

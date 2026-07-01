@@ -103,7 +103,7 @@ export default function ScannerClient() {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token }),
         });
-        if (!res.ok) remaining.push(token);
+        if (!res.ok && res.status !== 404) remaining.push(token);
       } catch { remaining.push(token); }
     }
     saveQueue(remaining);

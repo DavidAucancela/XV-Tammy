@@ -23,7 +23,8 @@ export async function POST(req: NextRequest) {
 
   const wasAlreadyCheckedIn = !!guest.checked_in_at;
 
-  await supabase.rpc("check_in", { p_token: token });
+  const { error: rpcError } = await supabase.rpc("check_in", { p_token: token });
+  if (rpcError) return NextResponse.json({ error: rpcError.message }, { status: 500 });
 
   return NextResponse.json({
     ok: true,

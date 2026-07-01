@@ -16,8 +16,13 @@ const lato = Lato({
 });
 
 export const metadata: Metadata = {
-  title: "Fiesta XV",
-  description: "Invitación a los XV años",
+  title: "XV Años — Tammy",
+  description: "Te invitamos a celebrar los XV años de Tammy",
+  openGraph: {
+    title: "XV Años — Tammy",
+    description: "Te invitamos a celebrar los XV años de Tammy",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

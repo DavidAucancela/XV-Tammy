@@ -65,7 +65,7 @@ export default function FamilyMessages({ messages }: { messages: Message[] }) {
         >
           {messages.map((msg, i) => (
             <motion.div
-              key={i}
+              key={msg.author}
               initial={{ opacity: 0, y: 40, rotate: i % 2 === 0 ? -0.8 : 0.8 }}
               whileInView={{ opacity: 1, y: 0, rotate: 0 }}
               viewport={{ once: true }}
