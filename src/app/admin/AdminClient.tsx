@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -107,6 +107,7 @@ export default function AdminClient({ initialGuests }: { initialGuests: Guest[] 
   const [guests, setGuests] = useState<Guest[]>(initialGuests);
   const [newIds, setNewIds] = useState<Set<string>>(new Set());
   const [isLive, setIsLive] = useState(false);
+  const flashTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const router = useRouter();
 
   const handleSignOut = useCallback(async () => {
@@ -134,7 +135,12 @@ export default function AdminClient({ initialGuests }: { initialGuests: Guest[] 
             // flash highlight if just checked in
             if (updated.checked_in_at) {
               setNewIds(prev => new Set(prev).add(updated.id));
-              setTimeout(() => setNewIds(prev => { const s = new Set(prev); s.delete(updated.id); return s; }), 2000);
+              const existing = flashTimers.current.get(updated.id);
+              if (existing) clearTimeout(existing);
+              flashTimers.current.set(updated.id, setTimeout(() => {
+                setNewIds(prev => { const s = new Set(prev); s.delete(updated.id); return s; });
+                flashTimers.current.delete(updated.id);
+              }, 2000));
             }
           } else if (payload.eventType === "INSERT") {
             const inserted = payload.new as Guest;
@@ -147,7 +153,10 @@ export default function AdminClient({ initialGuests }: { initialGuests: Guest[] 
       )
       .subscribe(status => setIsLive(status === "SUBSCRIBED"));
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+      flashTimers.current.forEach(clearTimeout);
+    };
   }, []);
 
   return (

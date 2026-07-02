@@ -19,6 +19,20 @@ export async function POST(req: NextRequest) {
 
   const supabase = createAdminClient();
 
+  const { data: guest, error: fetchError } = await supabase
+    .from("guests")
+    .select("pases")
+    .eq("token", token)
+    .single();
+
+  if (fetchError || !guest) {
+    return NextResponse.json({ error: "Token inválido" }, { status: 404 });
+  }
+
+  if (accion === "confirmar" && pases_confirmados > guest.pases) {
+    return NextResponse.json({ error: "Excede los pases disponibles" }, { status: 400 });
+  }
+
   const update =
     accion === "confirmar"
       ? { rsvp_estado: "confirmado", pases_confirmados }
