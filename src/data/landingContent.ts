@@ -34,7 +34,7 @@ export const photos: string[] = [
 
 // Canción de fondo de toda la página (archivo dentro de /public/audio).
 // Se reproduce apenas se entra a la landing, desde un widget flotante siempre visible.
-export const songUrl = "/audio/Mi Princesa - Josh Morales X Waleska Morales  Video Con Letra.mp3";
+export const songUrl = "/audio/mi-princesa.mp3";
 
 // Mensajes y videos de la familia — se muestran juntos en un mismo grid.
 // Cada item es de tipo "text" (mensaje escrito) o "video" (embed de YouTube/Vimeo).
