@@ -6,7 +6,6 @@ const NAV_LINKS = [
   { label: "Inicio", href: "inicio" },
   { label: "Galería", href: "galeria" },
   { label: "Familia", href: "familia" },
-  { label: "Video", href: "video" },
   { label: "Evento", href: "evento" },
   { label: "Ubicación", href: "ubicacion" },
 ];

@@ -1,13 +1,13 @@
 import MeshBackground from "@/components/landing/MeshBackground";
 import StickyNav from "@/components/landing/StickyNav";
+import MusicPlayer from "@/components/landing/MusicPlayer";
 import HeroSection from "@/components/landing/HeroSection";
 import CountdownSection from "@/components/landing/CountdownSection";
 import PhotoGallery from "@/components/landing/PhotoGallery";
 import FamilyMessages from "@/components/landing/FamilyMessages";
-import VideoSection from "@/components/landing/VideoSection";
 import EventLocation from "@/components/landing/EventLocation";
 import InvitePrompt from "@/components/landing/InvitePrompt";
-import { photos, messages, videoUrl, venue, songUrl } from "@/data/landingContent";
+import { photos, familyItems, venue, songUrl } from "@/data/landingContent";
 
 export default function Home() {
   const celebrant = process.env.NEXT_PUBLIC_CELEBRANT_NAME ?? "XV Años";
@@ -39,11 +39,11 @@ export default function Home() {
     >
       <MeshBackground />
       <StickyNav />
+      <MusicPlayer songUrl={songUrl} />
       <HeroSection celebrant={celebrant} />
       <CountdownSection dateLabel={dateLabel} timeLabel={timeLabel} />
-      <PhotoGallery photos={photos} songUrl={songUrl} />
-      <FamilyMessages messages={messages} />
-      <VideoSection videoUrl={videoUrl} />
+      <PhotoGallery photos={photos} />
+      <FamilyMessages items={familyItems} />
       <EventLocation
         dateLabel={dateLabel}
         timeLabel={timeLabel}

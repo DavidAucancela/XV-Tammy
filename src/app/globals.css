@@ -15,6 +15,39 @@ body {
   --gold-faint: rgba(210, 155, 55, 0.14);
 }
 
+/* ── Hide scrollbar on the gallery thumbnail filmstrip (WebKit) ── */
+.thumbnail-filmstrip::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Hide scrollbar on the event ticket row (WebKit) — stays a single row ── */
+.event-ticket-row::-webkit-scrollbar {
+  display: none;
+}
+.event-ticket-row {
+  scrollbar-width: none;
+}
+
+/* ── Masonry grid for mixed text/video family cards ── */
+.family-masonry {
+  columns: 1;
+  column-gap: 24px;
+}
+@media (min-width: 640px) {
+  .family-masonry {
+    columns: 2;
+  }
+}
+@media (min-width: 1024px) {
+  .family-masonry {
+    columns: 3;
+  }
+}
+.family-masonry-item {
+  break-inside: avoid;
+  margin-bottom: 24px;
+}
+
 /* ── Ornamental section divider: line ✦ line ── */
 .ornament-divider {
   display: flex;

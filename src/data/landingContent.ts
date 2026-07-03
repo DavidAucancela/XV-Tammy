@@ -32,34 +32,48 @@ export const photos: string[] = [
   "/photos/26.JPG",
 ];
 
-// Canción de fondo del slideshow (archivo dentro de /public/audio).
+// Canción de fondo de toda la página (archivo dentro de /public/audio).
+// Se reproduce apenas se entra a la landing, desde un widget flotante siempre visible.
 export const songUrl = "/audio/Mi Princesa - Josh Morales X Waleska Morales  Video Con Letra.mp3";
 
-// Mensajes de la familia — edita o agrega los que quieras
-export const messages = [
+// Mensajes y videos de la familia — se muestran juntos en un mismo grid.
+// Cada item es de tipo "text" (mensaje escrito) o "video" (embed de YouTube/Vimeo).
+// Para un video usa la URL de EMBED (ej: "https://www.youtube.com/embed/VIDEO_ID"),
+// no el link normal del video.
+export type FamilyItem =
+  | { type: "text"; author: string; role: string; text: string }
+  | { type: "video"; author: string; role: string; videoUrl: string };
+
+export const familyItems: FamilyItem[] = [
   {
+    type: "text",
     author: "Mamá y Papá",
     role: "Padres",
     text: "Mi niña, eres la alegría y el orgullo de nuestro hogar. Que este día tan especial sea el primero de muchos sueños cumplidos. Te amamos con todo el corazón.",
   },
   {
+    type: "text",
     author: "Abuela María",
     role: "Abuela",
     text: "Verte crecer ha sido el regalo más hermoso de mi vida. Hoy celebramos a la jovencita increíble que eres y a la mujer extraordinaria en que te convertirás.",
   },
   {
+    type: "text",
     author: "Tío Roberto",
     role: "Tío",
     text: "Siempre serás nuestra princesa. Que esta fiesta sea tan especial y radiante como tú eres para nuestra familia.",
   },
+  // Ejemplo de video — copia este bloque y cambia autor/rol/URL por cada video real:
+  // {
+  //   type: "video",
+  //   author: "Tía Rosa",
+  //   role: "Tía",
+  //   videoUrl: "https://www.youtube.com/embed/VIDEO_ID",
+  // },
 ];
-
-// URL de embed de YouTube (ej: "https://www.youtube.com/embed/VIDEO_ID")
-// Deja vacío para mostrar placeholder
-export const videoUrl = "";
 
 // Información del salón
 export const venue = {
-  name: "Salón de Eventos",
-  address: "Dirección del salón aquí",
+  name: "OE6C",
+  address: "Quito, Ecuador",
 };

@@ -10,25 +10,25 @@ const ICON_STROKE = "rgba(210,155,55,0.85)";
 
 const icons: Record<string, React.ReactNode> = {
   calendar: (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={ICON_STROKE} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ICON_STROKE} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="5" width="18" height="16" rx="2.5" />
       <path d="M3 10h18M8 3v4M16 3v4" />
     </svg>
   ),
   clock: (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={ICON_STROKE} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ICON_STROKE} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="9" />
       <path d="M12 7v5l3.5 2" />
     </svg>
   ),
   venue: (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={ICON_STROKE} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ICON_STROKE} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 21h18M5 21V8l7-5 7 5v13" />
       <path d="M10 21v-5a2 2 0 0 1 4 0v5" />
     </svg>
   ),
   pin: (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={ICON_STROKE} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ICON_STROKE} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11Z" />
       <circle cx="12" cy="10" r="2.5" />
     </svg>
@@ -55,7 +55,7 @@ export default function EventLocation({
     target: ref,
     offset: ["start end", "end start"],
   });
-  const cardY = useTransform(scrollYProgress, [0, 0.5, 1], [50, 0, -20]);
+  const cardY = useTransform(scrollYProgress, [0, 0.5, 1], [40, 0, -16]);
 
   const details = [
     { icon: icons.calendar, label: "Fecha", value: dateLabel },
@@ -70,7 +70,7 @@ export default function EventLocation({
       id="evento"
       style={{ padding: "100px 24px 48px", background: "rgba(9, 4, 13, 0.90)" }}
     >
-      <div style={{ maxWidth: 780, margin: "0 auto" }}>
+      <div style={{ maxWidth: 1000, margin: "0 auto" }}>
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -107,77 +107,139 @@ export default function EventLocation({
           </div>
         </motion.div>
 
-        {/* Detail cards — scroll-linked parallax */}
+        {/* Invitation ticket — a single unified row, never wraps */}
         <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-            gap: 18,
-            marginBottom: 32,
+            position: "relative",
+            borderRadius: 24,
+            padding: 1,
+            marginBottom: 40,
+            background:
+              "linear-gradient(120deg, rgba(210,155,55,0.4), rgba(232,105,154,0.28), rgba(210,155,55,0.18))",
+            boxShadow: "0 0 60px rgba(232,105,154,0.07)",
             y: cardY,
           }}
         >
-          {details.map(({ icon, label, value }, i) => (
-            <motion.div
-              key={label}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.55, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-              style={{
-                background:
-                  "linear-gradient(160deg, rgba(30,16,38,0.95) 0%, rgba(22,13,30,0.95) 100%)",
-                border: "1px solid #251535",
-                borderRadius: 20,
-                padding: "30px 26px",
-                display: "flex",
-                alignItems: "center",
-                gap: 18,
-                boxShadow: "0 0 40px rgba(232,105,154,0.05)",
-              }}
-            >
-              <span
-                style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: "50%",
-                  flexShrink: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  border: "1px solid var(--gold-soft, rgba(210,155,55,0.35))",
-                  background:
-                    "radial-gradient(circle, rgba(210,155,55,0.10) 0%, transparent 75%)",
-                }}
-              >
-                {icon}
-              </span>
-              <div style={{ minWidth: 0 }}>
-                <p
+          <div
+            className="event-ticket-row"
+            style={{
+              display: "flex",
+              overflowX: "auto",
+              borderRadius: 23,
+              background:
+                "linear-gradient(160deg, rgba(30,16,38,0.97) 0%, rgba(22,13,30,0.97) 55%, rgba(18,10,24,0.97) 100%)",
+              scrollSnapType: "x proximity",
+              WebkitOverflowScrolling: "touch",
+            }}
+          >
+            {details.map(({ icon, label, value }, i) => (
+              <div key={label} style={{ display: "flex", alignItems: "stretch", flex: "1 0 auto" }}>
+                {i > 0 && (
+                  <div
+                    aria-hidden
+                    style={{
+                      width: 1,
+                      alignSelf: "stretch",
+                      margin: "22px 0",
+                      background:
+                        "linear-gradient(180deg, transparent, var(--gold-soft, rgba(210,155,55,0.35)) 50%, transparent)",
+                      flexShrink: 0,
+                    }}
+                  />
+                )}
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.55, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
                   style={{
-                    fontSize: 8,
-                    letterSpacing: "0.28em",
-                    textTransform: "uppercase",
-                    color: "#b0798f",
-                    marginBottom: 7,
+                    flex: "1 0 190px",
+                    minWidth: 190,
+                    scrollSnapAlign: "start",
+                    padding: "32px 22px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    textAlign: "center",
+                    gap: 14,
                   }}
                 >
-                  {label}
-                </p>
-                <p
-                  style={{
-                    fontFamily: "var(--font-playfair), Georgia, serif",
-                    fontSize: 16,
-                    color: "#fdf0f8",
-                    textTransform: "capitalize",
-                    lineHeight: 1.45,
-                  }}
-                >
-                  {value}
-                </p>
+                  <span
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: "50%",
+                      flexShrink: 0,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      border: "1px solid var(--gold-soft, rgba(210,155,55,0.35))",
+                      background:
+                        "radial-gradient(circle, rgba(210,155,55,0.12) 0%, transparent 75%)",
+                    }}
+                  >
+                    {icon}
+                  </span>
+                  <div style={{ minWidth: 0 }}>
+                    <p
+                      style={{
+                        fontSize: 8,
+                        letterSpacing: "0.28em",
+                        textTransform: "uppercase",
+                        color: "#b0798f",
+                        marginBottom: 8,
+                      }}
+                    >
+                      {label}
+                    </p>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-playfair), Georgia, serif",
+                        fontSize: 15.5,
+                        color: "#fdf0f8",
+                        textTransform: "capitalize",
+                        lineHeight: 1.45,
+                      }}
+                    >
+                      {value}
+                    </p>
+                  </div>
+                </motion.div>
               </div>
-            </motion.div>
-          ))}
+            ))}
+          </div>
+
+          {/* Edge fades hint that the row scrolls when it doesn't fully fit */}
+          <div
+            aria-hidden
+            style={{
+              position: "absolute",
+              top: 1,
+              bottom: 1,
+              left: 1,
+              width: 28,
+              borderRadius: "23px 0 0 23px",
+              background: "linear-gradient(90deg, rgba(22,13,30,0.85), transparent)",
+              pointerEvents: "none",
+            }}
+          />
+          <div
+            aria-hidden
+            style={{
+              position: "absolute",
+              top: 1,
+              bottom: 1,
+              right: 1,
+              width: 28,
+              borderRadius: "0 23px 23px 0",
+              background: "linear-gradient(270deg, rgba(22,13,30,0.85), transparent)",
+              pointerEvents: "none",
+            }}
+          />
         </motion.div>
 
         {/* Map */}
@@ -203,7 +265,7 @@ export default function EventLocation({
                   style={{
                     borderRadius: 21,
                     overflow: "hidden",
-                    height: 340,
+                    height: 360,
                     background: "#0d0610",
                   }}
                 >
