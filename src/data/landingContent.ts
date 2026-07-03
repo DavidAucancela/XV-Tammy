@@ -2,8 +2,39 @@
 // Personaliza el contenido de la landing aquí
 // ============================================================
 
-// Rutas de fotos dentro de /public  (ej: "/photos/foto1.jpg")
-export const photos: string[] = [];
+// Rutas de fotos dentro de /public, en orden cronológico (de niña a señorita).
+// El slideshow las recorre en este orden con música de fondo.
+export const photos: string[] = [
+  "/photos/1.jpg",
+  "/photos/2.jpeg",
+  "/photos/3.jpg",
+  "/photos/4.jpg",
+  "/photos/5.jpg",
+  "/photos/6.jpg",
+  "/photos/7.jpg",
+  "/photos/9.jpg",
+  "/photos/10.jpg",
+  "/photos/11.jpg",
+  "/photos/12.jpg",
+  "/photos/13.jpg",
+  "/photos/14.jpg",
+  "/photos/15.jpg",
+  "/photos/16.jpg",
+  "/photos/17.jpg",
+  "/photos/18.jpg",
+  "/photos/19.jpg",
+  "/photos/20.jpg",
+  "/photos/21.jpg",
+  "/photos/22.jpg",
+  "/photos/23.jpg",
+  "/photos/24.jpg",
+  "/photos/25.jpg",
+  "/photos/26.JPG",
+];
+
+// Canción de fondo del slideshow (archivo dentro de /public/audio).
+// Deja "" para ocultar el botón de música. Ej: "/audio/cancion.mp3"
+export const songUrl = "";
 
 // Mensajes de la familia — edita o agrega los que quieras
 export const messages = [

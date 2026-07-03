@@ -44,15 +44,9 @@ export default function FamilyMessages({ messages }: { messages: Message[] }) {
           >
             Mensajes de la Familia
           </RevealText>
-          <div
-            style={{
-              width: 52,
-              height: 1,
-              background:
-                "linear-gradient(90deg, transparent, #e8699a, transparent)",
-              margin: "0 auto",
-            }}
-          />
+          <div className="ornament-divider">
+            <span>✦</span>
+          </div>
         </motion.div>
 
         {/* Message cards */}
@@ -75,59 +69,74 @@ export default function FamilyMessages({ messages }: { messages: Message[] }) {
                 maxTilt={7}
                 glowColor="rgba(232,105,154,0.18)"
                 style={{
-                  background: "rgba(22, 13, 30, 0.95)",
-                  border: "1px solid #251535",
+                  background:
+                    "linear-gradient(160deg, rgba(30,16,38,0.96) 0%, rgba(22,13,30,0.96) 55%, rgba(26,12,28,0.96) 100%)",
+                  border: "1px solid var(--gold-soft, rgba(210,155,55,0.35))",
                   borderRadius: 22,
-                  padding: "36px 30px 28px",
+                  padding: "40px 32px 30px",
                   position: "relative",
-                  overflow: "hidden",
                   height: "100%",
+                  boxShadow:
+                    "inset 0 0 0 1px rgba(13,6,16,0.9), 0 0 40px rgba(232,105,154,0.06)",
                 }}
               >
-                {/* Decorative radial behind quote mark */}
+                {/* Inner hairline frame */}
                 <div
                   style={{
                     position: "absolute",
-                    top: -40,
-                    right: -40,
-                    width: 140,
-                    height: 140,
-                    borderRadius: "50%",
-                    background:
-                      "radial-gradient(circle, rgba(232,105,154,0.08) 0%, transparent 70%)",
+                    inset: 7,
+                    borderRadius: 16,
+                    border: "1px solid var(--gold-faint, rgba(210,155,55,0.14))",
                     pointerEvents: "none",
-                    zIndex: 0,
                   }}
                 />
 
+                {/* Corner ornaments */}
+                {[
+                  { top: 12, left: 16 },
+                  { top: 12, right: 16 },
+                  { bottom: 12, left: 16 },
+                  { bottom: 12, right: 16 },
+                ].map((pos, j) => (
+                  <span
+                    key={j}
+                    style={{
+                      position: "absolute",
+                      ...pos,
+                      fontSize: 8,
+                      color: "var(--gold-soft, rgba(210,155,55,0.35))",
+                      pointerEvents: "none",
+                      lineHeight: 1,
+                    }}
+                  >
+                    ✦
+                  </span>
+                ))}
+
                 {/* Opening quote */}
                 <span
+                  aria-hidden
                   style={{
-                    position: "absolute",
-                    top: 10,
-                    left: 20,
+                    display: "block",
                     fontFamily: "var(--font-playfair), Georgia, serif",
-                    fontSize: 80,
-                    lineHeight: 1,
-                    color: "#e8699a",
-                    opacity: 0.10,
+                    fontSize: 52,
+                    lineHeight: 0.6,
+                    color: "var(--gold, rgba(210,155,55,0.55))",
                     userSelect: "none",
-                    pointerEvents: "none",
-                    zIndex: 0,
+                    marginBottom: 18,
                   }}
                 >
-                  "
+                  &ldquo;
                 </span>
 
                 <p
                   style={{
                     fontFamily: "var(--font-playfair), Georgia, serif",
-                    fontSize: 15,
-                    lineHeight: 1.85,
-                    color: "#e0c0d0",
+                    fontSize: 16.5,
+                    lineHeight: 1.9,
+                    color: "#ecd2df",
                     fontStyle: "italic",
-                    marginBottom: 24,
-                    marginTop: 14,
+                    marginBottom: 26,
                     position: "relative",
                     zIndex: 1,
                   }}
@@ -135,34 +144,66 @@ export default function FamilyMessages({ messages }: { messages: Message[] }) {
                   {msg.text}
                 </p>
 
+                {/* Gradient separator */}
                 <div
                   style={{
-                    borderTop: "1px solid rgba(37,21,53,0.8)",
-                    paddingTop: 18,
+                    height: 1,
+                    background:
+                      "linear-gradient(90deg, var(--gold-soft, rgba(210,155,55,0.35)), transparent)",
+                    marginBottom: 18,
+                  }}
+                />
+
+                {/* Author with monogram */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 14,
                     position: "relative",
                     zIndex: 1,
                   }}
                 >
-                  <p
+                  <span
                     style={{
-                      fontSize: 13,
-                      color: "#e8699a",
-                      fontWeight: 600,
-                      marginBottom: 3,
+                      width: 40,
+                      height: 40,
+                      borderRadius: "50%",
+                      border: "1px solid var(--gold-soft, rgba(210,155,55,0.35))",
+                      background: "rgba(210,155,55,0.08)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontFamily: "var(--font-playfair), Georgia, serif",
+                      fontSize: 17,
+                      color: "var(--gold, rgba(210,155,55,0.55))",
+                      flexShrink: 0,
                     }}
                   >
-                    — {msg.author}
-                  </p>
-                  <p
-                    style={{
-                      fontSize: 9,
-                      letterSpacing: "0.18em",
-                      textTransform: "uppercase",
-                      color: "#7a5870",
-                    }}
-                  >
-                    {msg.role}
-                  </p>
+                    {msg.author.charAt(0)}
+                  </span>
+                  <div>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-playfair), Georgia, serif",
+                        fontSize: 15,
+                        color: "#fdf0f8",
+                        marginBottom: 3,
+                      }}
+                    >
+                      {msg.author}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: 9,
+                        letterSpacing: "0.22em",
+                        textTransform: "uppercase",
+                        color: "#b0798f",
+                      }}
+                    >
+                      {msg.role}
+                    </p>
+                  </div>
                 </div>
               </TiltCard>
             </motion.div>

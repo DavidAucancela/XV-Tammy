@@ -35,13 +35,18 @@ export default function RevealText({
   const words = children.split(" ");
 
   return (
-    <Tag style={{ ...style, margin: 0, overflow: "hidden" }}>
+    <Tag style={{ margin: 0, ...style, overflow: "hidden" }}>
       <motion.span
         variants={container}
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, margin: "-20px" }}
-        style={{ display: "flex", flexWrap: "wrap", gap: "0.28em" }}
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "0.28em",
+          justifyContent: style?.justifyContent,
+        }}
       >
         {words.map((word, i) => (
           <span

@@ -9,7 +9,6 @@ export default function InvitePrompt({ celebrant }: { celebrant: string }) {
       style={{
         padding: "100px 24px 120px",
         background: "rgba(13, 6, 16, 0.88)",
-        textAlign: "center",
       }}
     >
       <motion.div
@@ -17,17 +16,18 @@ export default function InvitePrompt({ celebrant }: { celebrant: string }) {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        style={{ maxWidth: 480, margin: "0 auto" }}
+        style={{
+          maxWidth: 480,
+          margin: "0 auto",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          textAlign: "center",
+        }}
       >
-        <div
-          style={{
-            width: 60,
-            height: 1,
-            background:
-              "linear-gradient(90deg, transparent, #e8699a, transparent)",
-            margin: "0 auto 50px",
-          }}
-        />
+        <div className="ornament-divider" style={{ width: 160, marginBottom: 50 }}>
+          <span>✦</span>
+        </div>
 
         <RevealText
           tag="h2"
@@ -51,10 +51,11 @@ export default function InvitePrompt({ celebrant }: { celebrant: string }) {
           transition={{ duration: 0.6, delay: 0.3 }}
           style={{
             fontSize: 14,
-            color: "#7a5870",
+            color: "#a87f96",
             marginBottom: 44,
             lineHeight: 1.85,
             fontWeight: 300,
+            maxWidth: 400,
           }}
         >
           Usa el link personalizado que recibiste para confirmar tu asistencia y
@@ -67,18 +68,31 @@ export default function InvitePrompt({ celebrant }: { celebrant: string }) {
           viewport={{ once: true }}
           transition={{ duration: 0.55, delay: 0.45 }}
           style={{
-            background: "rgba(22, 13, 30, 0.95)",
-            border: "1px solid #251535",
             borderRadius: 18,
-            padding: "20px 30px",
-            display: "inline-block",
+            padding: 1,
+            background:
+              "linear-gradient(135deg, rgba(210,155,55,0.45), rgba(232,105,154,0.4), rgba(210,155,55,0.2))",
             marginBottom: 56,
-            boxShadow: "0 0 40px rgba(232,105,154,0.07)",
+            boxShadow: "0 0 40px rgba(232,105,154,0.08)",
           }}
         >
-          <p style={{ fontSize: 13, color: "#c9a0b8", letterSpacing: "0.04em" }}>
-            Revisa tu WhatsApp o correo por el enlace ✉️
-          </p>
+          <div
+            style={{
+              background: "rgba(22, 13, 30, 0.97)",
+              borderRadius: 17,
+              padding: "20px 32px",
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+            }}
+          >
+            <span aria-hidden style={{ fontSize: 18, opacity: 0.85 }}>
+              ✉️
+            </span>
+            <p style={{ fontSize: 13, color: "#e0c0d0", letterSpacing: "0.04em" }}>
+              Revisa tu WhatsApp o correo por el enlace
+            </p>
+          </div>
         </motion.div>
 
         <motion.p
@@ -90,12 +104,12 @@ export default function InvitePrompt({ celebrant }: { celebrant: string }) {
             fontFamily: "var(--font-playfair), Georgia, serif",
             fontSize: "clamp(0.95rem, 3vw, 1.25rem)",
             fontStyle: "italic",
-            color: "#4a2a3e",
+            color: "#8a6478",
             lineHeight: 1.75,
             marginBottom: 52,
           }}
         >
-          "Que este día sea el comienzo de tus sueños más grandes"
+          &ldquo;Que este día sea el comienzo de tus sueños más grandes&rdquo;
         </motion.p>
 
         <p
@@ -103,7 +117,7 @@ export default function InvitePrompt({ celebrant }: { celebrant: string }) {
             fontSize: 9,
             letterSpacing: "0.35em",
             textTransform: "uppercase",
-            color: "#2a1535",
+            color: "#5a3a50",
           }}
         >
           ✦ &nbsp; con cariño · {celebrant} y familia &nbsp; ✦
