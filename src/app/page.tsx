@@ -7,7 +7,7 @@ import PhotoGallery from "@/components/landing/PhotoGallery";
 import FamilyMessages from "@/components/landing/FamilyMessages";
 import EventLocation from "@/components/landing/EventLocation";
 import InvitePrompt from "@/components/landing/InvitePrompt";
-import { photos, familyItems, venue, songUrl } from "@/data/landingContent";
+import { photos, familyItems, venue, songUrl, heroPhoto } from "@/data/landingContent";
 
 export default function Home() {
   const celebrant = process.env.NEXT_PUBLIC_CELEBRANT_NAME ?? "XV Años";
@@ -29,6 +29,17 @@ export default function Home() {
   const lat = process.env.NEXT_PUBLIC_VENUE_LAT ?? "";
   const lng = process.env.NEXT_PUBLIC_VENUE_LNG ?? "";
 
+  // "Agregar al calendario" — real action for any visitor, not just invitees
+  // with a personal link. Assumes a 3-hour celebration when no end time is set.
+  const toGCalDate = (d: Date) => d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  const eventEnd = new Date(eventDate.getTime() + 3 * 60 * 60 * 1000);
+  const calendarUrl =
+    `https://calendar.google.com/calendar/render?action=TEMPLATE` +
+    `&text=${encodeURIComponent(`XV Años de ${celebrant}`)}` +
+    `&dates=${toGCalDate(eventDate)}/${toGCalDate(eventEnd)}` +
+    `&details=${encodeURIComponent(`Te esperamos para celebrar los XV años de ${celebrant}.`)}` +
+    `&location=${encodeURIComponent(`${venue.name}, ${venue.address}`)}`;
+
   return (
     <main
       style={{
@@ -40,7 +51,7 @@ export default function Home() {
       <MeshBackground />
       <StickyNav />
       <MusicPlayer songUrl={songUrl} />
-      <HeroSection celebrant={celebrant} />
+      <HeroSection celebrant={celebrant} photo={heroPhoto} />
       <CountdownSection dateLabel={dateLabel} timeLabel={timeLabel} />
       <PhotoGallery photos={photos} />
       <FamilyMessages items={familyItems} />
@@ -51,7 +62,7 @@ export default function Home() {
         lat={lat}
         lng={lng}
       />
-      <InvitePrompt celebrant={celebrant} />
+      <InvitePrompt celebrant={celebrant} calendarUrl={calendarUrl} />
     </main>
   );
 }

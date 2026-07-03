@@ -10,9 +10,42 @@ body {
 }
 
 :root {
+  /* ── Color: neutrals + surfaces ───────────────────────────── */
+  --bg: #0d0610;
+  --surface: rgba(22, 13, 30, 0.92);
+  --surface-elevated: rgba(31, 19, 41, 0.95);
+  --border: #251535;
+  --border-soft: rgba(37, 21, 53, 0.6);
+  --text: #fdf0f8;
+  --text-muted: #9b8294; /* meets WCAG AA (5.7:1) against --bg; #7a5870 only hit 3.3:1 */
+
+  /* ── Color: accents ───────────────────────────────────────── */
+  --accent: #e8699a;
+  --accent-soft: rgba(232, 105, 154, 0.35);
+  --accent-faint: rgba(232, 105, 154, 0.12);
+  --accent-secondary: #7a3a5e;
+  --accent-secondary-soft: rgba(122, 58, 94, 0.4);
   --gold: rgba(210, 155, 55, 0.55);
   --gold-soft: rgba(210, 155, 55, 0.35);
   --gold-faint: rgba(210, 155, 55, 0.14);
+  --gold-solid: #d29b37;
+
+  /* ── Radius scale ─────────────────────────────────────────── */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  /* ── Shadow scale (all tinted with the rose accent) ──────────*/
+  --shadow-sm: 0 0 30px rgba(232, 105, 154, 0.06);
+  --shadow-md: 0 0 40px rgba(232, 105, 154, 0.08);
+  --shadow-lg: 0 0 60px rgba(232, 105, 154, 0.10);
+
+  /* ── Motion ───────────────────────────────────────────────── */
+  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 200ms;
+  --duration-base: 300ms;
+  --duration-slow: 550ms;
 }
 
 /* ── Hide scrollbar on the gallery thumbnail filmstrip (WebKit) ── */

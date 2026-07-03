@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
@@ -30,7 +31,12 @@ const fadeSub = {
   show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" as const } },
 };
 
-export default function HeroSection({ celebrant }: { celebrant: string }) {
+const medallion = {
+  hidden: { opacity: 0, scale: 0.8, y: -16 },
+  show: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] as const } },
+};
+
+export default function HeroSection({ celebrant, photo }: { celebrant: string; photo?: string }) {
   const ref = useRef<HTMLElement>(null);
   const [sparkles, setSparkles] = useState<Sparkle[]>([]);
 
@@ -159,6 +165,70 @@ export default function HeroSection({ celebrant }: { celebrant: string }) {
           initial="hidden"
           animate="show"
         >
+          {/* Portrait medallion — anchors the invitation to Tammy specifically */}
+          {photo && (
+            <motion.div
+              variants={medallion}
+              style={{
+                position: "relative",
+                width: 132,
+                height: 132,
+                margin: "0 auto 28px",
+              }}
+            >
+              <div
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  inset: -22,
+                  borderRadius: "50%",
+                  background:
+                    "radial-gradient(circle, rgba(232,105,154,0.30) 0%, transparent 70%)",
+                  filter: "blur(10px)",
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  borderRadius: "50%",
+                  padding: 3,
+                  background:
+                    "conic-gradient(from 200deg, var(--gold-solid), var(--accent), var(--gold-solid))",
+                }}
+              >
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: "50%",
+                    padding: 4,
+                    background: "var(--bg)",
+                  }}
+                >
+                  <div
+                    style={{
+                      position: "relative",
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "50%",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <Image
+                      src={photo}
+                      alt={celebrant}
+                      fill
+                      sizes="132px"
+                      priority
+                      style={{ objectFit: "cover", objectPosition: "50% 22%" }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           {/* Kinetic title — word by word */}
           <div style={{ overflow: "hidden", marginBottom: 6 }}>
             <motion.h1
