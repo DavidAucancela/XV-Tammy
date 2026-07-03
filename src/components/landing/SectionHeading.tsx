@@ -8,7 +8,7 @@ export default function SectionHeading({
   title,
   marginBottom = 56,
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   marginBottom?: number;
 }) {
@@ -36,18 +36,20 @@ export default function SectionHeading({
         }}
       />
 
-      <p
-        style={{
-          position: "relative",
-          fontSize: 9,
-          letterSpacing: "0.4em",
-          textTransform: "uppercase",
-          color: "#e8699a",
-          marginBottom: 18,
-        }}
-      >
-        ✦ &nbsp; {eyebrow} &nbsp; ✦
-      </p>
+      {eyebrow && (
+        <p
+          style={{
+            position: "relative",
+            fontSize: 9,
+            letterSpacing: "0.4em",
+            textTransform: "uppercase",
+            color: "#e8699a",
+            marginBottom: 18,
+          }}
+        >
+          ✦ &nbsp; {eyebrow} &nbsp; ✦
+        </p>
+      )}
       <RevealText
         tag="h2"
         style={{

@@ -2,6 +2,9 @@
 // Personaliza el contenido de la landing aquí
 // ============================================================
 
+// Foto destacada del Hero — retrato reciente, se muestra en el medallón bajo el título.
+export const heroPhoto = "/photos/25.jpg";
+
 // Rutas de fotos dentro de /public, en orden cronológico (de niña a señorita).
 // El slideshow las recorre en este orden con música de fondo.
 export const photos: string[] = [

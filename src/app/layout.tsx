@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Lato } from "next/font/google";
+import { MotionConfig } from "framer-motion";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -32,7 +33,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className={`${playfair.variable} ${lato.variable}`}>{children}</body>
+      <body className={`${playfair.variable} ${lato.variable}`}>
+        {/* Every Framer Motion animation site-wide respects the OS reduced-motion
+            setting from here — no need to check it per component. */}
+        <MotionConfig reducedMotion="user">{children}</MotionConfig>
+      </body>
     </html>
   );
 }

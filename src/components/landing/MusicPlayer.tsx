@@ -140,9 +140,9 @@ export default function MusicPlayer({ songUrl = "" }: { songUrl?: string }) {
               borderRadius: 999,
               fontSize: 11,
               letterSpacing: "0.04em",
-              color: "#fdf0f8",
+              color: "var(--text)",
               background: "rgba(13,6,16,0.75)",
-              border: "1px solid rgba(232,105,154,0.35)",
+              border: "1px solid var(--accent-soft)",
               backdropFilter: "blur(10px)",
               WebkitBackdropFilter: "blur(10px)",
             }}
@@ -169,7 +169,7 @@ export default function MusicPlayer({ songUrl = "" }: { songUrl?: string }) {
                 WebkitBackdropFilter: "blur(14px)",
                 borderRadius: 999,
                 padding: "10px 16px",
-                border: "1px solid rgba(232,105,154,0.35)",
+                border: "1px solid var(--accent-soft)",
                 boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
               }}
             >
@@ -201,7 +201,7 @@ export default function MusicPlayer({ songUrl = "" }: { songUrl?: string }) {
                   width: 84,
                   height: 4,
                   cursor: "pointer",
-                  accentColor: "#e8699a",
+                  accentColor: "var(--accent)",
                 }}
               />
             </motion.div>
@@ -252,20 +252,20 @@ function ControlButton({
         width: size,
         height: size,
         borderRadius: "50%",
-        border: accent ? "1px solid rgba(232,105,154,0.6)" : "1px solid rgba(232,105,154,0.3)",
+        border: accent ? "1px solid var(--accent)" : "1px solid var(--accent-soft)",
         background: accent
-          ? "linear-gradient(145deg, #e8699a, #c94a7c)"
+          ? "linear-gradient(145deg, var(--accent), #c94a7c)"
           : "rgba(13,6,16,0.7)",
         backdropFilter: "blur(10px)",
         WebkitBackdropFilter: "blur(10px)",
-        color: accent ? "#0d0610" : "#fdf0f8",
+        color: accent ? "var(--bg)" : "var(--text)",
         cursor: "pointer",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         flexShrink: 0,
         boxShadow: accent ? "0 4px 16px rgba(232,105,154,0.4)" : "0 2px 10px rgba(0,0,0,0.25)",
-        transition: "transform 0.15s ease, box-shadow 0.15s ease",
+        transition: `transform var(--duration-fast) ease, box-shadow var(--duration-fast) ease`,
       }}
       onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.92)")}
       onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}

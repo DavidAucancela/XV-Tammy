@@ -2,8 +2,15 @@
 
 import { motion } from "framer-motion";
 import RevealText from "./RevealText";
+import { Button } from "./Button";
 
-export default function InvitePrompt({ celebrant }: { celebrant: string }) {
+export default function InvitePrompt({
+  celebrant,
+  calendarUrl,
+}: {
+  celebrant: string;
+  calendarUrl: string;
+}) {
   return (
     <section
       style={{
@@ -72,7 +79,7 @@ export default function InvitePrompt({ celebrant }: { celebrant: string }) {
             padding: 1,
             background:
               "linear-gradient(135deg, rgba(210,155,55,0.45), rgba(232,105,154,0.4), rgba(210,155,55,0.2))",
-            marginBottom: 56,
+            marginBottom: 28,
             boxShadow: "0 0 40px rgba(232,105,154,0.08)",
           }}
         >
@@ -86,13 +93,30 @@ export default function InvitePrompt({ celebrant }: { celebrant: string }) {
               gap: 12,
             }}
           >
-            <span aria-hidden style={{ fontSize: 18, opacity: 0.85 }}>
-              ✉️
-            </span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold-solid)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden style={{ flexShrink: 0 }}>
+              <rect x="3" y="5" width="18" height="14" rx="2.5" />
+              <path d="m4 7 8 6 8-6" />
+            </svg>
             <p style={{ fontSize: 13, color: "#e0c0d0", letterSpacing: "0.04em" }}>
               Revisa tu WhatsApp o correo por el enlace
             </p>
           </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.55, delay: 0.55 }}
+          style={{ marginBottom: 56 }}
+        >
+          <Button href={calendarUrl} variant="primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="5" width="18" height="16" rx="2.5" />
+              <path d="M3 10h18M8 3v4M16 3v4" />
+            </svg>
+            Agregar al calendario
+          </Button>
         </motion.div>
 
         <motion.p
@@ -104,7 +128,7 @@ export default function InvitePrompt({ celebrant }: { celebrant: string }) {
             fontFamily: "var(--font-playfair), Georgia, serif",
             fontSize: "clamp(0.95rem, 3vw, 1.25rem)",
             fontStyle: "italic",
-            color: "#8a6478",
+            color: "#a884a0",
             lineHeight: 1.75,
             marginBottom: 52,
           }}
@@ -117,7 +141,7 @@ export default function InvitePrompt({ celebrant }: { celebrant: string }) {
             fontSize: 9,
             letterSpacing: "0.35em",
             textTransform: "uppercase",
-            color: "#5a3a50",
+            color: "var(--text-muted)",
           }}
         >
           ✦ &nbsp; con cariño · {celebrant} y familia &nbsp; ✦

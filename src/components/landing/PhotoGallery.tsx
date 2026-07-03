@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView } from "framer-motion";
 import SectionHeading from "./SectionHeading";
+import { IconButton } from "./Button";
 
 const PLACEHOLDER_COUNT = 6;
 
@@ -102,11 +103,11 @@ export default function PhotoGallery({ photos }: { photos: string[] }) {
                 style={{
                   position: "relative",
                   aspectRatio: "4/3",
-                  borderRadius: 22,
+                  borderRadius: "var(--radius-lg)",
                   overflow: "hidden",
-                  border: "1px solid #251535",
-                  boxShadow: "0 0 60px rgba(232,105,154,0.10)",
-                  background: "#0d0610",
+                  border: "1px solid var(--border)",
+                  boxShadow: "var(--shadow-lg)",
+                  background: "var(--bg)",
                 }}
               >
                 <AnimatePresence initial={false} custom={direction}>
@@ -176,7 +177,7 @@ export default function PhotoGallery({ photos }: { photos: string[] }) {
                           style={{
                             fontFamily: "var(--font-playfair), Georgia, serif",
                             fontSize: 44,
-                            color: "#e8699a",
+                            color: "var(--accent)",
                             opacity: 0.25,
                           }}
                         >
@@ -235,42 +236,21 @@ export default function PhotoGallery({ photos }: { photos: string[] }) {
                 { dir: -1, label: "Foto anterior", char: "‹", side: { left: -8 } },
                 { dir: 1, label: "Foto siguiente", char: "›", side: { right: -8 } },
               ].map(({ dir, label, char, side }) => (
-                <button
+                <IconButton
                   key={label}
-                  aria-label={label}
+                  label={label}
                   onClick={() => advance(dir)}
                   style={{
                     position: "absolute",
                     top: "50%",
                     transform: "translateY(-50%)",
                     ...side,
-                    width: 42,
-                    height: 42,
-                    borderRadius: "50%",
-                    border: "1px solid rgba(232,105,154,0.35)",
-                    background: "rgba(13,6,16,0.65)",
-                    backdropFilter: "blur(8px)",
-                    color: "#fdf0f8",
                     fontSize: 22,
-                    lineHeight: 1,
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
                     zIndex: 5,
-                    transition: "border-color 0.25s, background 0.25s",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "#e8699a";
-                    e.currentTarget.style.background = "rgba(232,105,154,0.18)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "rgba(232,105,154,0.35)";
-                    e.currentTarget.style.background = "rgba(13,6,16,0.65)";
                   }}
                 >
                   {char}
-                </button>
+                </IconButton>
               ))}
             </div>
 
@@ -307,7 +287,7 @@ export default function PhotoGallery({ photos }: { photos: string[] }) {
                         aspectRatio: "4/3",
                         borderRadius: 8,
                         overflow: "hidden",
-                        border: i === index ? "2px solid #e8699a" : "2px solid transparent",
+                        border: i === index ? "2px solid var(--accent)" : "2px solid transparent",
                         opacity: i === index ? 1 : 0.45,
                         transition: "opacity 0.3s, border-color 0.3s",
                         cursor: "pointer",
@@ -356,7 +336,7 @@ export default function PhotoGallery({ photos }: { photos: string[] }) {
                   borderRadius: 999,
                   border: "none",
                   cursor: "pointer",
-                  background: i === index ? "#e8699a" : "rgba(232,105,154,0.25)",
+                  background: i === index ? "var(--accent)" : "rgba(232,105,154,0.25)",
                   transition: "width 0.35s ease, background 0.35s ease",
                   padding: 0,
                 }}

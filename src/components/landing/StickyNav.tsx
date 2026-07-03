@@ -10,11 +10,25 @@ const NAV_LINKS = [
   { label: "Ubicación", href: "ubicacion" },
 ];
 
+const SCROLLSPY_OFFSET = 120;
+
 export default function StickyNav() {
   const [visible, setVisible] = useState(false);
+  const [active, setActive] = useState(NAV_LINKS[0].href);
 
   useEffect(() => {
-    const onScroll = () => setVisible(window.scrollY > window.innerHeight * 0.65);
+    const onScroll = () => {
+      setVisible(window.scrollY > window.innerHeight * 0.65);
+
+      let current = NAV_LINKS[0].href;
+      for (const { href } of NAV_LINKS) {
+        const el = document.getElementById(href);
+        if (el && el.getBoundingClientRect().top - SCROLLSPY_OFFSET <= 0) {
+          current = href;
+        }
+      }
+      setActive(current);
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
@@ -42,28 +56,48 @@ export default function StickyNav() {
         transition: "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
       }}
     >
-      {NAV_LINKS.map(({ label, href }) => (
-        <button
-          key={href}
-          onClick={() => scrollTo(href)}
-          style={{
-            background: "none",
-            border: "none",
-            padding: "4px 0",
-            cursor: "pointer",
-            fontSize: 10,
-            letterSpacing: "0.22em",
-            textTransform: "uppercase",
-            color: "#7a5870",
-            fontFamily: "var(--font-lato), system-ui, sans-serif",
-            transition: "color 0.2s",
-          }}
-          onMouseEnter={e => (e.currentTarget.style.color = "#e8699a")}
-          onMouseLeave={e => (e.currentTarget.style.color = "#7a5870")}
-        >
-          {label}
-        </button>
-      ))}
+      {NAV_LINKS.map(({ label, href }) => {
+        const isActive = active === href;
+        return (
+          <button
+            key={href}
+            onClick={() => scrollTo(href)}
+            aria-current={isActive ? "true" : undefined}
+            style={{
+              position: "relative",
+              background: "none",
+              border: "none",
+              padding: "4px 0",
+              cursor: "pointer",
+              fontSize: 10,
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: isActive ? "var(--accent)" : "var(--text-muted)",
+              fontFamily: "var(--font-lato), system-ui, sans-serif",
+              transition: "color 0.25s",
+            }}
+            onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = "#e8699a"; }}
+            onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = "var(--text-muted)"; }}
+          >
+            {label}
+            <span
+              aria-hidden
+              style={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                bottom: -6,
+                height: 1.5,
+                borderRadius: 1,
+                background: "var(--accent)",
+                transform: isActive ? "scaleX(1)" : "scaleX(0)",
+                opacity: isActive ? 1 : 0,
+                transition: "transform 0.25s ease, opacity 0.25s ease",
+              }}
+            />
+          </button>
+        );
+      })}
     </nav>
   );
 }

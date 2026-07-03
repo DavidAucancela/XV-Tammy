@@ -3,10 +3,11 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import SectionHeading from "./SectionHeading";
+import { Button } from "./Button";
 
 type Venue = { name: string; address: string };
 
-const ICON_STROKE = "rgba(210,155,55,0.85)";
+const ICON_STROKE = "var(--gold-solid)";
 
 const icons: Record<string, React.ReactNode> = {
   calendar: (
@@ -58,10 +59,10 @@ export default function EventLocation({
   const cardY = useTransform(scrollYProgress, [0, 0.5, 1], [40, 0, -16]);
 
   const details = [
-    { icon: icons.calendar, label: "Fecha", value: dateLabel },
-    { icon: icons.clock, label: "Hora", value: timeLabel },
-    { icon: icons.venue, label: "Salón", value: venue.name },
-    { icon: icons.pin, label: "Dirección", value: venue.address },
+    { icon: icons.calendar, label: "Fecha", value: dateLabel, primary: true },
+    { icon: icons.clock, label: "Hora", value: timeLabel, primary: true },
+    { icon: icons.venue, label: "Salón", value: venue.name, primary: false },
+    { icon: icons.pin, label: "Dirección", value: venue.address, primary: false },
   ];
 
   return (
@@ -71,14 +72,15 @@ export default function EventLocation({
       style={{ padding: "100px 24px 48px", background: "rgba(9, 4, 13, 0.90)" }}
     >
       <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-        <SectionHeading eyebrow="te esperamos" title="El Evento" marginBottom={52} />
+        <SectionHeading title="El Evento" marginBottom={52} />
 
-        {/* Invitation ticket — a single unified row, never wraps */}
+        {/* Invitation ticket — a single unified row, never wraps.
+            Entrance reads like a stamp being pressed onto the invitation. */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, scale: 0.9, rotate: -2.5 }}
+          whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ type: "spring", stiffness: 220, damping: 18 }}
           style={{
             position: "relative",
             borderRadius: 24,
@@ -102,8 +104,8 @@ export default function EventLocation({
               WebkitOverflowScrolling: "touch",
             }}
           >
-            {details.map(({ icon, label, value }, i) => (
-              <div key={label} style={{ display: "flex", alignItems: "stretch", flex: "1 0 auto" }}>
+            {details.map(({ icon, label, value, primary }, i) => (
+              <div key={label} style={{ display: "flex", alignItems: "stretch", flex: primary ? "1.3 0 auto" : "1 0 auto" }}>
                 {i > 0 && (
                   <div
                     aria-hidden
@@ -123,29 +125,31 @@ export default function EventLocation({
                   viewport={{ once: true }}
                   transition={{ duration: 0.55, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
                   style={{
-                    flex: "1 0 190px",
-                    minWidth: 190,
+                    flex: primary ? "1.3 0 210px" : "1 0 170px",
+                    minWidth: primary ? 210 : 170,
                     scrollSnapAlign: "start",
-                    padding: "32px 22px",
+                    padding: primary ? "34px 22px" : "28px 20px",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
                     textAlign: "center",
-                    gap: 14,
+                    gap: primary ? 16 : 12,
+                    background: primary ? "var(--accent-faint)" : "transparent",
                   }}
                 >
                   <span
                     style={{
-                      width: 48,
-                      height: 48,
+                      width: primary ? 56 : 40,
+                      height: primary ? 56 : 40,
                       borderRadius: "50%",
                       flexShrink: 0,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      border: "1px solid var(--gold-soft, rgba(210,155,55,0.35))",
-                      background:
-                        "radial-gradient(circle, rgba(210,155,55,0.12) 0%, transparent 75%)",
+                      border: `1px solid ${primary ? "var(--accent-soft)" : "var(--gold-faint, rgba(210,155,55,0.14))"}`,
+                      background: primary
+                        ? "radial-gradient(circle, rgba(232,105,154,0.18) 0%, transparent 75%)"
+                        : "radial-gradient(circle, rgba(210,155,55,0.08) 0%, transparent 75%)",
                     }}
                   >
                     {icon}
@@ -153,11 +157,11 @@ export default function EventLocation({
                   <div style={{ minWidth: 0 }}>
                     <p
                       style={{
-                        fontSize: 8,
+                        fontSize: primary ? 9 : 8,
                         letterSpacing: "0.28em",
                         textTransform: "uppercase",
-                        color: "#b0798f",
-                        marginBottom: 8,
+                        color: primary ? "var(--accent)" : "#7a6070",
+                        marginBottom: primary ? 10 : 6,
                       }}
                     >
                       {label}
@@ -165,8 +169,8 @@ export default function EventLocation({
                     <p
                       style={{
                         fontFamily: "var(--font-playfair), Georgia, serif",
-                        fontSize: 15.5,
-                        color: "#fdf0f8",
+                        fontSize: primary ? 19 : 13.5,
+                        color: primary ? "var(--text)" : "#c9a0b8",
                         textTransform: "capitalize",
                         lineHeight: 1.45,
                       }}
@@ -244,36 +248,13 @@ export default function EventLocation({
                 </div>
               </div>
               <div style={{ textAlign: "center", marginTop: 24 }}>
-                <a
-                  href={`https://maps.google.com/?q=${lat},${lng}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 8,
-                    padding: "12px 30px",
-                    borderRadius: 999,
-                    border: "1px solid rgba(232,105,154,0.45)",
-                    color: "#e8699a",
-                    fontSize: 11,
-                    letterSpacing: "0.22em",
-                    textTransform: "uppercase",
-                    textDecoration: "none",
-                    transition: "background 0.25s, color 0.25s",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "rgba(232,105,154,0.12)";
-                    e.currentTarget.style.color = "#fdf0f8";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "transparent";
-                    e.currentTarget.style.color = "#e8699a";
-                  }}
-                >
-                  {icons.pin}
+                <Button href={`https://maps.google.com/?q=${lat},${lng}`} variant="primary">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11Z" />
+                    <circle cx="12" cy="10" r="2.5" />
+                  </svg>
                   Cómo llegar
-                </a>
+                </Button>
               </div>
             </>
           ) : (

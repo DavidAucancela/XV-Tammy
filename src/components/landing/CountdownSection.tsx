@@ -69,17 +69,17 @@ export default function CountdownSection({
       <motion.div
         style={{ maxWidth: 520, margin: "0 auto", y: sectionY, opacity: sectionOpacity }}
       >
-        <SectionHeading eyebrow="el gran día se acerca" title="Cuenta Regresiva" marginBottom={48} />
+        <SectionHeading title="Cuenta Regresiva" marginBottom={48} />
 
-        {/* Date card */}
+        {/* Date card — supporting info; the countdown digits below carry the section */}
         <div
           style={{
-            background: "rgba(22, 13, 30, 0.92)",
-            border: "1px solid #251535",
-            borderRadius: 22,
-            padding: "30px 40px",
-            marginBottom: 52,
-            boxShadow: "0 0 60px rgba(232,105,154,0.06)",
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "var(--radius-lg)",
+            padding: "22px 40px",
+            marginBottom: 60,
+            boxShadow: "var(--shadow-sm)",
           }}
         >
           <p
@@ -87,7 +87,7 @@ export default function CountdownSection({
               fontSize: 9,
               letterSpacing: "0.34em",
               textTransform: "uppercase",
-              color: "#7a5870",
+              color: "var(--text-muted)",
               marginBottom: 14,
             }}
           >
@@ -104,7 +104,7 @@ export default function CountdownSection({
           >
             {dateLabel}
           </p>
-          <p style={{ fontSize: 14, color: "#7a5870" }}>{timeLabel}</p>
+          <p style={{ fontSize: 14, color: "var(--text-muted)" }}>{timeLabel}</p>
         </div>
 
         {/* Countdown grid */}
@@ -115,7 +115,7 @@ export default function CountdownSection({
                 fontSize: 9,
                 letterSpacing: "0.40em",
                 textTransform: "uppercase",
-                color: "#7a5870",
+                color: "var(--text-muted)",
                 marginBottom: 24,
               }}
             >
@@ -123,9 +123,10 @@ export default function CountdownSection({
             </p>
             <div
               style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(4, 1fr)",
-                gap: 14,
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "center",
+                gap: "clamp(4px, 1.5vw, 14px)",
               }}
             >
               {[
@@ -134,46 +135,54 @@ export default function CountdownSection({
                 { v: pad(time.minutes), l: "min" },
                 { v: pad(time.seconds), l: "seg" },
               ].map(({ v, l }, i) => (
-                <motion.div
-                  key={l}
-                  initial={{ opacity: 0, y: 30, scale: 0.92 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.55, delay: i * 0.1, ease: "easeOut" }}
-                  style={{
-                    background: "rgba(22, 13, 30, 0.92)",
-                    border: "1px solid #251535",
-                    borderRadius: 18,
-                    padding: "24px 8px",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    boxShadow: "0 0 30px rgba(232,105,154,0.08)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "var(--font-playfair), Georgia, serif",
-                      fontSize: 36,
-                      color: "#e8699a",
-                      lineHeight: 1,
-                      fontVariantNumeric: "tabular-nums",
-                    }}
+                <div key={l} style={{ display: "flex", alignItems: "flex-start" }}>
+                  {i > 0 && (
+                    <span
+                      aria-hidden
+                      style={{
+                        fontFamily: "var(--font-playfair), Georgia, serif",
+                        fontSize: "clamp(1.3rem, 2.5vw, 2.2rem)",
+                        color: "var(--gold-solid)",
+                        lineHeight: 1,
+                        opacity: 0.55,
+                        margin: "0 clamp(2px, 1vw, 8px)",
+                      }}
+                    >
+                      :
+                    </span>
+                  )}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.4 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ type: "spring", stiffness: 260, damping: 16, delay: i * 0.08 }}
+                    style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
                   >
-                    {v}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 9,
-                      letterSpacing: "0.24em",
-                      textTransform: "uppercase",
-                      color: "#7a5870",
-                      marginTop: 10,
-                    }}
-                  >
-                    {l}
-                  </span>
-                </motion.div>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-playfair), Georgia, serif",
+                        fontSize: "clamp(2.2rem, 4.2vw, 3.6rem)",
+                        color: "var(--text)",
+                        lineHeight: 1,
+                        fontVariantNumeric: "tabular-nums",
+                        textShadow: "0 0 44px rgba(232,105,154,0.35)",
+                      }}
+                    >
+                      {v}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 9,
+                        letterSpacing: "0.24em",
+                        textTransform: "uppercase",
+                        color: "var(--text-muted)",
+                        marginTop: 10,
+                      }}
+                    >
+                      {l}
+                    </span>
+                  </motion.div>
+                </div>
               ))}
             </div>
           </>
