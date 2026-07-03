@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView } from "framer-motion";
-import RevealText from "./RevealText";
+import SectionHeading from "./SectionHeading";
 
 const PLACEHOLDER_COUNT = 6;
 
@@ -86,41 +86,7 @@ export default function PhotoGallery({ photos }: { photos: string[] }) {
   return (
     <section id="galeria" style={{ padding: "120px 16px 100px", background: "rgba(13, 6, 16, 0.88)" }}>
       <div style={{ maxWidth: "100%", margin: "0 auto" }}>
-        {/* Section header */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          style={{ textAlign: "center", marginBottom: 56 }}
-        >
-          <p
-            style={{
-              fontSize: 9,
-              letterSpacing: "0.38em",
-              textTransform: "uppercase",
-              color: "#e8699a",
-              marginBottom: 16,
-            }}
-          >
-            ✦ &nbsp; de niña a señorita &nbsp; ✦
-          </p>
-          <RevealText
-            tag="h2"
-            style={{
-              fontFamily: "var(--font-playfair), Georgia, serif",
-              fontSize: "clamp(1.9rem, 5.5vw, 3rem)",
-              fontWeight: 400,
-              color: "#fdf0f8",
-              marginBottom: 20,
-              justifyContent: "center",
-            }}
-          >
-            Mi Historia
-          </RevealText>
-          <div className="ornament-divider">
-            <span>✦</span>
-          </div>
-        </motion.div>
+        <SectionHeading eyebrow="de niña a señorita" title="Mi Historia" />
 
         {/* Slideshow */}
         <motion.div
