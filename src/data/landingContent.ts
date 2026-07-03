@@ -33,8 +33,7 @@ export const photos: string[] = [
 ];
 
 // Canción de fondo del slideshow (archivo dentro de /public/audio).
-// Deja "" para ocultar el botón de música. Ej: "/audio/cancion.mp3"
-export const songUrl = "";
+export const songUrl = "/audio/Mi Princesa - Josh Morales X Waleska Morales  Video Con Letra.mp3";
 
 // Mensajes de la familia — edita o agrega los que quieras
 export const messages = [
