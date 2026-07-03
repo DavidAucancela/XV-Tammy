@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import SectionHeading from "./SectionHeading";
 
 type TimeLeft = {
   days: number;
@@ -68,6 +69,8 @@ export default function CountdownSection({
       <motion.div
         style={{ maxWidth: 520, margin: "0 auto", y: sectionY, opacity: sectionOpacity }}
       >
+        <SectionHeading eyebrow="el gran día se acerca" title="Cuenta Regresiva" marginBottom={48} />
+
         {/* Date card */}
         <div
           style={{

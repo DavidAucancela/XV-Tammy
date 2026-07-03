@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import MusicPlayer from "@/components/landing/MusicPlayer";
+import { songUrl } from "@/data/landingContent";
 
 type Guest = {
   id: string;
@@ -104,6 +106,8 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
       className="min-h-screen flex flex-col items-center pb-16"
       style={{ background: "#0d0610", color: "#fdf0f8", fontFamily: "var(--font-lato), system-ui, sans-serif" }}
     >
+      <MusicPlayer songUrl={songUrl} />
+
       {/* ── Hero ── */}
       <motion.div
         variants={stagger}

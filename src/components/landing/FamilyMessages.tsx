@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import TiltCard from "./TiltCard";
-import RevealText from "./RevealText";
+import SectionHeading from "./SectionHeading";
 import type { FamilyItem } from "@/data/landingContent";
 
 export default function FamilyMessages({ items }: { items: FamilyItem[] }) {
@@ -13,41 +13,7 @@ export default function FamilyMessages({ items }: { items: FamilyItem[] }) {
       style={{ padding: "100px 24px", background: "rgba(9, 4, 13, 0.90)" }}
     >
       <div style={{ maxWidth: 1080, margin: "0 auto" }}>
-        {/* Section header */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          style={{ textAlign: "center", marginBottom: 60 }}
-        >
-          <p
-            style={{
-              fontSize: 9,
-              letterSpacing: "0.38em",
-              textTransform: "uppercase",
-              color: "#e8699a",
-              marginBottom: 16,
-            }}
-          >
-            ✦ &nbsp; con amor &nbsp; ✦
-          </p>
-          <RevealText
-            tag="h2"
-            style={{
-              fontFamily: "var(--font-playfair), Georgia, serif",
-              fontSize: "clamp(1.9rem, 5.5vw, 3rem)",
-              fontWeight: 400,
-              color: "#fdf0f8",
-              marginBottom: 20,
-              justifyContent: "center",
-            }}
-          >
-            Mensajes de la Familia
-          </RevealText>
-          <div className="ornament-divider">
-            <span>✦</span>
-          </div>
-        </motion.div>
+        <SectionHeading eyebrow="con amor" title="Mensajes de la Familia" marginBottom={60} />
 
         {/* Mixed text / video masonry grid */}
         <div className="family-masonry">

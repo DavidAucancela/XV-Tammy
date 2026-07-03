@@ -159,19 +159,6 @@ export default function HeroSection({ celebrant }: { celebrant: string }) {
           initial="hidden"
           animate="show"
         >
-          <motion.p
-            variants={fadeSub}
-            style={{
-              fontSize: 9,
-              letterSpacing: "0.48em",
-              textTransform: "uppercase",
-              color: "#e8699a",
-              marginBottom: 36,
-            }}
-          >
-            ✦ &nbsp; una celebración especial &nbsp; ✦
-          </motion.p>
-
           {/* Kinetic title — word by word */}
           <div style={{ overflow: "hidden", marginBottom: 6 }}>
             <motion.h1
