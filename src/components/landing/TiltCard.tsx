@@ -13,7 +13,7 @@ import { CSSProperties, ReactNode } from "react";
 export default function TiltCard({
   children,
   style,
-  glowColor = "rgba(232,105,154,0.22)",
+  glowColor = "rgba(var(--accent-rgb),0.22)",
   maxTilt = 6,
 }: {
   children: ReactNode;

@@ -2,33 +2,45 @@
 
 html {
   scroll-behavior: smooth;
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
-  background: #0d0610;
+  background: var(--bg);
 }
 
 :root {
-  /* ── Color: neutrals + surfaces ───────────────────────────── */
-  --bg: #0d0610;
-  --surface: rgba(22, 13, 30, 0.92);
-  --surface-elevated: rgba(31, 19, 41, 0.95);
-  --border: #251535;
-  --border-soft: rgba(37, 21, 53, 0.6);
-  --text: #fdf0f8;
-  --text-muted: #9b8294; /* meets WCAG AA (5.7:1) against --bg; #7a5870 only hit 3.3:1 */
+  /* ── Color: page surface (champagne editorial palette) ──────── */
+  --bg: #f3e6d6;
+  --bg-rgb: 243, 230, 214;
+  --surface: rgba(234, 216, 195, 0.65);
+  --surface-elevated: rgba(252, 246, 236, 0.85);
+  --border: #dcc7ae;
+  --border-soft: rgba(220, 199, 174, 0.5);
+  --text: #4a372e; /* 9.1:1 on --bg */
+  --text-muted: #7a6355; /* 4.6:1 on --bg */
+  --ivory: #fcf6ec;
 
-  /* ── Color: accents ───────────────────────────────────────── */
-  --accent: #e8699a;
-  --accent-soft: rgba(232, 105, 154, 0.35);
-  --accent-faint: rgba(232, 105, 154, 0.12);
-  --accent-secondary: #7a3a5e;
-  --accent-secondary-soft: rgba(122, 58, 94, 0.4);
-  --gold: rgba(210, 155, 55, 0.55);
-  --gold-soft: rgba(210, 155, 55, 0.35);
-  --gold-faint: rgba(210, 155, 55, 0.14);
-  --gold-solid: #d29b37;
+  /* ── Color: dark "glass" layer for floating widgets + photo/video scrims ── */
+  --ink: #2b211c;
+  --ink-rgb: 43, 33, 28;
+  --on-ink: #f3e6d6;
+  --on-ink-muted: rgba(243, 230, 214, 0.65);
+
+  /* ── Color: accents (dusty rose) ──────────────────────────────*/
+  --accent: #b4707c;
+  --accent-rgb: 180, 112, 124;
+  --accent-ink: #8f4e5f; /* 5.0:1 on --bg — use for text/icons, and as the primary button fill */
+  --accent-ink-rgb: 143, 78, 95;
+  --accent-soft: rgba(180, 112, 124, 0.35);
+  --accent-faint: rgba(180, 112, 124, 0.14);
+
+  /* ── Color: accents (soft gold) ────────────────────────────────*/
+  --gold: #c6a25e;
+  --gold-rgb: 198, 162, 94;
+  --gold-solid: #96702e; /* decorative/icon use only — 3.7:1, not for small text */
+  --gold-soft: rgba(198, 162, 94, 0.35);
+  --gold-faint: rgba(198, 162, 94, 0.14);
 
   /* ── Radius scale ─────────────────────────────────────────── */
   --radius-sm: 8px;
@@ -36,10 +48,10 @@ body {
   --radius-lg: 22px;
   --radius-pill: 999px;
 
-  /* ── Shadow scale (all tinted with the rose accent) ──────────*/
-  --shadow-sm: 0 0 30px rgba(232, 105, 154, 0.06);
-  --shadow-md: 0 0 40px rgba(232, 105, 154, 0.08);
-  --shadow-lg: 0 0 60px rgba(232, 105, 154, 0.10);
+  /* ── Shadow scale — soft neutral drop shadows, not color glows ── */
+  --shadow-sm: 0 4px 16px rgba(var(--ink-rgb), 0.08);
+  --shadow-md: 0 8px 24px rgba(var(--ink-rgb), 0.10);
+  --shadow-lg: 0 12px 40px rgba(var(--ink-rgb), 0.12);
 
   /* ── Motion ───────────────────────────────────────────────── */
   --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
@@ -53,12 +65,31 @@ body {
   display: none;
 }
 
-/* ── Hide scrollbar on the event ticket row (WebKit) — stays a single row ── */
-.event-ticket-row::-webkit-scrollbar {
-  display: none;
-}
+/* ── Event ticket row: symmetric grid, stacks to 1 column on narrow screens ── */
 .event-ticket-row {
-  scrollbar-width: none;
+  grid-template-columns: 1fr !important;
+}
+.event-ticket-divider {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-soft) 50%, transparent);
+}
+@media (min-width: 560px) {
+  .event-ticket-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .event-ticket-divider {
+    left: 0;
+    right: auto;
+    top: 18%;
+    bottom: 18%;
+    height: auto;
+    width: 1px;
+    background: linear-gradient(180deg, transparent, var(--gold-soft) 50%, transparent);
+  }
 }
 
 /* ── Masonry grid for mixed text/video family cards ── */
@@ -129,7 +160,8 @@ body {
   .mesh-blob { animation: none !important; }
 }
 
-/* Range input styling */
+/* Range input styling — volume slider lives inside the dark "ink" music
+   widget, so its accent uses the on-ink-friendly vivid rose. */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -141,32 +173,32 @@ input[type="range"]::-webkit-slider-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #e8699a;
+  background: var(--accent);
   cursor: pointer;
-  box-shadow: 0 0 8px rgba(232,105,154,0.4);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.4);
 }
 input[type="range"]::-moz-range-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #e8699a;
+  background: var(--accent);
   cursor: pointer;
   border: none;
-  box-shadow: 0 0 8px rgba(232,105,154,0.4);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.4);
 }
 input[type="range"]::-webkit-slider-runnable-track {
-  background: linear-gradient(90deg, #e8699a 0%, #e8699a 70%, rgba(232,105,154,0.25) 70%, rgba(232,105,154,0.25) 100%);
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent) 70%, rgba(var(--accent-rgb), 0.25) 70%, rgba(var(--accent-rgb), 0.25) 100%);
   height: 4px;
   border-radius: 2px;
 }
 input[type="range"]::-moz-range-track {
-  background: rgba(232,105,154,0.25);
+  background: rgba(var(--accent-rgb), 0.25);
   height: 4px;
   border-radius: 2px;
   border: none;
 }
 input[type="range"]::-moz-range-progress {
-  background: #e8699a;
+  background: var(--accent);
   height: 4px;
   border-radius: 2px;
 }

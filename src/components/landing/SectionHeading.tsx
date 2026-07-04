@@ -30,7 +30,7 @@ export default function SectionHeading({
           width: 320,
           height: 160,
           background:
-            "radial-gradient(ellipse at center, rgba(232,105,154,0.14) 0%, transparent 70%)",
+            "radial-gradient(ellipse at center, rgba(var(--accent-rgb),0.12) 0%, transparent 70%)",
           pointerEvents: "none",
           zIndex: 0,
         }}
@@ -43,7 +43,7 @@ export default function SectionHeading({
             fontSize: 9,
             letterSpacing: "0.4em",
             textTransform: "uppercase",
-            color: "#e8699a",
+            color: "var(--accent-ink)",
             marginBottom: 18,
           }}
         >
@@ -58,8 +58,7 @@ export default function SectionHeading({
           fontSize: "clamp(2rem, 5.5vw, 3.2rem)",
           fontWeight: 400,
           letterSpacing: "0.01em",
-          color: "#fdf0f8",
-          textShadow: "0 0 44px rgba(232,105,154,0.28)",
+          color: "var(--text)",
           marginBottom: 22,
           justifyContent: "center",
         }}

@@ -59,20 +59,18 @@ export default function EventLocation({
   const cardY = useTransform(scrollYProgress, [0, 0.5, 1], [40, 0, -16]);
 
   const details = [
-    { icon: icons.calendar, label: "Fecha", value: dateLabel, primary: true },
-    { icon: icons.clock, label: "Hora", value: timeLabel, primary: true },
-    { icon: icons.venue, label: "Salón", value: venue.name, primary: false },
-    { icon: icons.pin, label: "Dirección", value: venue.address, primary: false },
+    { icon: icons.calendar, label: "Fecha", value: dateLabel },
+    { icon: icons.clock, label: "Hora", value: timeLabel },
   ];
 
   return (
     <section
       ref={ref}
       id="evento"
-      style={{ padding: "100px 24px 48px", background: "rgba(9, 4, 13, 0.90)" }}
+      style={{ padding: "100px 24px 48px", background: "var(--bg)" }}
     >
       <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-        <SectionHeading title="El Evento" marginBottom={52} />
+        <SectionHeading title="Lugar y hora" marginBottom={52} />
 
         {/* Invitation ticket — a single unified row, never wraps.
             Entrance reads like a stamp being pressed onto the invitation. */}
@@ -87,69 +85,58 @@ export default function EventLocation({
             padding: 1,
             marginBottom: 40,
             background:
-              "linear-gradient(120deg, rgba(210,155,55,0.4), rgba(232,105,154,0.28), rgba(210,155,55,0.18))",
-            boxShadow: "0 0 60px rgba(232,105,154,0.07)",
+              "linear-gradient(120deg, rgba(var(--gold-rgb),0.5), rgba(var(--accent-rgb),0.35), rgba(var(--gold-rgb),0.25))",
+            boxShadow: "var(--shadow-md)",
             y: cardY,
           }}
         >
           <div
             className="event-ticket-row"
             style={{
-              display: "flex",
-              overflowX: "auto",
+              display: "grid",
+              gridTemplateColumns: `repeat(${details.length}, 1fr)`,
               borderRadius: 23,
               background:
-                "linear-gradient(160deg, rgba(30,16,38,0.97) 0%, rgba(22,13,30,0.97) 55%, rgba(18,10,24,0.97) 100%)",
-              scrollSnapType: "x proximity",
-              WebkitOverflowScrolling: "touch",
+                "linear-gradient(160deg, var(--surface-elevated) 0%, var(--surface) 100%)",
             }}
           >
-            {details.map(({ icon, label, value, primary }, i) => (
-              <div key={label} style={{ display: "flex", alignItems: "stretch", flex: primary ? "1.3 0 auto" : "1 0 auto" }}>
-                {i > 0 && (
-                  <div
-                    aria-hidden
-                    style={{
-                      width: 1,
-                      alignSelf: "stretch",
-                      margin: "22px 0",
-                      background:
-                        "linear-gradient(180deg, transparent, var(--gold-soft, rgba(210,155,55,0.35)) 50%, transparent)",
-                      flexShrink: 0,
-                    }}
-                  />
-                )}
+            {details.map(({ icon, label, value }, i) => (
+              <div
+                key={label}
+                style={{
+                  position: "relative",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                {i > 0 && <div aria-hidden className="event-ticket-divider" />}
                 <motion.div
                   initial={{ opacity: 0, y: 16 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.55, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
                   style={{
-                    flex: primary ? "1.3 0 210px" : "1 0 170px",
-                    minWidth: primary ? 210 : 170,
-                    scrollSnapAlign: "start",
-                    padding: primary ? "34px 22px" : "28px 20px",
+                    width: "100%",
+                    padding: "30px 18px",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
                     textAlign: "center",
-                    gap: primary ? 16 : 12,
-                    background: primary ? "var(--accent-faint)" : "transparent",
+                    gap: 13,
                   }}
                 >
                   <span
                     style={{
-                      width: primary ? 56 : 40,
-                      height: primary ? 56 : 40,
+                      width: 46,
+                      height: 46,
                       borderRadius: "50%",
                       flexShrink: 0,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      border: `1px solid ${primary ? "var(--accent-soft)" : "var(--gold-faint, rgba(210,155,55,0.14))"}`,
-                      background: primary
-                        ? "radial-gradient(circle, rgba(232,105,154,0.18) 0%, transparent 75%)"
-                        : "radial-gradient(circle, rgba(210,155,55,0.08) 0%, transparent 75%)",
+                      border: "1px solid var(--accent-soft)",
+                      background:
+                        "radial-gradient(circle, rgba(var(--accent-rgb),0.2) 0%, transparent 75%)",
                     }}
                   >
                     {icon}
@@ -157,11 +144,11 @@ export default function EventLocation({
                   <div style={{ minWidth: 0 }}>
                     <p
                       style={{
-                        fontSize: primary ? 9 : 8,
+                        fontSize: 9,
                         letterSpacing: "0.28em",
                         textTransform: "uppercase",
-                        color: primary ? "var(--accent)" : "#7a6070",
-                        marginBottom: primary ? 10 : 6,
+                        color: "var(--accent-ink)",
+                        marginBottom: 8,
                       }}
                     >
                       {label}
@@ -169,8 +156,8 @@ export default function EventLocation({
                     <p
                       style={{
                         fontFamily: "var(--font-playfair), Georgia, serif",
-                        fontSize: primary ? 19 : 13.5,
-                        color: primary ? "var(--text)" : "#c9a0b8",
+                        fontSize: 15.5,
+                        color: "var(--text)",
                         textTransform: "capitalize",
                         lineHeight: 1.45,
                       }}
@@ -182,34 +169,6 @@ export default function EventLocation({
               </div>
             ))}
           </div>
-
-          {/* Edge fades hint that the row scrolls when it doesn't fully fit */}
-          <div
-            aria-hidden
-            style={{
-              position: "absolute",
-              top: 1,
-              bottom: 1,
-              left: 1,
-              width: 28,
-              borderRadius: "23px 0 0 23px",
-              background: "linear-gradient(90deg, rgba(22,13,30,0.85), transparent)",
-              pointerEvents: "none",
-            }}
-          />
-          <div
-            aria-hidden
-            style={{
-              position: "absolute",
-              top: 1,
-              bottom: 1,
-              right: 1,
-              width: 28,
-              borderRadius: "0 23px 23px 0",
-              background: "linear-gradient(270deg, rgba(22,13,30,0.85), transparent)",
-              pointerEvents: "none",
-            }}
-          />
         </motion.div>
 
         {/* Map */}
@@ -227,8 +186,8 @@ export default function EventLocation({
                   borderRadius: 22,
                   padding: 1,
                   background:
-                    "linear-gradient(135deg, rgba(210,155,55,0.45), rgba(232,105,154,0.35), rgba(210,155,55,0.2))",
-                  boxShadow: "0 0 50px rgba(232,105,154,0.07)",
+                    "linear-gradient(135deg, rgba(var(--gold-rgb),0.5), rgba(var(--accent-rgb),0.4), rgba(var(--gold-rgb),0.25))",
+                  boxShadow: "var(--shadow-md)",
                 }}
               >
                 <div
@@ -236,7 +195,7 @@ export default function EventLocation({
                     borderRadius: 21,
                     overflow: "hidden",
                     height: 360,
-                    background: "#0d0610",
+                    background: "var(--surface)",
                   }}
                 >
                   <iframe
@@ -261,8 +220,8 @@ export default function EventLocation({
             <div
               style={{
                 borderRadius: 22,
-                border: "1px solid rgba(24,13,34,0.6)",
-                background: "rgba(14,7,22,0.80)",
+                border: "1px solid var(--border)",
+                background: "var(--surface)",
                 padding: "44px",
                 textAlign: "center",
               }}
@@ -279,7 +238,7 @@ export default function EventLocation({
                   fontSize: 9,
                   letterSpacing: "0.24em",
                   textTransform: "uppercase",
-                  color: "#6a4560",
+                  color: "var(--text-muted)",
                   marginTop: 14,
                 }}
               >

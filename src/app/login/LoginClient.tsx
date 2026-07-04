@@ -56,7 +56,7 @@ function LoginForm() {
               fontWeight: 400, margin: 0,
             }}
           >
-            XV — Tammy
+            XV — Tammy Maguana Sánchez
           </h1>
         </div>
 

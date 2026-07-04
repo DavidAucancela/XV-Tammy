@@ -9,12 +9,12 @@ import { IconButton } from "./Button";
 const PLACEHOLDER_COUNT = 6;
 
 const PLACEHOLDER_GRADIENTS = [
-  "linear-gradient(135deg, #1e0a1a 0%, #3d1535 100%)",
-  "linear-gradient(135deg, #0d0618 0%, #2a1040 100%)",
-  "linear-gradient(135deg, #1a0a18 0%, #4a1530 100%)",
-  "linear-gradient(135deg, #0e0814 0%, #251535 100%)",
-  "linear-gradient(135deg, #180a16 0%, #3a1038 100%)",
-  "linear-gradient(135deg, #0c0612 0%, #2a1030 100%)",
+  "linear-gradient(135deg, #f7ece0 0%, #ecd9c4 100%)",
+  "linear-gradient(135deg, #f5e8db 0%, #e8cfc7 100%)",
+  "linear-gradient(135deg, #f6ebd9 0%, #e3cfa0 100%)",
+  "linear-gradient(135deg, #f3e6d6 0%, #dcc7ae 100%)",
+  "linear-gradient(135deg, #f7e9e6 0%, #d9b8bd 100%)",
+  "linear-gradient(135deg, #f4ece2 0%, #e0d0b8 100%)",
 ];
 
 const SLIDE_MS = 3500;
@@ -85,9 +85,9 @@ export default function PhotoGallery({ photos }: { photos: string[] }) {
       };
 
   return (
-    <section id="galeria" style={{ padding: "120px 16px 100px", background: "rgba(13, 6, 16, 0.88)" }}>
-      <div style={{ maxWidth: "100%", margin: "0 auto" }}>
-        <SectionHeading eyebrow="de niña a señorita" title="Mi Historia" />
+    <section id="galeria" style={{ padding: "120px 8px 100px", background: "var(--bg)" }}>
+      <div style={{ maxWidth: "100%", margin: "0 auto", width: "100%" }}>
+        <SectionHeading eyebrow="de niña a señorita" title="Mi crecimiento" />
 
         {/* Slideshow */}
         <motion.div
@@ -107,7 +107,7 @@ export default function PhotoGallery({ photos }: { photos: string[] }) {
                   overflow: "hidden",
                   border: "1px solid var(--border)",
                   boxShadow: "var(--shadow-lg)",
-                  background: "var(--bg)",
+                  background: "var(--ink)",
                 }}
               >
                 <AnimatePresence initial={false} custom={direction}>
@@ -187,7 +187,7 @@ export default function PhotoGallery({ photos }: { photos: string[] }) {
                           style={{
                             fontSize: 9,
                             letterSpacing: "0.3em",
-                            color: "#6a4560",
+                            color: "var(--text-muted)",
                             textTransform: "uppercase",
                           }}
                         >
@@ -204,7 +204,7 @@ export default function PhotoGallery({ photos }: { photos: string[] }) {
                     position: "absolute",
                     inset: 0,
                     background:
-                      "linear-gradient(to top, rgba(13,6,16,0.55) 0%, transparent 30%)",
+                      "linear-gradient(to top, rgba(var(--ink-rgb),0.55) 0%, transparent 30%)",
                     pointerEvents: "none",
                     zIndex: 1,
                   }}
@@ -218,8 +218,8 @@ export default function PhotoGallery({ photos }: { photos: string[] }) {
                     right: 18,
                     fontSize: 10,
                     letterSpacing: "0.2em",
-                    color: "rgba(253,240,248,0.65)",
-                    background: "rgba(13,6,16,0.5)",
+                    color: "var(--on-ink)",
+                    background: "rgba(var(--ink-rgb),0.55)",
                     backdropFilter: "blur(6px)",
                     padding: "4px 10px",
                     borderRadius: 999,
@@ -336,7 +336,7 @@ export default function PhotoGallery({ photos }: { photos: string[] }) {
                   borderRadius: 999,
                   border: "none",
                   cursor: "pointer",
-                  background: i === index ? "var(--accent)" : "rgba(232,105,154,0.25)",
+                  background: i === index ? "var(--accent)" : "rgba(var(--accent-rgb),0.25)",
                   transition: "width 0.35s ease, background 0.35s ease",
                   padding: 0,
                 }}

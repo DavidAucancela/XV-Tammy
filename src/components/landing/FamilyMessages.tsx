@@ -1,97 +1,125 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
-import TiltCard from "./TiltCard";
+import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
 import SectionHeading from "./SectionHeading";
+import { useMusicContext } from "@/context/MusicContext";
 import type { FamilyItem } from "@/data/landingContent";
 
+type TextItem = Extract<FamilyItem, { type: "text" }>;
+type VideoItem = Extract<FamilyItem, { type: "video" }>;
+
 export default function FamilyMessages({ items }: { items: FamilyItem[] }) {
+  const { setIsVideoPlaying } = useMusicContext();
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  const activeItem = items.find((item) => `${item.author}-${item.type}` === activeId) ?? null;
+
+  const handleOpen = (item: FamilyItem) => {
+    const id = `${item.author}-${item.type}`;
+    setActiveId(id);
+    if (item.type === "video") {
+      setIsVideoPlaying(true);
+    }
+  };
+
+  const handleClose = () => {
+    setActiveId(null);
+    setIsVideoPlaying(false);
+  };
+
   return (
     <section
       id="familia"
-      style={{ padding: "100px 24px", background: "rgba(9, 4, 13, 0.90)" }}
+      style={{ padding: "100px 24px", background: "var(--bg)" }}
     >
       <div style={{ maxWidth: 1080, margin: "0 auto" }}>
-        <SectionHeading title="Mensajes de la Familia" marginBottom={60} />
+        <SectionHeading title="Mensajes de tu familia" marginBottom={60} />
 
-        {/* Mixed text / video masonry grid */}
-        <div className="family-masonry">
-          {items.map((item, i) => {
+        {/* Buttons for all people */}
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: 10,
+            marginBottom: 40,
+          }}
+        >
+          {items.map((item) => {
+            const isActive = activeId === `${item.author}-${item.type}`;
             const isVideo = item.type === "video";
-            const frameColor = isVideo ? "var(--accent-secondary-soft)" : "var(--gold-soft, rgba(210,155,55,0.35))";
-            const frameFaint = isVideo ? "rgba(122,58,94,0.25)" : "var(--gold-faint, rgba(210,155,55,0.14))";
             return (
-              <motion.div
-                key={`${item.author}-${i}`}
-                className="family-masonry-item"
-                initial={{ opacity: 0, y: 40, rotate: i % 2 === 0 ? -1.4 : 1.4 }}
-                whileInView={{ opacity: 1, y: 0, rotate: 0 }}
-                viewport={{ once: true }}
-                transition={{ type: "spring", stiffness: 170, damping: 20, delay: (i % 6) * 0.08 }}
+              <button
+                key={`${item.author}-${item.type}`}
+                onClick={() => (isActive ? handleClose() : handleOpen(item))}
+                aria-pressed={isActive}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "10px 20px",
+                  borderRadius: "var(--radius-pill)",
+                  border: `1px solid ${
+                    isActive ? (isVideo ? "var(--gold-solid)" : "var(--accent)") : isVideo ? "var(--gold-soft)" : "var(--accent-soft)"
+                  }`,
+                  background: isActive ? (isVideo ? "var(--gold-faint)" : "var(--accent-faint)") : "var(--surface)",
+                  color: isActive ? (isVideo ? "var(--gold-solid)" : "var(--accent)") : "var(--text)",
+                  fontFamily: "var(--font-playfair), Georgia, serif",
+                  fontSize: 14,
+                  cursor: "pointer",
+                  transition: "background var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard)",
+                }}
               >
-                <TiltCard
-                  maxTilt={7}
-                  glowColor={isVideo ? "rgba(122,58,94,0.28)" : "rgba(232,105,154,0.18)"}
-                  style={{
-                    background:
-                      "linear-gradient(160deg, rgba(30,16,38,0.96) 0%, rgba(22,13,30,0.96) 55%, rgba(26,12,28,0.96) 100%)",
-                    border: `1px solid ${frameColor}`,
-                    borderRadius: "var(--radius-lg)",
-                    padding: isVideo ? "20px 20px 26px" : "40px 32px 30px",
-                    position: "relative",
-                    boxShadow:
-                      "inset 0 0 0 1px rgba(13,6,16,0.9), 0 0 40px rgba(232,105,154,0.06)",
-                  }}
-                >
-                  {/* Inner hairline frame */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 7,
-                      borderRadius: "var(--radius-md)",
-                      border: `1px solid ${frameFaint}`,
-                      pointerEvents: "none",
-                    }}
-                  />
-
-                  {/* Corner ornaments */}
-                  {[
-                    { top: 12, left: 16 },
-                    { top: 12, right: 16 },
-                    { bottom: 12, left: 16 },
-                    { bottom: 12, right: 16 },
-                  ].map((pos, j) => (
-                    <span
-                      key={j}
-                      style={{
-                        position: "absolute",
-                        ...pos,
-                        fontSize: 8,
-                        color: frameColor,
-                        pointerEvents: "none",
-                        lineHeight: 1,
-                      }}
-                    >
-                      ✦
-                    </span>
-                  ))}
-
-                  {isVideo ? <VideoBody item={item} /> : <TextBody item={item} />}
-                  <AuthorFooter author={item.author} role={item.role} accent={isVideo ? "secondary" : "gold"} />
-                </TiltCard>
-              </motion.div>
+                {isVideo ? (
+                  <svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor" aria-hidden>
+                    <path d="M3 1.5v13l11-6.5-11-6.5z" />
+                  </svg>
+                ) : (
+                  <span style={{ fontSize: 11, opacity: 0.7 }}>♦</span>
+                )}
+                {item.author}
+              </button>
             );
           })}
         </div>
+
+        {/* Content panel */}
+        <AnimatePresence mode="wait">
+          {activeItem && (
+            <motion.div
+              key={`${activeItem.author}-${activeItem.type}`}
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              style={{ overflow: "hidden", maxWidth: 720, margin: "0 auto" }}
+            >
+              {activeItem.type === "text" ? (
+                <MessagePanel item={activeItem} />
+              ) : (
+                <VideoPanel item={activeItem} />
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );
 }
 
-function TextBody({ item }: { item: Extract<FamilyItem, { type: "text" }> }) {
+function MessagePanel({ item }: { item: TextItem }) {
   return (
-    <>
+    <div
+      style={{
+        background: "linear-gradient(160deg, var(--surface-elevated) 0%, var(--surface) 100%)",
+        border: "1px solid var(--accent-soft)",
+        borderRadius: "var(--radius-lg)",
+        padding: "40px 32px 30px",
+        marginTop: 28,
+        boxShadow: "var(--shadow-sm)",
+      }}
+    >
       <span
         aria-hidden
         style={{
@@ -99,7 +127,7 @@ function TextBody({ item }: { item: Extract<FamilyItem, { type: "text" }> }) {
           fontFamily: "var(--font-playfair), Georgia, serif",
           fontSize: 52,
           lineHeight: 0.6,
-          color: "var(--gold, rgba(210,155,55,0.55))",
+          color: "var(--accent)",
           userSelect: "none",
           marginBottom: 18,
         }}
@@ -112,11 +140,9 @@ function TextBody({ item }: { item: Extract<FamilyItem, { type: "text" }> }) {
           fontFamily: "var(--font-playfair), Georgia, serif",
           fontSize: 16.5,
           lineHeight: 1.9,
-          color: "#ecd2df",
+          color: "var(--text)",
           fontStyle: "italic",
           marginBottom: 26,
-          position: "relative",
-          zIndex: 1,
         }}
       >
         {item.text}
@@ -125,133 +151,84 @@ function TextBody({ item }: { item: Extract<FamilyItem, { type: "text" }> }) {
       <div
         style={{
           height: 1,
-          background: "linear-gradient(90deg, var(--gold-soft, rgba(210,155,55,0.35)), transparent)",
+          background: "linear-gradient(90deg, var(--accent-soft), transparent)",
           marginBottom: 18,
         }}
       />
-    </>
-  );
-}
 
-function VideoBody({ item }: { item: Extract<FamilyItem, { type: "video" }> }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.3 });
-
-  return (
-    <div ref={ref} style={{ position: "relative", zIndex: 1, marginBottom: 18, marginTop: 8 }}>
       <div
         style={{
-          position: "relative",
-          paddingBottom: "56.25%",
-          borderRadius: "var(--radius-md)",
-          overflow: "hidden",
-          background: "var(--bg)",
-          border: "1px solid var(--accent-secondary-soft)",
+          display: "flex",
+          alignItems: "center",
+          gap: 14,
         }}
       >
-        {inView && (
-          <iframe
-            src={item.videoUrl}
-            title={`Video de ${item.author}`}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            loading="lazy"
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none" }}
-          />
-        )}
-        {/* Recognizable at a glance as a video, even before the iframe paints */}
         <span
-          aria-hidden
           style={{
-            position: "absolute",
-            top: 10,
-            left: 10,
+            width: 40,
+            height: 40,
+            borderRadius: "50%",
+            border: "1px solid var(--accent-soft)",
+            background: "var(--accent-faint)",
             display: "flex",
             alignItems: "center",
-            gap: 5,
-            padding: "4px 9px 4px 7px",
-            borderRadius: "var(--radius-pill)",
-            background: "rgba(13,6,16,0.7)",
-            border: "1px solid var(--accent-secondary-soft)",
-            backdropFilter: "blur(6px)",
-            fontSize: 9,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: "#e0b8d0",
-            pointerEvents: "none",
-            zIndex: 1,
+            justifyContent: "center",
+            fontFamily: "var(--font-playfair), Georgia, serif",
+            fontSize: 17,
+            color: "var(--accent-ink)",
+            flexShrink: 0,
           }}
         >
-          <svg width="8" height="8" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M3 1.5v13l11-6.5-11-6.5z" />
-          </svg>
-          Video
+          {item.author.charAt(0)}
         </span>
+        <div>
+          <p
+            style={{
+              fontFamily: "var(--font-playfair), Georgia, serif",
+              fontSize: 15,
+              color: "var(--text)",
+              marginBottom: 3,
+            }}
+          >
+            {item.author}
+          </p>
+          <p
+            style={{
+              fontSize: 9,
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "var(--text-muted)",
+            }}
+          >
+            {item.role}
+          </p>
+        </div>
       </div>
     </div>
   );
 }
 
-function AuthorFooter({
-  author,
-  role,
-  accent = "gold",
-}: {
-  author: string;
-  role: string;
-  accent?: "gold" | "secondary";
-}) {
-  const isSecondary = accent === "secondary";
+function VideoPanel({ item }: { item: VideoItem }) {
   return (
     <div
       style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 14,
         position: "relative",
-        zIndex: 1,
+        paddingBottom: "56.25%",
+        marginTop: 28,
+        borderRadius: "var(--radius-md)",
+        overflow: "hidden",
+        background: "var(--ink)",
+        border: "1px solid var(--gold-soft)",
+        boxShadow: "var(--shadow-md)",
       }}
     >
-      <span
-        style={{
-          width: 40,
-          height: 40,
-          borderRadius: "50%",
-          border: `1px solid ${isSecondary ? "var(--accent-secondary-soft)" : "var(--gold-soft, rgba(210,155,55,0.35))"}`,
-          background: isSecondary ? "rgba(122,58,94,0.15)" : "rgba(210,155,55,0.08)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontFamily: "var(--font-playfair), Georgia, serif",
-          fontSize: 17,
-          color: isSecondary ? "#d9a8c4" : "var(--gold, rgba(210,155,55,0.55))",
-          flexShrink: 0,
-        }}
-      >
-        {author.charAt(0)}
-      </span>
-      <div>
-        <p
-          style={{
-            fontFamily: "var(--font-playfair), Georgia, serif",
-            fontSize: 15,
-            color: "#fdf0f8",
-            marginBottom: 3,
-          }}
-        >
-          {author}
-        </p>
-        <p
-          style={{
-            fontSize: 9,
-            letterSpacing: "0.22em",
-            textTransform: "uppercase",
-            color: "#b0798f",
-          }}
-        >
-          {role}
-        </p>
-      </div>
+      <iframe
+        src={item.videoUrl}
+        title={`Video de ${item.author}`}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none" }}
+      />
     </div>
   );
 }

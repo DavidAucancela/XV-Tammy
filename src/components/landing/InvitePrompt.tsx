@@ -15,7 +15,7 @@ export default function InvitePrompt({
     <section
       style={{
         padding: "100px 24px 120px",
-        background: "rgba(13, 6, 16, 0.88)",
+        background: "var(--bg)",
       }}
     >
       <motion.div
@@ -42,7 +42,7 @@ export default function InvitePrompt({
             fontFamily: "var(--font-playfair), Georgia, serif",
             fontSize: "clamp(1.6rem, 5.5vw, 2.4rem)",
             fontWeight: 400,
-            color: "#fdf0f8",
+            color: "var(--text)",
             marginBottom: 20,
             lineHeight: 1.3,
             justifyContent: "center",
@@ -58,7 +58,7 @@ export default function InvitePrompt({
           transition={{ duration: 0.6, delay: 0.3 }}
           style={{
             fontSize: 14,
-            color: "#a87f96",
+            color: "var(--text-muted)",
             marginBottom: 44,
             lineHeight: 1.85,
             fontWeight: 300,
@@ -78,14 +78,14 @@ export default function InvitePrompt({
             borderRadius: 18,
             padding: 1,
             background:
-              "linear-gradient(135deg, rgba(210,155,55,0.45), rgba(232,105,154,0.4), rgba(210,155,55,0.2))",
+              "linear-gradient(135deg, rgba(var(--gold-rgb),0.5), rgba(var(--accent-rgb),0.4), rgba(var(--gold-rgb),0.25))",
             marginBottom: 28,
-            boxShadow: "0 0 40px rgba(232,105,154,0.08)",
+            boxShadow: "var(--shadow-sm)",
           }}
         >
           <div
             style={{
-              background: "rgba(22, 13, 30, 0.97)",
+              background: "var(--surface-elevated)",
               borderRadius: 17,
               padding: "20px 32px",
               display: "flex",
@@ -97,7 +97,7 @@ export default function InvitePrompt({
               <rect x="3" y="5" width="18" height="14" rx="2.5" />
               <path d="m4 7 8 6 8-6" />
             </svg>
-            <p style={{ fontSize: 13, color: "#e0c0d0", letterSpacing: "0.04em" }}>
+            <p style={{ fontSize: 13, color: "var(--text)", letterSpacing: "0.04em" }}>
               Revisa tu WhatsApp o correo por el enlace
             </p>
           </div>
@@ -128,7 +128,7 @@ export default function InvitePrompt({
             fontFamily: "var(--font-playfair), Georgia, serif",
             fontSize: "clamp(0.95rem, 3vw, 1.25rem)",
             fontStyle: "italic",
-            color: "#a884a0",
+            color: "var(--text-muted)",
             lineHeight: 1.75,
             marginBottom: 52,
           }}

@@ -23,7 +23,7 @@ export default function MeshBackground() {
           left: "15%",
           borderRadius: "50%",
           background:
-            "radial-gradient(circle, rgba(232,105,154,0.22) 0%, transparent 65%)",
+            "radial-gradient(circle, rgba(var(--accent-rgb),0.16) 0%, transparent 65%)",
           filter: "blur(70px)",
           animationName: "mesh-blob-1",
           animationDuration: "20s",
@@ -42,7 +42,7 @@ export default function MeshBackground() {
           right: "-8%",
           borderRadius: "50%",
           background:
-            "radial-gradient(circle, rgba(210,155,55,0.13) 0%, transparent 65%)",
+            "radial-gradient(circle, rgba(var(--gold-rgb),0.18) 0%, transparent 65%)",
           filter: "blur(90px)",
           animationName: "mesh-blob-2",
           animationDuration: "27s",
@@ -50,7 +50,7 @@ export default function MeshBackground() {
           animationIterationCount: "infinite",
         }}
       />
-      {/* Deep magenta blob — mid left */}
+      {/* Deep rose blob — mid left, richer variant of the accent for depth */}
       <div
         className="mesh-blob"
         style={{
@@ -61,7 +61,7 @@ export default function MeshBackground() {
           left: "-8%",
           borderRadius: "50%",
           background:
-            "radial-gradient(circle, rgba(160,55,118,0.14) 0%, transparent 65%)",
+            "radial-gradient(circle, rgba(var(--accent-ink-rgb),0.12) 0%, transparent 65%)",
           filter: "blur(80px)",
           animationName: "mesh-blob-3",
           animationDuration: "32s",
