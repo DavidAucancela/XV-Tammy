@@ -153,11 +153,14 @@ export default function HeroSection({ celebrant, photo }: { celebrant: string; p
           position: "relative",
           zIndex: 1,
           textAlign: "center",
-          padding: "0 28px",
+          padding: "0 20px",
           maxWidth: 600,
           width: "100%",
           y: contentY,
           opacity: contentOpacity,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
         <motion.div
@@ -173,7 +176,7 @@ export default function HeroSection({ celebrant, photo }: { celebrant: string; p
                 position: "relative",
                 width: 132,
                 height: 132,
-                margin: "0 auto 28px",
+                marginBottom: 28,
               }}
             >
               <div
