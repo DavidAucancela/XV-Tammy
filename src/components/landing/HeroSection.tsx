@@ -174,20 +174,20 @@ export default function HeroSection({ celebrant, photo }: { celebrant: string; p
               variants={medallion}
               style={{
                 position: "relative",
-                width: 132,
-                height: 132,
-                marginBottom: 28,
+                width: 220,
+                height: 220,
+                marginBottom: 40,
               }}
             >
               <div
                 aria-hidden
                 style={{
                   position: "absolute",
-                  inset: -22,
+                  inset: -32,
                   borderRadius: "50%",
                   background:
                     "radial-gradient(circle, rgba(var(--accent-rgb),0.30) 0%, transparent 70%)",
-                  filter: "blur(10px)",
+                  filter: "blur(12px)",
                 }}
               />
               <div
@@ -222,7 +222,7 @@ export default function HeroSection({ celebrant, photo }: { celebrant: string; p
                       src={photo}
                       alt={celebrant}
                       fill
-                      sizes="132px"
+                      sizes="220px"
                       priority
                       style={{ objectFit: "cover", objectPosition: "50% 50%" }}
                     />
