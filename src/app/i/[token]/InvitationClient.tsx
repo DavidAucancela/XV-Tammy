@@ -104,7 +104,7 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
   return (
     <div
       className="min-h-screen flex flex-col items-center pb-16"
-      style={{ background: "#0d0610", color: "#fdf0f8", fontFamily: "var(--font-lato), system-ui, sans-serif" }}
+      style={{ background: "#F3E6D6", color: "#4A372E", fontFamily: "var(--font-lato), system-ui, sans-serif" }}
     >
       <MusicPlayer songUrl={songUrl} />
 
@@ -115,44 +115,44 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
         animate="show"
         className="w-full max-w-md px-6 pt-14 flex flex-col items-center text-center"
       >
-        <motion.p variants={fade} className="text-xs tracking-[0.3em] uppercase" style={{ color: "#e8699a" }}>
+        <motion.p variants={fade} className="text-xs tracking-[0.3em] uppercase" style={{ color: "#B4707C" }}>
           ✦ &nbsp; una invitación especial &nbsp; ✦
         </motion.p>
 
         <motion.h1
           variants={fade}
           className="mt-6 text-4xl leading-tight"
-          style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#fdf0f8" }}
+          style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4A372E" }}
         >
           Los XV Años
           <br />
-          <span style={{ color: "#e8699a" }}>de {celebrant}</span>
+          <span style={{ color: "#B4707C" }}>de {celebrant}</span>
         </motion.h1>
 
-        <motion.div variants={fade} className="mt-1 w-16 h-px" style={{ background: "#e8699a" }} />
+        <motion.div variants={fade} className="mt-1 w-16 h-px" style={{ background: "#B4707C" }} />
 
-        <motion.p variants={fade} className="mt-6 text-lg font-light" style={{ color: "#f4b8d0" }}>
+        <motion.p variants={fade} className="mt-6 text-lg font-light" style={{ color: "#B4707C" }}>
           {guest.nombre}
         </motion.p>
-        <motion.p variants={fade} className="mt-1 text-sm" style={{ color: "#7a5870" }}>
+        <motion.p variants={fade} className="mt-1 text-sm" style={{ color: "#7A6355" }}>
           {guest.pases === 1 ? "1 pase reservado" : `${guest.pases} pases reservados`}
         </motion.p>
 
-        {/* ── Detalles del evento ── */}
+        {/* ── Detalles del evento: Lugar y hora ── */}
         <motion.div
           variants={fade}
           className="mt-10 w-full rounded-2xl p-6 flex flex-col gap-3 text-sm"
-          style={{ background: "#160d1e", border: "1px solid #251535" }}
+          style={{ background: "rgba(234,216,195,0.65)", border: "1px solid #DCC7AE" }}
         >
           <Detail icon="✦" label={capitalize(dateLabel)} />
           <Detail icon="✦" label={timeLabel} />
         </motion.div>
 
-        {/* ── Cuenta regresiva ── */}
+        {/* ── Cada vez más cerca ── */}
         {time !== null && (time.days > 0 || time.hours > 0 || time.minutes > 0) && (
           <motion.div variants={fade} className="mt-10 w-full">
-            <p className="text-xs tracking-widest uppercase mb-4" style={{ color: "#7a5870" }}>
-              faltan
+            <p className="text-xs tracking-widest uppercase mb-4" style={{ color: "#7A6355" }}>
+              cada vez más cerca
             </p>
             <div className="grid grid-cols-4 gap-3">
               {[
@@ -164,15 +164,15 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
                 <div
                   key={l}
                   className="flex flex-col items-center rounded-xl py-4"
-                  style={{ background: "#160d1e", border: "1px solid #251535" }}
+                  style={{ background: "rgba(234,216,195,0.65)", border: "1px solid #DCC7AE" }}
                 >
                   <span
                     className="text-2xl font-light tabular-nums"
-                    style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#e8699a" }}
+                    style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#B4707C" }}
                   >
                     {v}
                   </span>
-                  <span className="text-[10px] tracking-widest uppercase mt-1" style={{ color: "#7a5870" }}>
+                  <span className="text-[10px] tracking-widest uppercase mt-1" style={{ color: "#7A6355" }}>
                     {l}
                   </span>
                 </div>
@@ -186,14 +186,14 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
           <AnimatePresence mode="wait">
             {step === "pending" && (
               <motion.div key="pending" {...slideInOut} className="flex flex-col gap-4">
-                <p className="text-sm tracking-wider uppercase" style={{ color: "#7a5870" }}>
+                <p className="text-sm tracking-wider uppercase" style={{ color: "#7A6355" }}>
                   ¿Confirmás tu asistencia?
                 </p>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setStep("selecting")}
                     className="flex-1 rounded-xl py-3 text-sm font-light tracking-widest uppercase transition-opacity hover:opacity-80"
-                    style={{ background: "#e8699a", color: "#0d0610" }}
+                    style={{ background: "#B4707C", color: "#F3E6D6" }}
                   >
                     Sí, voy
                   </button>
@@ -201,7 +201,7 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
                     onClick={() => handleRsvp("declinar")}
                     disabled={loading}
                     className="flex-1 rounded-xl py-3 text-sm font-light tracking-widest uppercase transition-opacity hover:opacity-80 disabled:opacity-40"
-                    style={{ background: "#1e1228", color: "#7a5870", border: "1px solid #2a1535" }}
+                    style={{ background: "rgba(234,216,195,0.65)", color: "#7A6355", border: "1px solid #DCC7AE" }}
                   >
                     No puedo
                   </button>
@@ -211,7 +211,7 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
 
             {step === "selecting" && (
               <motion.div key="selecting" {...slideInOut} className="flex flex-col gap-5">
-                <p className="text-sm tracking-wider uppercase" style={{ color: "#7a5870" }}>
+                <p className="text-sm tracking-wider uppercase" style={{ color: "#7A6355" }}>
                   ¿Cuántas personas van a asistir?
                 </p>
                 <div className="flex gap-3 justify-center flex-wrap">
@@ -222,27 +222,27 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
                       className="w-12 h-12 rounded-full text-sm font-light transition-all"
                       style={
                         selectedPases === n
-                          ? { background: "#e8699a", color: "#0d0610" }
-                          : { background: "#1e1228", color: "#7a5870", border: "1px solid #2a1535" }
+                          ? { background: "#B4707C", color: "#F3E6D6" }
+                          : { background: "rgba(234,216,195,0.65)", color: "#7A6355", border: "1px solid #DCC7AE" }
                       }
                     >
                       {n}
                     </button>
                   ))}
                 </div>
-                {error && <p className="text-xs text-center" style={{ color: "#e07070" }}>{error}</p>}
+                {error && <p className="text-xs text-center" style={{ color: "#C85555" }}>{error}</p>}
                 <button
                   onClick={() => handleRsvp("confirmar")}
                   disabled={loading}
                   className="w-full rounded-xl py-3 text-sm font-light tracking-widest uppercase transition-opacity hover:opacity-80 disabled:opacity-40"
-                  style={{ background: "#e8699a", color: "#0d0610" }}
+                  style={{ background: "#B4707C", color: "#F3E6D6" }}
                 >
                   {loading ? "Confirmando…" : "Confirmar"}
                 </button>
                 <button
                   onClick={() => setStep("pending")}
                   className="text-xs tracking-widest uppercase"
-                  style={{ color: "#7a5870" }}
+                  style={{ color: "#7A6355" }}
                 >
                   ← Volver
                 </button>
@@ -251,12 +251,12 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
 
             {step === "confirmed" && (
               <motion.div key="confirmed" {...slideInOut} className="flex flex-col items-center gap-5">
-                <p className="text-xs tracking-[0.3em] uppercase" style={{ color: "#e8699a" }}>
+                <p className="text-xs tracking-[0.3em] uppercase" style={{ color: "#B4707C" }}>
                   ✦ &nbsp; ¡Te esperamos! &nbsp; ✦
                 </p>
-                <p className="text-sm font-light" style={{ color: "#7a5870" }}>
+                <p className="text-sm font-light" style={{ color: "#7A6355" }}>
                   Tu pase de entrada —{" "}
-                  <span style={{ color: "#f4b8d0" }}>
+                  <span style={{ color: "#B4707C" }}>
                     {selectedPases} {selectedPases === 1 ? "persona" : "personas"}
                   </span>
                 </p>
@@ -265,7 +265,7 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
                   className="rounded-2xl overflow-hidden p-3"
-                  style={{ background: "#fafafa" }}
+                  style={{ background: "#FCFAEF" }}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -280,11 +280,11 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
                   href={`/api/qr?token=${token}`}
                   download={`invitacion-${guest.nombre.replace(/\s+/g, "-")}.png`}
                   className="text-xs tracking-widest uppercase transition-opacity hover:opacity-70"
-                  style={{ color: "#e8699a" }}
+                  style={{ color: "#B4707C" }}
                 >
                   Descargar QR ↓
                 </a>
-                <p className="text-xs text-center max-w-xs" style={{ color: "#7a5870" }}>
+                <p className="text-xs text-center max-w-xs" style={{ color: "#7A6355" }}>
                   Guarda esta pantalla o descarga tu QR. Lo vas a necesitar en la entrada.
                 </p>
               </motion.div>
@@ -292,13 +292,13 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
 
             {step === "declined" && (
               <motion.div key="declined" {...slideInOut} className="flex flex-col items-center gap-3">
-                <p className="text-sm" style={{ color: "#7a5870" }}>
+                <p className="text-sm" style={{ color: "#7A6355" }}>
                   Lamentamos que no puedas acompañarnos.
                 </p>
                 <button
                   onClick={() => setStep("pending")}
                   className="text-xs tracking-widest uppercase mt-2"
-                  style={{ color: "#e8699a" }}
+                  style={{ color: "#B4707C" }}
                 >
                   Cambiar respuesta
                 </button>
@@ -315,13 +315,13 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
             target="_blank"
             rel="noopener noreferrer"
             className="mt-12 text-xs tracking-[0.25em] uppercase transition-opacity hover:opacity-70"
-            style={{ color: "#7a5870" }}
+            style={{ color: "#7A6355" }}
           >
             ¿Cómo llegar? →
           </motion.a>
         )}
 
-        <motion.p variants={fade} className="mt-14 text-[10px] tracking-widest uppercase" style={{ color: "#2a1535" }}>
+        <motion.p variants={fade} className="mt-14 text-[10px] tracking-widest uppercase" style={{ color: "#B4707C" }}>
           ✦ &nbsp; con cariño &nbsp; ✦
         </motion.p>
       </motion.div>
@@ -332,8 +332,8 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
 function Detail({ icon, label }: { icon: string; label: string }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="text-xs" style={{ color: "#e8699a" }}>{icon}</span>
-      <span style={{ color: "#9a7888" }}>{label}</span>
+      <span className="text-xs" style={{ color: "#B4707C" }}>{icon}</span>
+      <span style={{ color: "#4A372E" }}>{label}</span>
     </div>
   );
 }
