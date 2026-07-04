@@ -167,6 +167,12 @@ export default function HeroSection({ celebrant, photo }: { celebrant: string; p
           variants={stagger}
           initial="hidden"
           animate="show"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            width: "100%",
+          }}
         >
           {/* Portrait medallion — anchors the invitation to Tammy specifically */}
           {photo && (
@@ -176,7 +182,7 @@ export default function HeroSection({ celebrant, photo }: { celebrant: string; p
                 position: "relative",
                 width: 220,
                 height: 220,
-                marginBottom: 40,
+                margin: "0 auto 40px",
               }}
             >
               <div
