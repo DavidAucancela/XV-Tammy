@@ -167,6 +167,12 @@ export default function HeroSection({ celebrant, photo }: { celebrant: string; p
           variants={stagger}
           initial="hidden"
           animate="show"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            width: "100%",
+          }}
         >
           {/* Portrait medallion — anchors the invitation to Tammy specifically */}
           {photo && (
@@ -174,20 +180,20 @@ export default function HeroSection({ celebrant, photo }: { celebrant: string; p
               variants={medallion}
               style={{
                 position: "relative",
-                width: 132,
-                height: 132,
-                marginBottom: 28,
+                width: 220,
+                height: 220,
+                margin: "0 auto 40px",
               }}
             >
               <div
                 aria-hidden
                 style={{
                   position: "absolute",
-                  inset: -22,
+                  inset: -32,
                   borderRadius: "50%",
                   background:
                     "radial-gradient(circle, rgba(var(--accent-rgb),0.30) 0%, transparent 70%)",
-                  filter: "blur(10px)",
+                  filter: "blur(12px)",
                 }}
               />
               <div
@@ -222,7 +228,7 @@ export default function HeroSection({ celebrant, photo }: { celebrant: string; p
                       src={photo}
                       alt={celebrant}
                       fill
-                      sizes="132px"
+                      sizes="220px"
                       priority
                       style={{ objectFit: "cover", objectPosition: "50% 50%" }}
                     />
