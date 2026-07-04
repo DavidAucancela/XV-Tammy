@@ -44,7 +44,7 @@ export default function Home() {
     <main
       style={{
         background: "transparent",
-        color: "#fdf0f8",
+        color: "var(--text)",
         fontFamily: "var(--font-lato), system-ui, sans-serif",
       }}
     >

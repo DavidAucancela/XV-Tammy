@@ -78,7 +78,7 @@ export default function HeroSection({ celebrant, photo }: { celebrant: string; p
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
-        background: "rgba(13, 6, 16, 0.88)",
+        background: "var(--bg)",
       }}
     >
       {/* Parallax blob 1 — faster */}
@@ -91,7 +91,7 @@ export default function HeroSection({ celebrant, photo }: { celebrant: string; p
           height: "min(680px, 80vw)",
           borderRadius: "50%",
           background:
-            "radial-gradient(circle, rgba(232,105,154,0.16) 0%, transparent 65%)",
+            "radial-gradient(circle, rgba(var(--accent-rgb),0.14) 0%, transparent 65%)",
           filter: "blur(60px)",
           pointerEvents: "none",
           y: blob1Y,
@@ -107,7 +107,7 @@ export default function HeroSection({ celebrant, photo }: { celebrant: string; p
           height: "min(420px, 55vw)",
           borderRadius: "50%",
           background:
-            "radial-gradient(circle, rgba(210,155,55,0.10) 0%, transparent 65%)",
+            "radial-gradient(circle, rgba(var(--gold-rgb),0.16) 0%, transparent 65%)",
           filter: "blur(80px)",
           pointerEvents: "none",
           y: blob2Y,
@@ -131,7 +131,7 @@ export default function HeroSection({ celebrant, photo }: { celebrant: string; p
               left: `${s.x}%`,
               top: `${s.y}%`,
               fontSize: s.size,
-              color: "#e8699a",
+              color: "var(--accent)",
               userSelect: "none",
             }}
             animate={{ y: [-10, 10, -10], opacity: [0.12, 0.40, 0.12] }}
@@ -183,7 +183,7 @@ export default function HeroSection({ celebrant, photo }: { celebrant: string; p
                   inset: -22,
                   borderRadius: "50%",
                   background:
-                    "radial-gradient(circle, rgba(232,105,154,0.30) 0%, transparent 70%)",
+                    "radial-gradient(circle, rgba(var(--accent-rgb),0.30) 0%, transparent 70%)",
                   filter: "blur(10px)",
                 }}
               />
@@ -221,7 +221,7 @@ export default function HeroSection({ celebrant, photo }: { celebrant: string; p
                       fill
                       sizes="132px"
                       priority
-                      style={{ objectFit: "cover", objectPosition: "50% 22%" }}
+                      style={{ objectFit: "cover", objectPosition: "50% 50%" }}
                     />
                   </div>
                 </div>
@@ -238,7 +238,7 @@ export default function HeroSection({ celebrant, photo }: { celebrant: string; p
                 fontSize: "clamp(3rem, 12vw, 6rem)",
                 fontWeight: 400,
                 lineHeight: 1.0,
-                color: "#fdf0f8",
+                color: "var(--text)",
                 margin: 0,
               }}
             >
@@ -253,7 +253,7 @@ export default function HeroSection({ celebrant, photo }: { celebrant: string; p
                 fontFamily: "var(--font-playfair), Georgia, serif",
                 fontSize: "clamp(1.5rem, 6vw, 3.2rem)",
                 fontStyle: "italic",
-                color: "#e8699a",
+                color: "var(--accent)",
                 margin: 0,
               }}
             >
@@ -266,7 +266,7 @@ export default function HeroSection({ celebrant, photo }: { celebrant: string; p
             style={{
               width: 70,
               height: 1,
-              background: "linear-gradient(90deg, transparent, #e8699a, transparent)",
+              background: "linear-gradient(90deg, transparent, var(--accent), transparent)",
               margin: "0 auto 32px",
             }}
           />
@@ -275,7 +275,7 @@ export default function HeroSection({ celebrant, photo }: { celebrant: string; p
             variants={fadeSub}
             style={{
               fontSize: 14,
-              color: "#c9a0b8",
+              color: "var(--text-muted)",
               letterSpacing: "0.04em",
               lineHeight: 1.85,
               maxWidth: 400,
@@ -316,12 +316,12 @@ export default function HeroSection({ celebrant, photo }: { celebrant: string; p
             fontSize: 8,
             letterSpacing: "0.35em",
             textTransform: "uppercase",
-            color: "#3a1a30",
+            color: "rgba(var(--ink-rgb), 0.4)",
           }}
         >
           scroll
         </span>
-        <span style={{ color: "#3a1a30", fontSize: 16 }}>↓</span>
+        <span style={{ color: "rgba(var(--ink-rgb), 0.4)", fontSize: 16 }}>↓</span>
       </motion.button>
     </section>
   );

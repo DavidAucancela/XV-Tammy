@@ -3,7 +3,7 @@
 // ============================================================
 
 // Foto destacada del Hero — retrato reciente, se muestra en el medallón bajo el título.
-export const heroPhoto = "/photos/25.jpg";
+export const heroPhoto = "/photos/inicio_1_hero.png";
 
 // Rutas de fotos dentro de /public, en orden cronológico (de niña a señorita).
 // El slideshow las recorre en este orden con música de fondo.
@@ -66,13 +66,24 @@ export const familyItems: FamilyItem[] = [
     role: "Tío",
     text: "Siempre serás nuestra princesa. Que esta fiesta sea tan especial y radiante como tú eres para nuestra familia.",
   },
-  // Ejemplo de video — copia este bloque y cambia autor/rol/URL por cada video real:
-  // {
-  //   type: "video",
-  //   author: "Tía Rosa",
-  //   role: "Tía",
-  //   videoUrl: "https://www.youtube.com/embed/VIDEO_ID",
-  // },
+  {
+    type: "video",
+    author: "Tía Rosa",
+    role: "Tía",
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+  },
+  {
+    type: "video",
+    author: "Prima Ana",
+    role: "Prima",
+    videoUrl: "https://www.youtube.com/embed/jNQXAC9IVRw",
+  },
+  {
+    type: "video",
+    author: "Padrino Luis",
+    role: "Padrino",
+    videoUrl: "https://www.youtube.com/embed/9bZkp7q19f0",
+  },
 ];
 
 // Información del salón

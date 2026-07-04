@@ -37,9 +37,9 @@ export function Button({ children, onClick, href, variant = "secondary", style }
 
   const variants: Record<string, CSSProperties> = {
     primary: {
-      border: "1px solid var(--accent)",
-      background: "var(--accent)",
-      color: "#1a0a14",
+      border: "1px solid var(--accent-ink)",
+      background: "var(--accent-ink)",
+      color: "var(--ivory)",
       fontWeight: 600,
       boxShadow: hover ? "var(--shadow-md)" : "var(--shadow-sm)",
     },
@@ -82,7 +82,11 @@ type IconButtonProps = {
   style?: CSSProperties;
 };
 
-/** Circular ghost control — arrows, mute, play/pause. Never the primary action. */
+/**
+ * Circular "dark glass" control — arrows, mute, play/pause. Lives on the
+ * --ink floating-widget layer, never on the page's light surface directly.
+ * Never the primary action.
+ */
 export function IconButton({ children, label, onClick, size = "md", style }: IconButtonProps) {
   const [hover, setHover] = useState(false);
   const [focus, setFocus] = useState(false);
@@ -101,10 +105,10 @@ export function IconButton({ children, label, onClick, size = "md", style }: Ico
         height: dim,
         borderRadius: "50%",
         border: `1px solid ${hover ? "var(--accent)" : "var(--accent-soft)"}`,
-        background: hover ? "var(--accent-faint)" : "rgba(13,6,16,0.65)",
+        background: hover ? "rgba(var(--ink-rgb), 0.8)" : "rgba(var(--ink-rgb), 0.65)",
         backdropFilter: "blur(8px)",
         WebkitBackdropFilter: "blur(8px)",
-        color: "var(--text)",
+        color: "var(--on-ink)",
         fontSize: size === "sm" ? 14 : 18,
         lineHeight: 1,
         cursor: "pointer",

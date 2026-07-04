@@ -50,8 +50,8 @@ export default function StickyNav() {
         gap: 28,
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
-        background: "rgba(13, 6, 16, 0.88)",
-        borderBottom: "1px solid rgba(232, 105, 154, 0.12)",
+        background: "rgba(var(--ink-rgb), 0.9)",
+        borderBottom: "1px solid rgba(var(--accent-rgb), 0.18)",
         transform: visible ? "translateY(0)" : "translateY(-100%)",
         transition: "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
       }}
@@ -72,12 +72,12 @@ export default function StickyNav() {
               fontSize: 10,
               letterSpacing: "0.22em",
               textTransform: "uppercase",
-              color: isActive ? "var(--accent)" : "var(--text-muted)",
+              color: isActive ? "var(--accent)" : "var(--on-ink-muted)",
               fontFamily: "var(--font-lato), system-ui, sans-serif",
               transition: "color 0.25s",
             }}
-            onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = "#e8699a"; }}
-            onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = "var(--text-muted)"; }}
+            onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = "var(--on-ink)"; }}
+            onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = "var(--on-ink-muted)"; }}
           >
             {label}
             <span

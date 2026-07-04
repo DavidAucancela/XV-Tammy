@@ -62,14 +62,14 @@ export default function CountdownSection({
       id="countdown"
       style={{
         padding: "100px 24px",
-        background: "rgba(13, 6, 16, 0.88)",
+        background: "var(--bg)",
         textAlign: "center",
       }}
     >
       <motion.div
         style={{ maxWidth: 520, margin: "0 auto", y: sectionY, opacity: sectionOpacity }}
       >
-        <SectionHeading title="Cuenta Regresiva" marginBottom={48} />
+        <SectionHeading title="Cada vez más cerca" marginBottom={48} />
 
         {/* Date card — supporting info; the countdown digits below carry the section */}
         <div
@@ -96,7 +96,7 @@ export default function CountdownSection({
           <p
             style={{
               fontSize: 18,
-              color: "#c9a0b8",
+              color: "var(--text)",
               textTransform: "capitalize",
               marginBottom: 6,
               fontWeight: 300,
@@ -165,7 +165,6 @@ export default function CountdownSection({
                         color: "var(--text)",
                         lineHeight: 1,
                         fontVariantNumeric: "tabular-nums",
-                        textShadow: "0 0 44px rgba(232,105,154,0.35)",
                       }}
                     >
                       {v}

@@ -2,14 +2,17 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useMusicContext } from "@/context/MusicContext";
 
 export default function MusicPlayer({ songUrl = "" }: { songUrl?: string }) {
+  const { isVideoPlaying } = useMusicContext();
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(0.6);
   const [expanded, setExpanded] = useState(false);
   const [needsTap, setNeedsTap] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const wasPlayingBeforeVideo = useRef(false);
 
   // Autoplay as soon as the page loads. Browsers usually block unmuted
   // autoplay without a prior user gesture, so we fall back to muted
@@ -83,6 +86,20 @@ export default function MusicPlayer({ songUrl = "" }: { songUrl?: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [songUrl]);
 
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isVideoPlaying) {
+      wasPlayingBeforeVideo.current = !audio.paused;
+      audio.pause();
+    } else {
+      if (wasPlayingBeforeVideo.current) {
+        audio.play().catch(() => {});
+      }
+    }
+  }, [isVideoPlaying]);
+
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -140,8 +157,8 @@ export default function MusicPlayer({ songUrl = "" }: { songUrl?: string }) {
               borderRadius: 999,
               fontSize: 11,
               letterSpacing: "0.04em",
-              color: "var(--text)",
-              background: "rgba(13,6,16,0.75)",
+              color: "var(--on-ink)",
+              background: "rgba(var(--ink-rgb), 0.85)",
               border: "1px solid var(--accent-soft)",
               backdropFilter: "blur(10px)",
               WebkitBackdropFilter: "blur(10px)",
@@ -164,19 +181,19 @@ export default function MusicPlayer({ songUrl = "" }: { songUrl?: string }) {
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
-                background: "rgba(13,6,16,0.78)",
+                background: "rgba(var(--ink-rgb), 0.9)",
                 backdropFilter: "blur(14px)",
                 WebkitBackdropFilter: "blur(14px)",
                 borderRadius: 999,
                 padding: "10px 16px",
                 border: "1px solid var(--accent-soft)",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
+                boxShadow: "0 8px 24px rgba(var(--ink-rgb), 0.35)",
               }}
             >
               <span
                 style={{
                   fontSize: 11,
-                  color: "#f4b8d0",
+                  color: "var(--on-ink)",
                   fontFamily: "var(--font-playfair, Georgia, serif)",
                   whiteSpace: "nowrap",
                   maxWidth: 120,
@@ -252,19 +269,19 @@ function ControlButton({
         width: size,
         height: size,
         borderRadius: "50%",
-        border: accent ? "1px solid var(--accent)" : "1px solid var(--accent-soft)",
+        border: accent ? "1px solid var(--accent-ink)" : "1px solid var(--accent-soft)",
         background: accent
-          ? "linear-gradient(145deg, var(--accent), #c94a7c)"
-          : "rgba(13,6,16,0.7)",
+          ? "linear-gradient(145deg, var(--accent), var(--accent-ink))"
+          : "rgba(var(--ink-rgb), 0.75)",
         backdropFilter: "blur(10px)",
         WebkitBackdropFilter: "blur(10px)",
-        color: accent ? "var(--bg)" : "var(--text)",
+        color: accent ? "var(--ivory)" : "var(--on-ink)",
         cursor: "pointer",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         flexShrink: 0,
-        boxShadow: accent ? "0 4px 16px rgba(232,105,154,0.4)" : "0 2px 10px rgba(0,0,0,0.25)",
+        boxShadow: accent ? "0 4px 16px rgba(var(--accent-rgb), 0.4)" : "0 2px 10px rgba(var(--ink-rgb), 0.3)",
         transition: `transform var(--duration-fast) ease, box-shadow var(--duration-fast) ease`,
       }}
       onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.92)")}
@@ -277,7 +294,7 @@ function ControlButton({
             position: "absolute",
             inset: -4,
             borderRadius: "50%",
-            border: "1px solid rgba(232,105,154,0.5)",
+            border: "1px solid rgba(var(--accent-rgb), 0.5)",
             animation: "musicPlayerPulse 1.8s ease-out infinite",
           }}
         />
