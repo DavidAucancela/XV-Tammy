@@ -292,17 +292,18 @@ export default function HeroSection({ celebrant, photo }: { celebrant: string; p
       <motion.button
         style={{
           position: "absolute",
-          bottom: 40,
+          bottom: 32,
           left: "50%",
           transform: "translateX(-50%)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 6,
+          justifyContent: "center",
+          gap: 4,
           background: "none",
           border: "none",
           cursor: "pointer",
-          padding: 8,
+          padding: 0,
           zIndex: 2,
         }}
         animate={{ y: [0, 8, 0] }}
