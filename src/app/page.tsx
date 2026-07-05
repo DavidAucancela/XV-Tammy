@@ -1,4 +1,5 @@
 import MeshBackground from "@/components/landing/MeshBackground";
+import FloatingIcons from "@/components/landing/FloatingIcons";
 import StickyNav from "@/components/landing/StickyNav";
 import MusicPlayer from "@/components/landing/MusicPlayer";
 import HeroSection from "@/components/landing/HeroSection";
@@ -49,6 +50,7 @@ export default function Home() {
       }}
     >
       <MeshBackground />
+      <FloatingIcons />
       <StickyNav />
       <MusicPlayer songUrl={songUrl} />
       <HeroSection celebrant={celebrant} photo={heroPhoto} />
