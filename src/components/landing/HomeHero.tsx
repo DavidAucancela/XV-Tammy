@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 type TimeLeft = {
@@ -61,11 +61,8 @@ export default function HomeHero({
   venueName: string;
 }) {
   const [time, setTime] = useState<TimeLeft | null>(null);
-  const hasSetIntervalRef = useRef(false);
 
   useEffect(() => {
-    if (hasSetIntervalRef.current) return;
-    hasSetIntervalRef.current = true;
     setTime(getTimeLeft());
     const id = setInterval(() => setTime(getTimeLeft()), 1_000);
     return () => clearInterval(id);
