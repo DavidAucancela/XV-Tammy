@@ -22,7 +22,8 @@ Digital invitation + QR check-in system for a quinceañera (50–150 guests). A 
 **Event Date:** 2026-08-29 at 20:00 (Quito, Ecuador)
 
 **Routes**
-- `/` — full landing page (hero, countdown, gallery, family messages, video, location, CTA)
+- `/` — single-viewport landing (no scroll): hero identity, live countdown, condensed event info (date/time/venue name, no map), link to `/recuerdos`. Silent — no audio.
+- `/recuerdos` — scrollable second page: photo gallery, family messages, full event location (map + "Cómo llegar"), invite/calendar CTA. Background music starts here (`MusicPlayer`).
 - `/i/[token]` — personalized invitation with RSVP flow (SSR, public)
 - `/api/qr?token=<token>` — server-side PNG generation, immutable cache
 - `/api/checkin` — POST, registers guest entry (admin client)
@@ -43,7 +44,8 @@ Digital invitation + QR check-in system for a quinceañera (50–150 guests). A 
 src/
 ├── app/                          # Next.js App Router
 │   ├── layout.tsx / globals.css
-│   ├── page.tsx                  # landing — Server Component, imports all sections
+│   ├── page.tsx                  # page 1 — single-viewport hero+countdown+event info, no scroll
+│   ├── recuerdos/page.tsx        # page 2 — gallery, family messages, full location, invite CTA
 │   ├── i/[token]/page.tsx        # invitation — async params (Next 15 requirement)
 │   ├── scan/page.tsx
 │   ├── admin/page.tsx
@@ -54,25 +56,26 @@ src/
 │       ├── rsvp/route.ts         # uses createAdminClient
 │       └── qr/route.ts           # runtime: nodejs — uses qrcode npm package
 ├── components/
-│   └── landing/                  # all landing page sections (Client Components)
+│   └── landing/                  # all landing/recuerdos page sections (Client Components)
 │       ├── MeshBackground.tsx    # animated gradient mesh (5 blobs, varying opacities)
 │       ├── FloatingIcons.tsx     # decorative floating icons (stars/diamonds, parallax)
-│       ├── StickyNav.tsx         # glassmorphism nav, appears after 65% vh scroll
-│       ├── HeroSection.tsx       # parallax layers + kinetic title (220×220 centered medallion)
-│       ├── CountdownSection.tsx  # "Cada vez más cerca" — countdown with typography reveal
+│       ├── HomeHero.tsx          # page 1: no-scroll hero + countdown + condensed event info
+│       ├── GalleryNav.tsx        # page 2 scrollspy nav (galería/familia/evento) + link back to `/`
 │       ├── PhotoGallery.tsx      # Ken Burns slideshow + filmstrip thumbnails
 │       ├── FamilyMessages.tsx    # accordion-style family messages (text + video)
 │       ├── EventLocation.tsx     # "Lugar y hora" — 2-col grid (date + time) + maps
 │       ├── InvitePrompt.tsx      # CTA section + Add to Calendar
 │       ├── RevealText.tsx        # word-by-word stagger reveal (Framer Motion)
 │       ├── TiltCard.tsx          # 3D tilt + cursor-following glow
-│       ├── MusicPlayer.tsx       # background music player + video pause integration
+│       ├── MusicPlayer.tsx       # background music player + video pause integration (only rendered on /recuerdos)
 │       └── SectionHeading.tsx    # consistent section headers (eyebrow + title)
 ├── data/
 │   └── landingContent.ts         # photos[], messages[], videoUrl, venue — edit here
-└── lib/supabase/
-    ├── client.ts                 # createBrowserClient — use in Client Components
-    └── server.ts                 # createServerClient (SSR) + createAdminClient (service role)
+├── lib/
+│   ├── eventDetails.ts           # shared celebrant/dateLabel/timeLabel/calendarUrl/lat/lng derivation
+│   └── supabase/
+│       ├── client.ts                 # createBrowserClient — use in Client Components
+│       └── server.ts                 # createServerClient (SSR) + createAdminClient (service role)
 ```
 
 **Two Supabase clients:**
@@ -81,13 +84,12 @@ src/
 
 **Next.js 15 async params:** Dynamic route `params` are a `Promise` — always `await params` before destructuring.
 
-**Landing content:** All customizable content (photos, family messages, video URL, venue) lives in `src/data/landingContent.ts`. The `page.tsx` Server Component reads env vars and passes everything as serializable props to Client Components.
+**Landing content:** All customizable content (photos, family messages, video URL, venue) lives in `src/data/landingContent.ts`. Both `page.tsx` and `recuerdos/page.tsx` are Server Components that call `getEventDetails()` (`src/lib/eventDetails.ts`) to derive `celebrant`/`dateLabel`/`timeLabel`/`lat`/`lng`/`calendarUrl` identically, then pass everything as serializable props to Client Components.
 
 **Section titles (updated):**
 - "Mensajes de tu familia" — family text/video accordion
 - "Lugar y hora" — event details (date + time, no address card)
 - "Mi crecimiento" — photo gallery ("de niña a señorita" eyebrow)
-- "Cada vez más cerca" — countdown timer
 
 ## Environment variables
 
@@ -117,15 +119,18 @@ See `.env.example` for a complete template.
 
 ## Key features
 
-**Landing page:**
-- Animated mesh background with 5 dynamic gradient blobs (22–25% opacity, 24–35s durations)
-- 12 floating decorative icons (stars/diamonds) with parallax + fade animation
-- Hero section: 220×220px centered portrait medallion with animated glow
-- Countdown: "Cada vez más cerca" with real-time timer (days/hrs/min/sec)
+**Landing page 1 (`/`) — single viewport, no scroll:**
+- Animated mesh background with 5 dynamic gradient blobs + 12 floating decorative icons
+- Compact hero identity (medallion + kinetic title), live countdown timer (days/hrs/min/sec), and condensed event info (date/time/venue name, no map) all fit in one screen via `HomeHero.tsx`
+- Silent — no audio widget here
+- Single link ("Fotos y mensajes") to `/recuerdos`
+
+**Recuerdos page (`/recuerdos`) — scrollable:**
 - Photo gallery: Ken Burns zoom + filmstrip navigation + responsive layouts
 - Family messages: Accordion-style buttons (text vs. video) with music pause integration
-- Sticky navigation: Glassmorphism design, reveals at 65% viewport scroll
-- Background music player: UI controls + auto-pause during video playback
+- Full event location (map + "Cómo llegar") and invite/calendar CTA
+- Scrollspy navigation (`GalleryNav.tsx`): glassmorphism design, reveals at 65% viewport scroll, plus a static link back to `/`
+- Background music player: starts playing here, UI controls + auto-pause during video playback
 
 **Personalized invitation (/i/[token]):**
 - Matching champagne + rose gold color scheme
@@ -197,3 +202,13 @@ See `.env.example` for a complete template.
 - ✅ Mobile layouts optimized for 375px+ screens
 - ✅ Touch targets meet 44×44px minimum
 - ✅ Proper color contrast (WCAG AA verified)
+
+## graphify
+
+This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+
+Rules:
+- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
+- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
+- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
