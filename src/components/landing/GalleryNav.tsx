@@ -1,18 +1,17 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect } from "react";
 
 const NAV_LINKS = [
-  { label: "Inicio", href: "inicio" },
   { label: "Galería", href: "galeria" },
   { label: "Familia", href: "familia" },
   { label: "Evento", href: "evento" },
-  { label: "Ubicación", href: "ubicacion" },
 ];
 
 const SCROLLSPY_OFFSET = 120;
 
-export default function StickyNav() {
+export default function GalleryNav() {
   const [visible, setVisible] = useState(false);
   const [active, setActive] = useState(NAV_LINKS[0].href);
 
@@ -56,6 +55,19 @@ export default function StickyNav() {
         transition: "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
       }}
     >
+      <Link
+        href="/"
+        style={{
+          fontSize: 10,
+          letterSpacing: "0.22em",
+          textTransform: "uppercase",
+          color: "var(--on-ink-muted)",
+          textDecoration: "none",
+        }}
+      >
+        Inicio
+      </Link>
+
       {NAV_LINKS.map(({ label, href }) => {
         const isActive = active === href;
         return (

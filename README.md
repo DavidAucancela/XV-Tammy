@@ -96,29 +96,43 @@ npm run lint       # ESLint
 
 ## Personalizar contenido
 
-Editar `src/data/landingContent.ts`:
+Editar `src/data/landingContent.ts` para cambiar fotos, mensajes, música y ubicación:
 
 ```ts
-// Fotos de la galería (paths en /public/photos/)
+// Fotos de la galería "Mi crecimiento" (paths en /public/photos/)
 export const photos: string[] = [
-  "/photos/foto1.jpg",
+  "/photos/foto1.jpg",    // aparecerá en slideshow
   "/photos/foto2.jpg",
 ];
 
-// Mensajes de la familia
-export const messages = [
-  { author: "Mamá y Papá", role: "Padres", text: "..." },
+// Mensajes de la familia: texto + video
+export const familyItems = [
+  // Texto (abre como panel)
+  { id: "mama-papa", type: "text", nombre: "Mamá y Papá", text: "..." },
+  { id: "abuela", type: "text", nombre: "Abuela María", text: "..." },
+  
+  // Video (abre iframe con pausa de música)
+  { id: "tia-rosa", type: "video", nombre: "Tía Rosa", videoUrl: "..." },
 ];
 
-// URL de YouTube embed (vacío = placeholder)
-export const videoUrl = "https://www.youtube.com/embed/VIDEO_ID";
+// Música de fondo del landing
+export const songUrl = "https://example.com/mi-princesa.mp3";
 
-// Nombre y dirección del salón
+// Detalles del evento
 export const venue = {
   name: "Salón Elegance",
-  address: "Av. Principal 123, Ciudad",
+  address: "Av. Principal 123, Quito, Ecuador",
 };
+
+// Foto del hero (medallón)
+export const heroPhoto = "/photos/tammy-portrait.jpg";
 ```
+
+**Secciones actualizadas:**
+- "Mi crecimiento" — galería de fotos con Ken Burns + filmstrip
+- "Cada vez más cerca" — countdown timer
+- "Mensajes de tu familia" — accordion (texto + video)
+- "Lugar y hora" — fecha, hora, mapa
 
 ## Estructura del proyecto
 
@@ -139,23 +153,46 @@ src/
 │       └── qr/route.ts         # GET  — PNG del QR
 ├── components/
 │   └── landing/
-│       ├── MeshBackground.tsx  # fondo animado fixed
-│       ├── StickyNav.tsx       # nav glassmorphism
-│       ├── HeroSection.tsx     # hero con parallax
-│       ├── CountdownSection.tsx
-│       ├── PhotoGallery.tsx
-│       ├── FamilyMessages.tsx
-│       ├── VideoSection.tsx
-│       ├── EventLocation.tsx   # detalles + embed Google Maps
-│       ├── InvitePrompt.tsx
+│       ├── MeshBackground.tsx  # 5 blobs animados, gradientes suaves
+│       ├── FloatingIcons.tsx   # 12 iconos decorativos flotantes (stars/diamonds)
+│       ├── StickyNav.tsx       # nav glassmorphism en --ink
+│       ├── HeroSection.tsx     # hero 220×220px medallion centered + parallax
+│       ├── CountdownSection.tsx # "Cada vez más cerca"
+│       ├── PhotoGallery.tsx    # Ken Burns slideshow + thumbnails
+│       ├── FamilyMessages.tsx  # accordion de texto/video con MusicContext
+│       ├── EventLocation.tsx   # "Lugar y hora" — 2-col grid + maps
+│       ├── InvitePrompt.tsx    # CTA + Add to Calendar
+│       ├── MusicPlayer.tsx     # reproductor fijo con pausa automática
 │       ├── RevealText.tsx      # kinetic word-reveal
-│       └── TiltCard.tsx        # tilt 3D + cursor glow
+│       ├── TiltCard.tsx        # tilt 3D + cursor glow
+│       ├── SectionHeading.tsx  # headers consistentes
+│       └── Button.tsx          # botones reutilizables
 ├── data/
 │   └── landingContent.ts       # fotos, mensajes, video, venue
 └── lib/supabase/
     ├── client.ts               # browser client (anon key)
     └── server.ts               # SSR client + createAdminClient
 ```
+
+## Diseño visual
+
+**Paleta editorial (champagne + rose gold):**
+- Fondo: champán claro (#F3E6D6)
+- Texto principal: taupe oscuro (#4A372E)
+- Acentos: rosa viejo (#B4707C) + dorado suave (#C6A25E)
+- Widgets flotantes: vidrio oscuro (#2B211C)
+
+**Características:**
+- Animated gradient mesh: 5 blobs con opacidades de 22–25%
+- Floating icons: 12 elementos decorativos (stars/diamonds) con parallax
+- Centered layouts: hero medallion, texto, botones — todo simétrico
+- Responsive: mobile 375px+, tablet 768px+, desktop 1024px+
+- Glassmorphism nav y player (blur + transparency)
+
+**Animaciones:**
+- Framer Motion: parallax, word-reveal, floating icons, countdown
+- Smooth transitions: 150–400ms durations
+- Respeta `prefers-reduced-motion`
 
 ## Seguridad
 
