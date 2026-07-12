@@ -1,6 +1,7 @@
 import MeshBackground from "@/components/landing/MeshBackground";
 import FloatingIcons from "@/components/landing/FloatingIcons";
 import GalleryNav from "@/components/landing/GalleryNav";
+import ScrollProgress from "@/components/landing/ScrollProgress";
 import MusicPlayer from "@/components/landing/MusicPlayer";
 import PhotoGallery from "@/components/landing/PhotoGallery";
 import FamilyMessages from "@/components/landing/FamilyMessages";
@@ -22,6 +23,7 @@ export default function Recuerdos() {
     >
       <MeshBackground />
       <FloatingIcons />
+      <ScrollProgress />
       <GalleryNav />
       <MusicPlayer songUrl={songUrl} />
       <PhotoGallery photos={photos} />

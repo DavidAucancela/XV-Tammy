@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, Lato } from "next/font/google";
 import { MotionConfig } from "framer-motion";
 import { MusicProvider } from "@/context/MusicContext";
+import PageTransition from "@/components/landing/PageTransition";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -18,12 +19,18 @@ const lato = Lato({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
   title: "XV Años — Tammy Maguana Sánchez",
   description: "Te invitamos a celebrar los XV años de Tammy Maguana Sánchez",
   openGraph: {
     title: "XV Años — Tammy Maguana Sánchez",
     description: "Te invitamos a celebrar los XV años de Tammy Maguana Sánchez",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "XV Años — Tammy Maguana Sánchez",
+    description: "Te invitamos a celebrar los XV años de Tammy Maguana Sánchez",
   },
 };
 
@@ -38,7 +45,9 @@ export default function RootLayout({
         <MusicProvider>
           {/* Every Framer Motion animation site-wide respects the OS reduced-motion
               setting from here — no need to check it per component. */}
-          <MotionConfig reducedMotion="user">{children}</MotionConfig>
+          <MotionConfig reducedMotion="user">
+            <PageTransition>{children}</PageTransition>
+          </MotionConfig>
         </MusicProvider>
       </body>
     </html>

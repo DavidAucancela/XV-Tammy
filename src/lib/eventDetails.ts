@@ -2,7 +2,8 @@ import { venue } from "@/data/landingContent";
 
 export function getEventDetails() {
   const celebrant = process.env.NEXT_PUBLIC_CELEBRANT_NAME ?? "XV Años";
-  const eventDate = new Date(process.env.NEXT_PUBLIC_EVENT_DATE!);
+  const rawEventDate = new Date(process.env.NEXT_PUBLIC_EVENT_DATE ?? "");
+  const eventDate = Number.isNaN(rawEventDate.getTime()) ? new Date() : rawEventDate;
 
   const dateLabel = new Intl.DateTimeFormat("es", {
     weekday: "long",
@@ -31,5 +32,5 @@ export function getEventDetails() {
     `&details=${encodeURIComponent(`Te esperamos para celebrar los XV años de ${celebrant}.`)}` +
     `&location=${encodeURIComponent(`${venue.name}, ${venue.address}`)}`;
 
-  return { celebrant, dateLabel, timeLabel, lat, lng, calendarUrl };
+  return { celebrant, dateLabel, timeLabel, lat, lng, calendarUrl, eventDateISO: eventDate.toISOString() };
 }

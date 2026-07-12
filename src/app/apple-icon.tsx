@@ -15,24 +15,24 @@ export default function AppleIcon() {
           alignItems: "center",
           justifyContent: "center",
           gap: 14,
-          background: "linear-gradient(160deg, #251535 0%, #0d0610 100%)",
+          background: "linear-gradient(160deg, #F3E6D6 0%, #EAD8C3 100%)",
         }}
       >
         <div
           style={{
             width: 56,
             height: 56,
-            background: "#e8699a",
+            background: "linear-gradient(135deg, #C6A25E, #B4707C)",
             transform: "rotate(45deg)",
             borderRadius: 12,
-            boxShadow: "0 0 24px rgba(232,105,154,0.55)",
+            boxShadow: "0 0 24px rgba(180,112,124,0.4)",
           }}
         />
         <div
           style={{
             fontSize: 34,
             letterSpacing: 6,
-            color: "#fdf0f8",
+            color: "#8F4E5F",
             fontFamily: "Georgia, serif",
           }}
         >

@@ -12,13 +12,10 @@ const NAV_LINKS = [
 const SCROLLSPY_OFFSET = 120;
 
 export default function GalleryNav() {
-  const [visible, setVisible] = useState(false);
   const [active, setActive] = useState(NAV_LINKS[0].href);
 
   useEffect(() => {
     const onScroll = () => {
-      setVisible(window.scrollY > window.innerHeight * 0.65);
-
       let current = NAV_LINKS[0].href;
       for (const { href } of NAV_LINKS) {
         const el = document.getElementById(href);
@@ -38,78 +35,103 @@ export default function GalleryNav() {
 
   return (
     <nav
+      className="gallery-nav"
       style={{
         position: "fixed",
         top: 0, left: 0, right: 0,
         zIndex: 50,
-        padding: "14px 24px",
         display: "flex",
-        justifyContent: "center",
+        justifyContent: "space-between",
         alignItems: "center",
-        gap: 28,
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
         background: "rgba(var(--ink-rgb), 0.9)",
         borderBottom: "1px solid rgba(var(--accent-rgb), 0.18)",
-        transform: visible ? "translateY(0)" : "translateY(-100%)",
-        transition: "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
       }}
     >
+      {/* Always-available way back to the landing hero */}
       <Link
         href="/"
+        className="gallery-nav-back"
         style={{
-          fontSize: 10,
-          letterSpacing: "0.22em",
+          display: "inline-flex",
+          alignItems: "center",
           textTransform: "uppercase",
-          color: "var(--on-ink-muted)",
+          color: "var(--on-ink)",
           textDecoration: "none",
+          border: "1px solid var(--accent-soft)",
+          borderRadius: "var(--radius-pill)",
+          whiteSpace: "nowrap",
+          transition: "border-color 0.25s, background 0.25s",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = "var(--accent)";
+          e.currentTarget.style.background = "rgba(var(--accent-rgb), 0.14)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = "var(--accent-soft)";
+          e.currentTarget.style.background = "transparent";
         }}
       >
-        Inicio
+        <svg
+          aria-hidden
+          width="12"
+          height="12"
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M10.5 3 5.5 8l5 5" />
+        </svg>
+        Volver al inicio
       </Link>
 
-      {NAV_LINKS.map(({ label, href }) => {
-        const isActive = active === href;
-        return (
-          <button
-            key={href}
-            onClick={() => scrollTo(href)}
-            aria-current={isActive ? "true" : undefined}
-            style={{
-              position: "relative",
-              background: "none",
-              border: "none",
-              padding: "4px 0",
-              cursor: "pointer",
-              fontSize: 10,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              color: isActive ? "var(--accent)" : "var(--on-ink-muted)",
-              fontFamily: "var(--font-lato), system-ui, sans-serif",
-              transition: "color 0.25s",
-            }}
-            onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = "var(--on-ink)"; }}
-            onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = "var(--on-ink-muted)"; }}
-          >
-            {label}
-            <span
-              aria-hidden
+      <div className="gallery-nav-links" style={{ display: "flex", alignItems: "center" }}>
+        {NAV_LINKS.map(({ label, href }) => {
+          const isActive = active === href;
+          return (
+            <button
+              key={href}
+              onClick={() => scrollTo(href)}
+              aria-current={isActive ? "true" : undefined}
+              className="gallery-nav-link"
               style={{
-                position: "absolute",
-                left: 0,
-                right: 0,
-                bottom: -6,
-                height: 1.5,
-                borderRadius: 1,
-                background: "var(--accent)",
-                transform: isActive ? "scaleX(1)" : "scaleX(0)",
-                opacity: isActive ? 1 : 0,
-                transition: "transform 0.25s ease, opacity 0.25s ease",
+                position: "relative",
+                background: "none",
+                border: "none",
+                padding: "4px 0",
+                cursor: "pointer",
+                textTransform: "uppercase",
+                color: isActive ? "var(--accent)" : "var(--on-ink-muted)",
+                fontFamily: "var(--font-lato), system-ui, sans-serif",
+                transition: "color 0.25s",
               }}
-            />
-          </button>
-        );
-      })}
+              onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = "var(--on-ink)"; }}
+              onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = "var(--on-ink-muted)"; }}
+            >
+              {label}
+              <span
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  bottom: -6,
+                  height: 1.5,
+                  borderRadius: 1,
+                  background: "var(--accent)",
+                  transform: isActive ? "scaleX(1)" : "scaleX(0)",
+                  opacity: isActive ? 1 : 0,
+                  transition: "transform 0.25s ease, opacity 0.25s ease",
+                }}
+              />
+            </button>
+          );
+        })}
+      </div>
     </nav>
   );
 }
