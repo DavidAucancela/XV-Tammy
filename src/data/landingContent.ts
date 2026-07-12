@@ -39,6 +39,8 @@ export const photos: string[] = [
 // Se reproduce apenas se entra a la landing, desde un widget flotante siempre visible.
 export const songUrl = "/audio/mi-princesa.mp3";
 
+export const dressCode = "Código de vestimenta: Elegante";
+
 // Mensajes y videos de la familia — se muestran juntos en un mismo grid.
 // Cada item es de tipo "text" (mensaje escrito) o "video" (embed de YouTube/Vimeo).
 // Para un video usa la URL de EMBED (ej: "https://www.youtube.com/embed/VIDEO_ID"),
