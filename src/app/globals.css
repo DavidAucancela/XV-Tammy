@@ -155,9 +155,43 @@ body {
   80%        { transform: translate(-3%,  6%)  scale(0.97); }
 }
 
+/* ── /recuerdos navbar: compact sizing on small phones so
+   "Volver al inicio" + the three section links fit on one row ── */
+.gallery-nav { padding: 12px clamp(14px, 3vw, 24px); gap: 16px; }
+.gallery-nav-back { font-size: 10px; letter-spacing: 0.18em; padding: 8px 14px; gap: 8px; }
+.gallery-nav-links { gap: clamp(14px, 3vw, 28px); }
+.gallery-nav-link { font-size: 10px; letter-spacing: 0.22em; }
+@media (max-width: 430px) {
+  .gallery-nav { padding: 10px; gap: 8px; }
+  .gallery-nav-back { font-size: 9px; letter-spacing: 0.1em; padding: 7px 10px; gap: 5px; }
+  .gallery-nav-links { gap: 10px; }
+  .gallery-nav-link { font-size: 9px; letter-spacing: 0.12em; }
+}
+
+/* ── Shimmer title: a gold/rose sheen sweeps across the hero heading ── */
+.shimmer-title {
+  background: linear-gradient(
+    110deg,
+    var(--text) 32%,
+    var(--accent) 46%,
+    var(--gold) 53%,
+    var(--text) 68%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer-sweep 4.5s ease-in-out infinite;
+}
+@keyframes shimmer-sweep {
+  from { background-position: 130% 0; }
+  to   { background-position: -130% 0; }
+}
+
 /* ── Reduce motion ── */
 @media (prefers-reduced-motion: reduce) {
   .mesh-blob { animation: none !important; }
+  .shimmer-title { animation: none; }
 }
 
 /* Range input styling — volume slider lives inside the dark "ink" music
@@ -201,6 +235,18 @@ input[type="range"]::-moz-range-progress {
   background: var(--accent);
   height: 4px;
   border-radius: 2px;
+}
+
+/* ── Keyboard focus ring — global fallback for interactive elements that
+   don't manage their own outline (nav links, gallery arrows/thumbnails,
+   dots). Elements with their own focus handling (Button, IconButton) set
+   an inline outline that overrides this. ── */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* html5-qrcode — fill the scanner container */

@@ -13,17 +13,17 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(160deg, #251535 0%, #0d0610 100%)",
+          background: "linear-gradient(160deg, #F3E6D6 0%, #EAD8C3 100%)",
         }}
       >
         <div
           style={{
             width: 15,
             height: 15,
-            background: "#e8699a",
+            background: "linear-gradient(135deg, #C6A25E, #B4707C)",
             transform: "rotate(45deg)",
             borderRadius: 3,
-            boxShadow: "0 0 6px rgba(232,105,154,0.7)",
+            boxShadow: "0 0 6px rgba(180,112,124,0.5)",
           }}
         />
       </div>
