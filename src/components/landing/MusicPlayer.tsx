@@ -5,20 +5,18 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useMusicContext } from "@/context/MusicContext";
 
 export default function MusicPlayer({ songUrl = "" }: { songUrl?: string }) {
-  const { isVideoPlaying } = useMusicContext();
+  const { isVideoPlaying, musicRequested } = useMusicContext();
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(0.6);
   const [expanded, setExpanded] = useState(false);
-  const [needsTap, setNeedsTap] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const wasPlayingBeforeVideo = useRef(false);
 
-  // Autoplay as soon as the page loads. Browsers usually block unmuted
-  // autoplay without a prior user gesture, so we fall back to muted
-  // autoplay and unmute on the visitor's first tap/click/keypress anywhere.
-  // Actual play/pause UI state is always synced from the <audio> element's
-  // own events, never guessed — that's what keeps the button reliable.
+  // Playback only starts when something explicitly requests it (e.g. the
+  // "reproducir música" button in the gallery), never automatically on
+  // page load. Actual play/pause UI state is always synced from the
+  // <audio> element's own events, never guessed.
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !songUrl) return;
@@ -27,64 +25,23 @@ export default function MusicPlayer({ songUrl = "" }: { songUrl?: string }) {
     const onPause = () => setPlaying(false);
     audio.addEventListener("play", onPlay);
     audio.addEventListener("pause", onPause);
-
     audio.volume = volume;
-    let cancelled = false;
-
-    // Only needed when autoplay was actually blocked — attaching it
-    // unconditionally would make it fire on the visitor's very first
-    // click anywhere, including the button's own play/pause click,
-    // silently re-triggering play() right after a manual pause.
-    const unlock = () => {
-      if (cancelled) return;
-      audio.muted = false;
-      audio.volume = volume;
-      setMuted(false);
-      setNeedsTap(false);
-      audio.play().catch(() => {});
-    };
-    const attachUnlock = () => {
-      document.addEventListener("click", unlock, { once: true });
-      document.addEventListener("touchstart", unlock, { once: true });
-      document.addEventListener("keydown", unlock, { once: true });
-    };
-    const detachUnlock = () => {
-      document.removeEventListener("click", unlock);
-      document.removeEventListener("touchstart", unlock);
-      document.removeEventListener("keydown", unlock);
-    };
-
-    const attemptAutoplay = async () => {
-      try {
-        await audio.play();
-      } catch {
-        if (cancelled) return;
-        try {
-          audio.muted = true;
-          await audio.play();
-          if (!cancelled) {
-            setMuted(true);
-            setNeedsTap(true);
-            attachUnlock();
-          }
-        } catch {
-          // Fully blocked — visitor can still start it manually from the
-          // widget, or the first tap anywhere will kick it off.
-          if (!cancelled) setNeedsTap(true);
-          attachUnlock();
-        }
-      }
-    };
-    attemptAutoplay();
 
     return () => {
-      cancelled = true;
       audio.removeEventListener("play", onPlay);
       audio.removeEventListener("pause", onPause);
-      detachUnlock();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [songUrl]);
+
+  useEffect(() => {
+    if (!musicRequested) return;
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.volume = muted ? 0 : volume;
+    audio.play().catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [musicRequested]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -103,7 +60,6 @@ export default function MusicPlayer({ songUrl = "" }: { songUrl?: string }) {
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    setNeedsTap(false);
     if (audio.paused) {
       audio.volume = muted ? 0 : volume;
       audio.play().catch(() => {});
@@ -145,30 +101,6 @@ export default function MusicPlayer({ songUrl = "" }: { songUrl?: string }) {
         gap: 10,
       }}
     >
-      <AnimatePresence>
-        {needsTap && (
-          <motion.p
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 6 }}
-            style={{
-              margin: 0,
-              padding: "6px 12px",
-              borderRadius: 999,
-              fontSize: 11,
-              letterSpacing: "0.04em",
-              color: "var(--on-ink)",
-              background: "rgba(var(--ink-rgb), 0.85)",
-              border: "1px solid var(--accent-soft)",
-              backdropFilter: "blur(10px)",
-              WebkitBackdropFilter: "blur(10px)",
-            }}
-          >
-            ♪ toca la pantalla para activar el sonido
-          </motion.p>
-        )}
-      </AnimatePresence>
-
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <AnimatePresence>
           {expanded && (

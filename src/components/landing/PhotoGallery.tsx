@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView } from "framer-motion";
 import SectionHeading from "./SectionHeading";
 import { IconButton } from "./Button";
+import { useMusicContext } from "@/context/MusicContext";
 
 const PLACEHOLDER_COUNT = 6;
 
@@ -21,6 +22,7 @@ const SLIDE_MS = 3500;
 const SWIPE_THRESHOLD = 60;
 
 export default function PhotoGallery({ photos }: { photos: string[] }) {
+  const { musicRequested, requestMusic } = useMusicContext();
   const hasPhotos = photos.length > 0;
   const count = hasPhotos ? photos.length : PLACEHOLDER_COUNT;
 
@@ -88,6 +90,33 @@ export default function PhotoGallery({ photos }: { photos: string[] }) {
     <section id="galeria" style={{ padding: "120px 8px 100px", background: "var(--bg)" }}>
       <div style={{ maxWidth: "100%", margin: "0 auto", width: "100%" }}>
         <SectionHeading eyebrow="de niña a señorita" title="Mi crecimiento" />
+
+        <div style={{ display: "flex", justifyContent: "center", margin: "-8px 0 28px" }}>
+          <button
+            onClick={requestMusic}
+            disabled={musicRequested}
+            aria-label={musicRequested ? "Música sonando" : "Reproducir música"}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 18px",
+              borderRadius: 999,
+              border: "1px solid var(--border)",
+              background: musicRequested ? "rgba(180,112,124,0.12)" : "var(--surface)",
+              color: "var(--accent-ink)",
+              fontSize: 12,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              cursor: musicRequested ? "default" : "pointer",
+              transition: "background 0.25s, opacity 0.25s",
+              opacity: musicRequested ? 0.75 : 1,
+            }}
+          >
+            <span aria-hidden>♪</span>
+            {musicRequested ? "Música sonando" : "Reproducir música"}
+          </button>
+        </div>
 
         {/* Slideshow */}
         <motion.div
