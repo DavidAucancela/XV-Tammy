@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import MusicPlayer from "@/components/landing/MusicPlayer";
-import { songUrl } from "@/data/landingContent";
+import FlipCard from "@/components/landing/FlipCard";
+import { songUrl, dressCode } from "@/data/landingContent";
 
 type Guest = {
   id: string;
@@ -122,11 +123,9 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
         <motion.h1
           variants={fade}
           className="mt-6 text-4xl leading-tight"
-          style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4A372E" }}
+          style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#B4707C" }}
         >
-          Los XV Años
-          <br />
-          <span style={{ color: "#B4707C" }}>de {celebrant}</span>
+          {celebrant}
         </motion.h1>
 
         <motion.div variants={fade} className="mt-1 w-16 h-px" style={{ background: "#B4707C" }} />
@@ -137,6 +136,15 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
         <motion.p variants={fade} className="mt-1 text-sm" style={{ color: "#7A6355" }}>
           {guest.pases === 1 ? "1 pase reservado" : `${guest.pases} pases reservados`}
         </motion.p>
+
+        <motion.p variants={fade} className="mt-2 text-xs tracking-widest uppercase" style={{ color: "#B4707C" }}>
+          {dressCode}
+        </motion.p>
+
+        {/* ── Tarjeta volteadora ── */}
+        <motion.div variants={fade} className="mt-10 w-full">
+          <FlipCard />
+        </motion.div>
 
         {/* ── Detalles del evento: Lugar y hora ── */}
         <motion.div
