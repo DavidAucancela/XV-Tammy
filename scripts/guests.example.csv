@@ -1,10 +1,11 @@
 # Lista de invitados — XV Tammy
-# Formato: nombre,pases
-# Copiá este archivo como guests.csv y completalo
+# Formato: nombre,pases,telefono
+# El teléfono es el celular donde recibirán la invitación por WhatsApp
+# (permite buscar la invitación desde la página con ese número).
 
-nombre,pases
-Familia García,4
-Juan Pérez,2
-Ana López,1
-Familia Rodríguez,6
-María Torres,2
+nombre,pases,telefono
+Familia García,4,0991234567
+Juan Pérez,2,0987654321
+Ana López,1,
+Familia Rodríguez,6,+593998877665
+María Torres,2,0965554433

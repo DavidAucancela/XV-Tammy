@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import RevealText from "./RevealText";
 import { Button } from "./Button";
@@ -11,6 +13,44 @@ export default function InvitePrompt({
   celebrant: string;
   calendarUrl: string;
 }) {
+  const router = useRouter();
+  const [telefono, setTelefono] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const buscar = async () => {
+    if (status === "loading") return;
+    const digits = telefono.replace(/\D/g, "");
+    if (digits.length < 9) {
+      setStatus("error");
+      setErrorMsg("Escribe tu número completo (ej: 0991234567)");
+      return;
+    }
+    setStatus("loading");
+    setErrorMsg("");
+    try {
+      const res = await fetch("/api/invitacion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ telefono }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setStatus("error");
+        setErrorMsg(
+          res.status === 404
+            ? "No encontramos una invitación con ese número. Verifica que sea el celular donde recibiste el WhatsApp."
+            : "Algo salió mal, inténtalo de nuevo."
+        );
+        return;
+      }
+      router.push(`/i/${data.token}`);
+    } catch {
+      setStatus("error");
+      setErrorMsg("Algo salió mal, inténtalo de nuevo.");
+    }
+  };
+
   return (
     <section
       style={{
@@ -65,11 +105,15 @@ export default function InvitePrompt({
             maxWidth: 400,
           }}
         >
-          Usa el link personalizado que recibiste para confirmar tu asistencia y
-          generar tu pase digital de entrada.
+          Tu invitación llega por WhatsApp. Ingresa el número de celular donde la
+          recibiste y abre tu pase de entrada con código QR.
         </motion.p>
 
-        <motion.div
+        <motion.form
+          onSubmit={(e) => {
+            e.preventDefault();
+            buscar();
+          }}
           initial={{ opacity: 0, scale: 0.94 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
@@ -81,27 +125,84 @@ export default function InvitePrompt({
               "linear-gradient(135deg, rgba(var(--gold-rgb),0.5), rgba(var(--accent-rgb),0.4), rgba(var(--gold-rgb),0.25))",
             marginBottom: 28,
             boxShadow: "var(--shadow-sm)",
+            width: "100%",
+            maxWidth: 420,
           }}
         >
           <div
             style={{
               background: "var(--surface-elevated)",
               borderRadius: 17,
-              padding: "20px 32px",
+              padding: "24px 26px",
               display: "flex",
-              alignItems: "center",
-              gap: 12,
+              flexDirection: "column",
+              gap: 14,
             }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold-solid)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden style={{ flexShrink: 0 }}>
-              <rect x="3" y="5" width="18" height="14" rx="2.5" />
-              <path d="m4 7 8 6 8-6" />
-            </svg>
-            <p style={{ fontSize: 13, color: "var(--text)", letterSpacing: "0.04em" }}>
-              Revisa tu WhatsApp o correo por el enlace
-            </p>
+            <label
+              htmlFor="telefono-invitacion"
+              style={{
+                fontSize: 10,
+                letterSpacing: "0.26em",
+                textTransform: "uppercase",
+                color: "var(--accent-ink)",
+                textAlign: "left",
+              }}
+            >
+              Número de celular
+            </label>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold-solid)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden style={{ flexShrink: 0 }}>
+                <rect x="7" y="2" width="10" height="20" rx="2.5" />
+                <path d="M11 18h2" />
+              </svg>
+              <input
+                id="telefono-invitacion"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                placeholder="0991234567"
+                value={telefono}
+                onChange={(e) => {
+                  setTelefono(e.target.value);
+                  if (status === "error") setStatus("idle");
+                }}
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  minHeight: 44,
+                  padding: "10px 14px",
+                  borderRadius: 12,
+                  border: "1px solid var(--border)",
+                  background: "var(--ivory)",
+                  color: "var(--text)",
+                  fontSize: 16,
+                  letterSpacing: "0.06em",
+                  outline: "none",
+                }}
+                onFocus={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
+                onBlur={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
+              />
+            </div>
+            {status === "error" && (
+              <p
+                role="alert"
+                style={{
+                  fontSize: 12.5,
+                  color: "var(--accent-ink)",
+                  textAlign: "left",
+                  margin: 0,
+                  lineHeight: 1.5,
+                }}
+              >
+                {errorMsg}
+              </p>
+            )}
+            <Button variant="primary" style={{ justifyContent: "center", opacity: status === "loading" ? 0.7 : 1 }}>
+              {status === "loading" ? "Buscando…" : "Ver mi invitación"}
+            </Button>
           </div>
-        </motion.div>
+        </motion.form>
 
         <motion.div
           initial={{ opacity: 0, y: 12 }}

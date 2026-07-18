@@ -51,17 +51,13 @@ export default function HomeHero({
   photo,
   dateLabel,
   timeLabel,
-  venueName,
   eventDateISO,
-  mapsUrl,
 }: {
   celebrant: string;
   photo?: string;
   dateLabel: string;
   timeLabel: string;
-  venueName: string;
   eventDateISO: string;
-  mapsUrl?: string;
 }) {
   const [time, setTime] = useState<TimeLeft | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -427,76 +423,24 @@ export default function HomeHero({
           </motion.div>
         )}
 
-        {/* Row 3 — condensed event info: date · time, venue links to Maps */}
+        {/* Row 3 — condensed event info (la ubicación completa vive en /recuerdos) */}
         <motion.div
           variants={fadeUp}
           style={{
             display: "flex",
-            flexDirection: "column",
+            flexWrap: "wrap",
             alignItems: "center",
-            gap: "clamp(4px, 1vh, 8px)",
+            justifyContent: "center",
+            gap: "clamp(8px, 2vw, 16px)",
+            fontSize: "clamp(14px, 3.2vw, 17px)",
+            color: "var(--text)",
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "clamp(8px, 2vw, 16px)",
-              fontSize: "clamp(14px, 3.2vw, 17px)",
-              color: "var(--text)",
-            }}
-          >
-            <span style={{ textTransform: "capitalize" }}>{dateLabel}</span>
-            <span aria-hidden style={{ color: "var(--gold-solid)", opacity: 0.7 }}>
-              ·
-            </span>
-            <span>{timeLabel}</span>
-          </div>
-          {mapsUrl ? (
-            <a
-              href={mapsUrl}
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 7,
-                minHeight: 40,
-                padding: "4px 10px",
-                fontSize: "clamp(12.5px, 2.8vw, 15px)",
-                color: "var(--text-muted)",
-                textDecoration: "none",
-                transition: "color 0.25s ease",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--accent-ink)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
-            >
-              <svg
-                aria-hidden
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="var(--gold-solid)"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ flexShrink: 0 }}
-              >
-                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                <circle cx="12" cy="10" r="3" />
-              </svg>
-              <span style={{ borderBottom: "1px solid rgba(var(--gold-rgb), 0.45)" }}>
-                {venueName}
-              </span>
-            </a>
-          ) : (
-            <span style={{ fontSize: "clamp(12.5px, 2.8vw, 15px)", color: "var(--text-muted)" }}>
-              {venueName}
-            </span>
-          )}
+          <span style={{ textTransform: "capitalize" }}>{dateLabel}</span>
+          <span aria-hidden style={{ color: "var(--gold-solid)", opacity: 0.7 }}>
+            ·
+          </span>
+          <span>{timeLabel}</span>
         </motion.div>
       </motion.div>
     </main>
