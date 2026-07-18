@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import FlipCard from "@/components/landing/FlipCard";
 import { dressCode } from "@/data/landingContent";
 
 type Guest = {
@@ -137,11 +136,6 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
         <motion.p variants={fade} className="mt-2 text-xs tracking-widest uppercase" style={{ color: "#B4707C" }}>
           {dressCode}
         </motion.p>
-
-        {/* ── Tarjeta volteadora ── */}
-        <motion.div variants={fade} className="mt-10 w-full">
-          <FlipCard />
-        </motion.div>
 
         {/* ── Detalles del evento: Lugar y hora ── */}
         <motion.div
