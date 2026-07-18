@@ -4,14 +4,17 @@ import GalleryNav from "@/components/landing/GalleryNav";
 import ScrollProgress from "@/components/landing/ScrollProgress";
 import MusicPlayer from "@/components/landing/MusicPlayer";
 import PhotoGallery from "@/components/landing/PhotoGallery";
+import PhotoGrid from "@/components/landing/PhotoGrid";
 import FamilyMessages from "@/components/landing/FamilyMessages";
 import EventLocation from "@/components/landing/EventLocation";
 import InvitePrompt from "@/components/landing/InvitePrompt";
-import { photos, familyItems, venue, songUrl } from "@/data/landingContent";
+import { familyItems, venue, songUrl, slideshowCount } from "@/data/landingContent";
 import { getEventDetails } from "@/lib/eventDetails";
+import { getGalleryPhotos } from "@/lib/photos";
 
 export default function Recuerdos() {
   const { celebrant, dateLabel, timeLabel, lat, lng, calendarUrl } = getEventDetails();
+  const photos = getGalleryPhotos();
 
   return (
     <main
@@ -26,7 +29,8 @@ export default function Recuerdos() {
       <ScrollProgress />
       <GalleryNav />
       <MusicPlayer songUrl={songUrl} />
-      <PhotoGallery photos={photos} />
+      <PhotoGallery photos={photos.slice(0, slideshowCount)} />
+      <PhotoGrid photos={photos} />
       <FamilyMessages items={familyItems} />
       <EventLocation
         dateLabel={dateLabel}
