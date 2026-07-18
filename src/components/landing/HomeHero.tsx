@@ -53,6 +53,7 @@ export default function HomeHero({
   timeLabel,
   venueName,
   eventDateISO,
+  mapsUrl,
 }: {
   celebrant: string;
   photo?: string;
@@ -60,14 +61,24 @@ export default function HomeHero({
   timeLabel: string;
   venueName: string;
   eventDateISO: string;
+  mapsUrl?: string;
 }) {
   const [time, setTime] = useState<TimeLeft | null>(null);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
     setTime(getTimeLeft(eventDateISO));
     const id = setInterval(() => setTime(getTimeLeft(eventDateISO)), 1_000);
     return () => clearInterval(id);
   }, [eventDateISO]);
+
+  useEffect(() => {
+    setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }, []);
+
+  // getTimeLeft clamps at 0, so all-zeros means the event has arrived.
+  const eventArrived =
+    time !== null && time.days === 0 && time.hours === 0 && time.minutes === 0 && time.seconds === 0;
 
   const { x: pointerX, y: pointerY } = usePointerParallax();
   const medallionX = useTransform(pointerX, [-1, 1], [-5, 5]);
@@ -113,6 +124,9 @@ export default function HomeHero({
         <Link
           href="/recuerdos"
           style={{
+            display: "inline-flex",
+            alignItems: "center",
+            minHeight: 44,
             fontSize: 11,
             letterSpacing: "0.22em",
             textTransform: "uppercase",
@@ -120,7 +134,16 @@ export default function HomeHero({
             textDecoration: "none",
             border: "1px solid var(--accent-soft)",
             borderRadius: "var(--radius-pill)",
-            padding: "9px 18px",
+            padding: "10px 20px",
+            transition: "background 0.25s ease, border-color 0.25s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(var(--accent-rgb), 0.12)";
+            e.currentTarget.style.borderColor = "var(--accent)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "transparent";
+            e.currentTarget.style.borderColor = "var(--accent-soft)";
           }}
         >
           Fotos y mensajes ✦
@@ -171,7 +194,7 @@ export default function HomeHero({
               {/* Idle float — separate element so it composes with the
                   entrance variant and pointer parallax on the parent. */}
               <motion.div
-                animate={{ y: [0, -7, 0] }}
+                animate={reducedMotion ? undefined : { y: [0, -7, 0] }}
                 transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
                 style={{ position: "absolute", inset: 0 }}
               >
@@ -257,6 +280,25 @@ export default function HomeHero({
         {/* Row 2 — countdown */}
         {time !== null && (
           <motion.div variants={fadeUp} style={{ minHeight: 0 }}>
+            {eventArrived ? (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                <span aria-hidden style={{ color: "var(--gold-solid)", fontSize: 22 }}>
+                  ✦
+                </span>
+                <p
+                  style={{
+                    fontFamily: "var(--font-playfair), Georgia, serif",
+                    fontSize: "clamp(1.6rem, 5vw, 2.6rem)",
+                    fontStyle: "italic",
+                    color: "var(--accent-ink)",
+                    margin: 0,
+                  }}
+                >
+                  ¡Llegó el gran día!
+                </p>
+              </div>
+            ) : (
+              <>
             {/* Eyebrow framed by gold hairlines */}
             <div
               style={{
@@ -380,31 +422,81 @@ export default function HomeHero({
                 </div>
               ))}
             </div>
+              </>
+            )}
           </motion.div>
         )}
 
-        {/* Row 3 — condensed event info (no map) */}
+        {/* Row 3 — condensed event info: date · time, venue links to Maps */}
         <motion.div
           variants={fadeUp}
           style={{
             display: "flex",
-            flexWrap: "wrap",
+            flexDirection: "column",
             alignItems: "center",
-            justifyContent: "center",
-            gap: "clamp(8px, 2vw, 16px)",
-            fontSize: "clamp(13px, 3vw, 16px)",
-            color: "var(--text-muted)",
+            gap: "clamp(4px, 1vh, 8px)",
           }}
         >
-          <span style={{ textTransform: "capitalize" }}>{dateLabel}</span>
-          <span aria-hidden style={{ opacity: 0.4 }}>
-            ·
-          </span>
-          <span>{timeLabel}</span>
-          <span aria-hidden style={{ opacity: 0.4 }}>
-            ·
-          </span>
-          <span>{venueName}</span>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "clamp(8px, 2vw, 16px)",
+              fontSize: "clamp(14px, 3.2vw, 17px)",
+              color: "var(--text)",
+            }}
+          >
+            <span style={{ textTransform: "capitalize" }}>{dateLabel}</span>
+            <span aria-hidden style={{ color: "var(--gold-solid)", opacity: 0.7 }}>
+              ·
+            </span>
+            <span>{timeLabel}</span>
+          </div>
+          {mapsUrl ? (
+            <a
+              href={mapsUrl}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 7,
+                minHeight: 40,
+                padding: "4px 10px",
+                fontSize: "clamp(12.5px, 2.8vw, 15px)",
+                color: "var(--text-muted)",
+                textDecoration: "none",
+                transition: "color 0.25s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--accent-ink)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
+            >
+              <svg
+                aria-hidden
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="var(--gold-solid)"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ flexShrink: 0 }}
+              >
+                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              <span style={{ borderBottom: "1px solid rgba(var(--gold-rgb), 0.45)" }}>
+                {venueName}
+              </span>
+            </a>
+          ) : (
+            <span style={{ fontSize: "clamp(12.5px, 2.8vw, 15px)", color: "var(--text-muted)" }}>
+              {venueName}
+            </span>
+          )}
         </motion.div>
       </motion.div>
     </main>
