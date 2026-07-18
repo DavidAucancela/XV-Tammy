@@ -44,7 +44,6 @@ Complemento de `CLAUDE.md` — solo hechos no obvios que un agente probablemente
 - `PageTransition` (`src/components/landing/PageTransition.tsx`) wrappa `{children}` en el layout — transiciones entre páginas.
 - Componentes florales decorativos (solo visual, no data-driven): `Butterflies`, `CornerFlorals`, `FallingPetals`, `PetalBurst`, `SparkleTrail`, `Sparkles`.
 - `ScrollProgress` — barra de progreso de scroll en `/recuerdos`.
-- `FlipCard` — tarjeta volteadora 3D en la página de invitación (`/i/[token]`), usa `framer-motion` para rotación Y.
 - `usePointerParallax` (`src/lib/usePointerParallax.ts`) — hook para parallax basado en posición del cursor.
 
 ## Contenido editable
