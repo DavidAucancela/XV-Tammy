@@ -6,11 +6,12 @@ import Sparkles from "@/components/landing/Sparkles";
 import SparkleTrail from "@/components/landing/SparkleTrail";
 import Butterflies from "@/components/landing/Butterflies";
 import HomeHero from "@/components/landing/HomeHero";
+import InvitationOpener from "@/components/landing/InvitationOpener";
 import { heroPhoto, venue } from "@/data/landingContent";
 import { getEventDetails } from "@/lib/eventDetails";
 
 export default function Home() {
-  const { celebrant, dateLabel, timeLabel, eventDateISO } = getEventDetails();
+  const { celebrant, dateLabel, timeLabel, eventDateISO, lat, lng } = getEventDetails();
 
   return (
     <>
@@ -21,14 +22,17 @@ export default function Home() {
       <SparkleTrail />
       <Butterflies />
       <CornerFlorals />
-      <HomeHero
-        celebrant={celebrant}
-        photo={heroPhoto}
-        dateLabel={dateLabel}
-        timeLabel={timeLabel}
-        venueName={venue.name}
-        eventDateISO={eventDateISO}
-      />
+      <InvitationOpener celebrant={celebrant}>
+        <HomeHero
+          celebrant={celebrant}
+          photo={heroPhoto}
+          dateLabel={dateLabel}
+          timeLabel={timeLabel}
+          venueName={venue.name}
+          eventDateISO={eventDateISO}
+          mapsUrl={lat && lng ? `https://maps.google.com/?q=${lat},${lng}` : undefined}
+        />
+      </InvitationOpener>
     </>
   );
 }
