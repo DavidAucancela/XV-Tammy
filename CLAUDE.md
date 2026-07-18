@@ -22,19 +22,20 @@ Digital invitation + QR check-in system for a quinceañera (50–150 guests). A 
 **Event Date:** 2026-09-19 at 17:00 (Quito, Ecuador)
 
 **Routes**
-- `/` — single-viewport landing (no scroll): hero identity, live countdown, condensed event info (date/time/venue name, no map), link to `/recuerdos`. Silent — no audio.
+- `/` — single-viewport landing (no scroll): seal intro (InvitationOpener), hero identity, live countdown, condensed event info (date/time only — full location lives in `/recuerdos`), link to `/recuerdos`. Silent — no audio.
 - `/recuerdos` — scrollable second page: photo gallery, family messages, full event location (map + "Cómo llegar"), invite/calendar CTA. Background music starts here (`MusicPlayer`).
 - `/i/[token]` — personalized invitation with RSVP flow (SSR, public)
 - `/api/qr?token=<token>` — server-side PNG generation, immutable cache
 - `/api/checkin` — POST, registers guest entry (admin client)
 - `/api/rsvp` — POST, confirms or declines RSVP (validates pases_confirmados ≤ pases)
+- `/api/invitacion` — POST `{ telefono }`, finds guest by phone (matches last 9 digits against `guests.telefono`), returns `{ token, nombre }`; used by InvitePrompt to open `/i/[token]`
 - `/scan` — camera-based QR scanner for door staff
 - `/admin` — real-time check-in dashboard (requires auth)
 - `/login` — magic link login (email OTP via Supabase)
 - `/auth/callback` — OAuth code exchange; `next` param is validated to be a relative path only
 
 **Supabase schema**
-- Table `guests`: `id`, `nombre`, `pases`, `token`, `rsvp_estado`, `pases_confirmados`, `checked_in_at`, `created_at`
+- Table `guests`: `id`, `nombre`, `pases`, `telefono` (digits-only, nullable), `token`, `rsvp_estado`, `pases_confirmados`, `checked_in_at`, `created_at`
 - RPC `check_in(p_token)`: idempotent, security definer — sets `checked_in_at` only if null
 - RLS must be enabled; only authenticated users should be able to read `guests`
 
@@ -65,8 +66,8 @@ src/
 │       ├── PhotoGallery.tsx      # Ken Burns slideshow + filmstrip thumbnails (first `slideshowCount` photos)
 │       ├── PhotoGrid.tsx         # "Álbum de recuerdos" grid (all photos) + lightbox (keyboard/swipe nav)
 │       ├── FamilyMessages.tsx    # accordion-style family messages (text + video)
-│       ├── EventLocation.tsx     # "Lugar y hora" — 2-col grid (date + time) + maps
-│       ├── InvitePrompt.tsx      # CTA section + Add to Calendar
+│       ├── EventLocation.tsx     # "Fecha, hora y lugar" — 3-card ticket (date/time/venue) + map + Cómo llegar
+│       ├── InvitePrompt.tsx      # phone lookup form (POST /api/invitacion → /i/[token]) + Add to Calendar
 │       ├── RevealText.tsx        # word-by-word stagger reveal (Framer Motion)
 │       ├── TiltCard.tsx          # 3D tilt + cursor-following glow
 │       ├── MusicPlayer.tsx       # background music player + video pause integration (only rendered on /recuerdos)
@@ -91,7 +92,7 @@ src/
 
 **Section titles (updated):**
 - "Mensajes de tu familia" — family text/video accordion
-- "Lugar y hora" — event details (date + time, no address card)
+- "Fecha, hora y lugar" — event details ticket (date + time + venue cards) + map + "Cómo llegar"
 - "Mi crecimiento" — photo gallery ("de niña a señorita" eyebrow)
 
 ## Environment variables

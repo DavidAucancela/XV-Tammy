@@ -59,8 +59,9 @@ export default function EventLocation({
   const cardY = useTransform(scrollYProgress, [0, 0.5, 1], [40, 0, -16]);
 
   const details = [
-    { icon: icons.calendar, label: "Fecha", value: dateLabel },
-    { icon: icons.clock, label: "Hora", value: timeLabel },
+    { icon: icons.calendar, label: "Fecha", value: dateLabel, sub: null, capitalize: true },
+    { icon: icons.clock, label: "Hora", value: timeLabel, sub: null, capitalize: false },
+    { icon: icons.pin, label: "Lugar", value: venue.name, sub: venue.address, capitalize: false },
   ];
 
   return (
@@ -70,7 +71,7 @@ export default function EventLocation({
       style={{ padding: "100px 24px 48px", background: "var(--bg)" }}
     >
       <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-        <SectionHeading title="Lugar y hora" marginBottom={52} />
+        <SectionHeading title="Fecha, hora y lugar" marginBottom={52} />
 
         {/* Invitation ticket — a single unified row, never wraps.
             Entrance reads like a stamp being pressed onto the invitation. */}
@@ -100,7 +101,7 @@ export default function EventLocation({
                 "linear-gradient(160deg, var(--surface-elevated) 0%, var(--surface) 100%)",
             }}
           >
-            {details.map(({ icon, label, value }, i) => (
+            {details.map(({ icon, label, value, sub, capitalize }, i) => (
               <div
                 key={label}
                 style={{
@@ -158,12 +159,24 @@ export default function EventLocation({
                         fontFamily: "var(--font-playfair), Georgia, serif",
                         fontSize: 15.5,
                         color: "var(--text)",
-                        textTransform: "capitalize",
+                        textTransform: capitalize ? "capitalize" : "none",
                         lineHeight: 1.45,
                       }}
                     >
                       {value}
                     </p>
+                    {sub && (
+                      <p
+                        style={{
+                          fontSize: 12,
+                          color: "var(--text-muted)",
+                          marginTop: 6,
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        {sub}
+                      </p>
+                    )}
                   </div>
                 </motion.div>
               </div>

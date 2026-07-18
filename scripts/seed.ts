@@ -45,17 +45,19 @@ if (!existsSync(csvPath)) {
   process.exit(1);
 }
 
-type GuestRow = { nombre: string; pases: number; token: string };
+type GuestRow = { nombre: string; pases: number; telefono: string | null; token: string };
 
 const rows: GuestRow[] = readFileSync(csvPath, "utf-8")
   .split("\n")
   .map(l => l.trim())
   .filter(l => l && !l.startsWith("#") && !l.toLowerCase().startsWith("nombre"))
   .map(line => {
-    const [nombre, pasesStr] = line.split(",").map(s => s.trim());
+    const [nombre, pasesStr, telefonoStr] = line.split(",").map(s => s.trim());
     if (!nombre) return null;
     const pases = parseInt(pasesStr ?? "1", 10);
-    return { nombre, pases: isNaN(pases) || pases < 1 ? 1 : pases, token: randomUUID() };
+    // Solo dígitos — /api/invitacion busca por los últimos 9, sin formato
+    const telefono = (telefonoStr ?? "").replace(/\D/g, "") || null;
+    return { nombre, pases: isNaN(pases) || pases < 1 ? 1 : pases, telefono, token: randomUUID() };
   })
   .filter(Boolean) as GuestRow[];
 
@@ -83,9 +85,10 @@ async function main() {
     }
 
     const { error } = await supabase.from("guests").insert({
-      nombre: guest.nombre,
-      pases:  guest.pases,
-      token:  guest.token,
+      nombre:   guest.nombre,
+      pases:    guest.pases,
+      telefono: guest.telefono,
+      token:    guest.token,
     });
 
     if (error) {
