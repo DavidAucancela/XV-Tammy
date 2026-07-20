@@ -69,44 +69,6 @@ export default function MeshBackground() {
           animationIterationCount: "infinite",
         }}
       />
-      {/* Soft rose blob — top right, subtle accent */}
-      <div
-        className="mesh-blob"
-        style={{
-          position: "absolute",
-          width: "min(500px, 55vw)",
-          height: "min(500px, 55vw)",
-          top: "15%",
-          right: "5%",
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle, rgba(var(--accent-rgb),0.14) 0%, transparent 65%)",
-          filter: "blur(75px)",
-          animationName: "mesh-blob-4",
-          animationDuration: "35s",
-          animationTimingFunction: "ease-in-out",
-          animationIterationCount: "infinite",
-        }}
-      />
-      {/* Gold-soft blob — center, delicate glow */}
-      <div
-        className="mesh-blob"
-        style={{
-          position: "absolute",
-          width: "min(420px, 50vw)",
-          height: "min(420px, 50vw)",
-          top: "50%",
-          right: "20%",
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle, rgba(var(--gold-rgb),0.14) 0%, transparent 70%)",
-          filter: "blur(80px)",
-          animationName: "mesh-blob-5",
-          animationDuration: "30s",
-          animationTimingFunction: "ease-in-out",
-          animationIterationCount: "infinite",
-        }}
-      />
     </div>
   );
 }

@@ -16,6 +16,8 @@ export function usePointerParallax(): { x: MotionValue<number>; y: MotionValue<n
 
   useEffect(() => {
     if (!window.matchMedia("(pointer: fine)").matches) return;
+    // Motion values no pasan por MotionConfig — gate manual de reduced motion.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     function handleMove(e: PointerEvent) {
       rawX.set((e.clientX / window.innerWidth) * 2 - 1);

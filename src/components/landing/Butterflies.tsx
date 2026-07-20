@@ -10,15 +10,20 @@ type Flight = {
   duration: number;
   delay: number;
   reverse: boolean;
-  hue: keyof typeof WING_FILLS;
+  hue: ButterflyHue;
 };
 
-const WING_FILLS = {
+export const WING_FILLS = {
   rose: { upper: "#DE9AA9", lower: "#C4788A", spot: "#E8CD9C" },
   gold: { upper: "#E0BE85", lower: "#C6A25E", spot: "#F0C3CE" },
+  lavender: { upper: "#B9A6C4", lower: "#9A85AC", spot: "#F0C3CE" },
+  sage: { upper: "#B7C2A1", lower: "#96A57F", spot: "#E8CD9C" },
+  blush: { upper: "#EFC9C2", lower: "#D9A79C", spot: "#C6A25E" },
 } as const;
 
-function ButterflyShape({ size, hue, mirror }: { size: number; hue: Flight["hue"]; mirror?: boolean }) {
+export type ButterflyHue = keyof typeof WING_FILLS;
+
+export function ButterflyShape({ size, hue, mirror }: { size: number; hue: ButterflyHue; mirror?: boolean }) {
   const c = WING_FILLS[hue];
   return (
     <svg

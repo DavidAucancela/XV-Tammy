@@ -1,5 +1,4 @@
 import MeshBackground from "@/components/landing/MeshBackground";
-import FloatingIcons from "@/components/landing/FloatingIcons";
 import FallingPetals from "@/components/landing/FallingPetals";
 import CornerFlorals from "@/components/landing/CornerFlorals";
 import Sparkles from "@/components/landing/Sparkles";
@@ -16,7 +15,6 @@ export default function Home() {
   return (
     <>
       <MeshBackground />
-      <FloatingIcons />
       <FallingPetals />
       <Sparkles />
       <SparkleTrail />
