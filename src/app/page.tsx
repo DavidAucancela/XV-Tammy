@@ -1,4 +1,5 @@
 import MeshBackground from "@/components/landing/MeshBackground";
+import GardenScene from "@/components/landing/GardenScene";
 import FallingPetals from "@/components/landing/FallingPetals";
 import CornerFlorals from "@/components/landing/CornerFlorals";
 import Sparkles from "@/components/landing/Sparkles";
@@ -15,6 +16,7 @@ export default function Home() {
   return (
     <>
       <MeshBackground />
+      <GardenScene />
       <FallingPetals />
       <Sparkles />
       <SparkleTrail />
