@@ -7,7 +7,7 @@ import FallingPetals from "@/components/landing/FallingPetals";
 import CornerFlorals from "@/components/landing/CornerFlorals";
 import Sparkles from "@/components/landing/Sparkles";
 import SparkleTrail from "@/components/landing/SparkleTrail";
-import Butterflies from "@/components/landing/Butterflies";
+import ButterflyGame from "@/components/landing/ButterflyGame";
 import HomeHero from "@/components/landing/HomeHero";
 import InvitationOpener from "@/components/landing/InvitationOpener";
 import { heroPhoto } from "@/data/landingContent";
@@ -26,7 +26,7 @@ export default function Home() {
       <FallingPetals />
       <Sparkles />
       <SparkleTrail />
-      <Butterflies />
+      <ButterflyGame />
       <CornerFlorals />
       <InvitationOpener celebrant={celebrant}>
         <HomeHero
