@@ -22,7 +22,7 @@ Digital invitation + QR check-in system for a quinceañera (50–150 guests). A 
 **Event Date:** 2026-09-19 at 17:00 (Quito, Ecuador)
 
 **Routes**
-- `/` — single-viewport landing (no scroll): seal intro (InvitationOpener), hero identity, live countdown, condensed event info (date/time only — full location lives in `/recuerdos`), link to `/recuerdos`. Silent — no audio.
+- `/` — single-viewport landing (no scroll): seal intro (InvitationOpener), immersive garden scene (GardenScene + fauna + ButterflyGame minigame), hero identity, live countdown, condensed event info (date/time only — full location lives in `/recuerdos`), link to `/recuerdos`. Silent — no audio. Game starts after the seal opens (CustomEvent `xv:invite-opened`).
 - `/recuerdos` — scrollable second page: photo gallery, family messages, full event location (map + "Cómo llegar"), invite/calendar CTA. Background music starts here (`MusicPlayer`).
 - `/i/[token]` — personalized invitation with RSVP flow (SSR, public)
 - `/api/qr?token=<token>` — server-side PNG generation, immutable cache
@@ -58,8 +58,13 @@ src/
 │       └── qr/route.ts           # runtime: nodejs — uses qrcode npm package
 ├── components/
 │   └── landing/                  # all landing/recuerdos page sections (Client Components)
-│       ├── MeshBackground.tsx    # animated gradient mesh (5 blobs, varying opacities)
-│       ├── FloatingIcons.tsx     # decorative floating icons (stars/diamonds, parallax)
+│       ├── MeshBackground.tsx    # animated gradient mesh (3 blobs)
+│       ├── FloatingIcons.tsx     # decorative floating icons — only used on /recuerdos now
+│       ├── GardenScene.tsx       # page 1: watercolor garden layers with pointer parallax; exports FLOWER_ANCHORS
+│       ├── Fireflies.tsx         # page 1: 8-12 gold fireflies (drift + flicker, no blur)
+│       ├── Hummingbirds.tsx      # page 1: 1-2 hummingbirds cycling FLOWER_ANCHORS with feeding pauses
+│       ├── PassingBirds.tsx      # page 1: occasional swallow crossing top band (25-45s)
+│       ├── ButterflyGame.tsx     # page 1: catch-the-butterfly minigame (tap → burst + counter, reward each 10)
 │       ├── HomeHero.tsx          # page 1: no-scroll hero + countdown + condensed event info (venue links to Maps)
 │       ├── InvitationOpener.tsx  # page 1 overlay: wax-seal "Toca para abrir" intro; opens with petal burst, once per session (sessionStorage)
 │       ├── GalleryNav.tsx        # page 2 scrollspy nav (galería/familia/evento) + link back to `/`
