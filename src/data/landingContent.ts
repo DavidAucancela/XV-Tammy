@@ -6,13 +6,19 @@
 export const heroPhoto = "/photos/inicio_1_hero.png";
 
 // Las fotos de la galería se cargan automáticamente desde /public/photos:
-// todo archivo con nombre numérico (1.jpg, 2.webp, ...) entra, ordenado por
-// número (orden cronológico, de niña a señorita). Ver src/lib/photos.ts.
+// todo archivo con nombre numérico entra, ordenado por número (orden
+// cronológico, de niña a señorita). Soporta decimales para intercalar:
+// 2.1.jpeg queda entre 2.jpg y 3.jpg. Ver src/lib/photos.ts.
 // Para agregar fotos usa: ./scripts/optimize-photos.sh <carpeta-originales>
 
-// Cuántas fotos (las primeras N) aparecen en el slideshow "Mi crecimiento".
-// El resto se ve en la cuadrícula "Álbum de recuerdos" con lightbox.
-export const slideshowCount = 25;
+// Etapas de "Mi crecimiento": cada grupo abarca las fotos hasta el número
+// indicado en `hasta` (inclusive); el último grupo toma todas las restantes.
+export const photoGroups = [
+  { title: "Mis primeros pasos", hasta: 6 },
+  { title: "Descubriendo el mundo", hasta: 14 },
+  { title: "Forjando mi esencia", hasta: 22 },
+  { title: "Creciendo con ilusión", hasta: Infinity },
+];
 
 // Canción de fondo de toda la página (archivo dentro de /public/audio).
 // Se reproduce apenas se entra a la landing, desde un widget flotante siempre visible.

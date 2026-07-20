@@ -5,16 +5,19 @@ import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import SectionHeading from "./SectionHeading";
 import { IconButton } from "./Button";
+import type { GalleryGroup } from "./PhotoGallery";
 
-const INITIAL_VISIBLE = 18;
 const SWIPE_THRESHOLD = 60;
 
-export default function PhotoGrid({ photos }: { photos: string[] }) {
-  const [expanded, setExpanded] = useState(false);
+/**
+ * Álbum completo organizado por etapas: pestañas + flechas para navegar
+ * entre grupos, cuadrícula del grupo activo y lightbox con navegación.
+ */
+export default function PhotoGrid({ groups }: { groups: GalleryGroup[] }) {
+  const [active, setActive] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
 
-  const visible = expanded ? photos : photos.slice(0, INITIAL_VISIBLE);
-  const hasMore = photos.length > INITIAL_VISIBLE;
+  const photos = groups[active]?.photos ?? [];
 
   const close = useCallback(() => setLightbox(null), []);
   const step = useCallback(
@@ -24,6 +27,13 @@ export default function PhotoGrid({ photos }: { photos: string[] }) {
       );
     },
     [photos.length]
+  );
+  const goGroup = useCallback(
+    (target: number) => {
+      setActive(((target % groups.length) + groups.length) % groups.length);
+      setLightbox(null);
+    },
+    [groups.length]
   );
 
   // Teclado + bloqueo de scroll mientras el lightbox está abierto
@@ -43,90 +53,137 @@ export default function PhotoGrid({ photos }: { photos: string[] }) {
     };
   }, [lightbox, close, step]);
 
-  if (photos.length === 0) return null;
+  if (groups.every((g) => g.photos.length === 0)) return null;
 
   return (
     <section style={{ padding: "0 16px 120px", background: "var(--bg)" }}>
       <div style={{ maxWidth: "1140px", margin: "0 auto", width: "100%" }}>
         <SectionHeading eyebrow="todos los momentos" title="Álbum de recuerdos" />
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        {/* Pestañas de etapas */}
+        <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
-            gap: 10,
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: 8,
+            margin: "0 auto 30px",
+            maxWidth: 720,
           }}
         >
-          {visible.map((src, i) => (
+          {groups.map((g, i) => (
             <button
-              key={src}
-              onClick={() => setLightbox(i)}
-              aria-label={`Ampliar foto ${i + 1}`}
+              key={g.title}
+              onClick={() => goGroup(i)}
+              aria-current={i === active}
               style={{
-                position: "relative",
-                aspectRatio: "1",
-                borderRadius: 10,
-                overflow: "hidden",
-                border: "1px solid var(--border)",
-                boxShadow: "var(--shadow-sm)",
-                cursor: "zoom-in",
-                padding: 0,
-                background: "var(--surface)",
-              }}
-              onMouseEnter={(e) => {
-                const img = e.currentTarget.querySelector("img");
-                if (img) img.style.transform = "scale(1.06)";
-              }}
-              onMouseLeave={(e) => {
-                const img = e.currentTarget.querySelector("img");
-                if (img) img.style.transform = "scale(1)";
-              }}
-            >
-              <Image
-                src={src}
-                alt={`Recuerdo ${i + 1}`}
-                fill
-                sizes="(max-width: 768px) 45vw, 190px"
-                style={{
-                  objectFit: "cover",
-                  pointerEvents: "none",
-                  transition: "transform 0.45s ease",
-                }}
-              />
-            </button>
-          ))}
-        </motion.div>
-
-        {hasMore && (
-          <div style={{ display: "flex", justifyContent: "center", marginTop: 28 }}>
-            <button
-              onClick={() => setExpanded((v) => !v)}
-              style={{
-                padding: "10px 24px",
+                padding: "9px 16px",
                 borderRadius: 999,
-                border: "1px solid var(--border)",
-                background: "var(--surface)",
-                color: "var(--accent-ink)",
-                fontSize: 12,
-                letterSpacing: "0.08em",
+                border: i === active ? "1px solid var(--accent)" : "1px solid var(--border)",
+                background: i === active ? "rgba(var(--accent-rgb),0.14)" : "var(--surface)",
+                color: i === active ? "var(--accent-ink)" : "var(--text-muted)",
+                fontSize: 11,
+                letterSpacing: "0.07em",
                 textTransform: "uppercase",
                 cursor: "pointer",
-                transition: "background 0.25s",
+                transition: "background 0.25s, border-color 0.25s, color 0.25s",
               }}
             >
-              {expanded ? "Ver menos" : `Ver todas las fotos (${photos.length})`}
+              {g.title}
+              <span style={{ opacity: 0.55, marginLeft: 6 }}>{g.photos.length}</span>
             </button>
-          </div>
-        )}
+          ))}
+        </div>
+
+        {/* Cuadrícula del grupo activo */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={active}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+              gap: 10,
+            }}
+          >
+            {photos.map((src, i) => (
+              <button
+                key={src}
+                onClick={() => setLightbox(i)}
+                aria-label={`Ampliar foto ${i + 1} de ${groups[active].title}`}
+                style={{
+                  position: "relative",
+                  aspectRatio: "1",
+                  borderRadius: 10,
+                  overflow: "hidden",
+                  border: "1px solid var(--border)",
+                  boxShadow: "var(--shadow-sm)",
+                  cursor: "zoom-in",
+                  padding: 0,
+                  background: "var(--surface)",
+                }}
+                onMouseEnter={(e) => {
+                  const img = e.currentTarget.querySelector("img");
+                  if (img) img.style.transform = "scale(1.06)";
+                }}
+                onMouseLeave={(e) => {
+                  const img = e.currentTarget.querySelector("img");
+                  if (img) img.style.transform = "scale(1)";
+                }}
+              >
+                <Image
+                  src={src}
+                  alt={`${groups[active].title} — recuerdo ${i + 1}`}
+                  fill
+                  sizes="(max-width: 768px) 45vw, 190px"
+                  style={{
+                    objectFit: "cover",
+                    pointerEvents: "none",
+                    transition: "transform 0.45s ease",
+                  }}
+                />
+              </button>
+            ))}
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Navegación entre etapas */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 18,
+            marginTop: 30,
+          }}
+        >
+          <IconButton label="Etapa anterior" onClick={() => goGroup(active - 1)} size="sm">
+            ‹
+          </IconButton>
+          <span
+            style={{
+              fontSize: 11,
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              color: "var(--text-muted)",
+              minWidth: 150,
+              textAlign: "center",
+            }}
+          >
+            {groups[active].title}
+          </span>
+          <IconButton label="Etapa siguiente" onClick={() => goGroup(active + 1)} size="sm">
+            ›
+          </IconButton>
+        </div>
       </div>
 
       {/* Lightbox */}
       <AnimatePresence>
-        {lightbox !== null && (
+        {lightbox !== null && photos[lightbox] && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -167,7 +224,7 @@ export default function PhotoGrid({ photos }: { photos: string[] }) {
             >
               <Image
                 src={photos[lightbox]}
-                alt={`Recuerdo ${lightbox + 1}`}
+                alt={`${groups[active].title} — recuerdo ${lightbox + 1}`}
                 fill
                 sizes="92vw"
                 style={{ objectFit: "contain", pointerEvents: "none" }}
@@ -217,9 +274,10 @@ export default function PhotoGrid({ photos }: { photos: string[] }) {
                 padding: "5px 14px",
                 borderRadius: 999,
                 pointerEvents: "none",
+                whiteSpace: "nowrap",
               }}
             >
-              {lightbox + 1} / {photos.length}
+              {groups[active].title} · {lightbox + 1} / {photos.length}
             </span>
           </motion.div>
         )}
