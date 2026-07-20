@@ -1,11 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView } from "framer-motion";
 import SectionHeading from "./SectionHeading";
 import { IconButton } from "./Button";
 import { useMusicContext } from "@/context/MusicContext";
+
+export type GalleryGroup = { title: string; photos: string[] };
 
 const PLACEHOLDER_COUNT = 6;
 
@@ -21,8 +23,18 @@ const PLACEHOLDER_GRADIENTS = [
 const SLIDE_MS = 3500;
 const SWIPE_THRESHOLD = 60;
 
-export default function PhotoGallery({ photos }: { photos: string[] }) {
+export default function PhotoGallery({ groups }: { groups: GalleryGroup[] }) {
   const { musicRequested, requestMusic } = useMusicContext();
+  const photos = useMemo(() => groups.flatMap((g) => g.photos), [groups]);
+  // Índice de la primera foto de cada grupo (para saltar y marcar la etapa)
+  const groupStarts = useMemo(() => {
+    let acc = 0;
+    return groups.map((g) => {
+      const start = acc;
+      acc += g.photos.length;
+      return start;
+    });
+  }, [groups]);
   const hasPhotos = photos.length > 0;
   const count = hasPhotos ? photos.length : PLACEHOLDER_COUNT;
 
@@ -76,6 +88,15 @@ export default function PhotoGallery({ photos }: { photos: string[] }) {
     }
   }, [index]);
 
+  // Etapa a la que pertenece la foto actual
+  const currentGroup = useMemo(() => {
+    let g = 0;
+    for (let i = 0; i < groupStarts.length; i++) {
+      if (index >= groupStarts[i]) g = i;
+    }
+    return g;
+  }, [index, groupStarts]);
+
   // Deterministic Ken Burns direction per slide.
   const kb = index % 4;
   const kenBurns = reducedMotion.current
@@ -117,6 +138,47 @@ export default function PhotoGallery({ photos }: { photos: string[] }) {
             {musicRequested ? "Música sonando" : "Reproducir música"}
           </button>
         </div>
+
+        {/* Etapas — saltan a la primera foto de cada grupo */}
+        {hasPhotos && groups.length > 1 && (
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              gap: 8,
+              margin: "0 auto 26px",
+              maxWidth: 720,
+            }}
+          >
+            {groups.map((g, i) => (
+              <button
+                key={g.title}
+                onClick={() => goTo(groupStarts[i], i >= currentGroup ? 1 : -1)}
+                aria-label={`Ir a la etapa ${g.title}`}
+                aria-current={i === currentGroup}
+                style={{
+                  padding: "9px 16px",
+                  borderRadius: 999,
+                  border:
+                    i === currentGroup
+                      ? "1px solid var(--accent)"
+                      : "1px solid var(--border)",
+                  background:
+                    i === currentGroup ? "rgba(var(--accent-rgb),0.14)" : "var(--surface)",
+                  color: i === currentGroup ? "var(--accent-ink)" : "var(--text-muted)",
+                  fontSize: 11,
+                  letterSpacing: "0.07em",
+                  textTransform: "uppercase",
+                  cursor: "pointer",
+                  transition: "background 0.25s, border-color 0.25s, color 0.25s",
+                }}
+              >
+                {g.title}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Slideshow */}
         <motion.div
@@ -238,6 +300,33 @@ export default function PhotoGallery({ photos }: { photos: string[] }) {
                     zIndex: 1,
                   }}
                 />
+
+                {/* Etapa actual */}
+                {hasPhotos && groups[currentGroup] && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      bottom: 14,
+                      left: 18,
+                      fontSize: 10,
+                      letterSpacing: "0.16em",
+                      textTransform: "uppercase",
+                      color: "var(--on-ink)",
+                      background: "rgba(var(--ink-rgb),0.55)",
+                      backdropFilter: "blur(6px)",
+                      padding: "4px 12px",
+                      borderRadius: 999,
+                      zIndex: 2,
+                      pointerEvents: "none",
+                      maxWidth: "60%",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {groups[currentGroup].title}
+                  </span>
+                )}
 
                 {/* Counter */}
                 <span

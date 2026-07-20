@@ -7,7 +7,7 @@ const ROSE = { outer: "#F0C3CE", mid: "#DE9AA9", inner: "#C4788A", heart: "#C6A2
 const LEAF = { fill: "#A3B08F", vein: "#83926F" };
 
 /** Stylized blush rose seen from above — three rings of petals + gold heart. */
-function Rose({ size }: { size: number }) {
+export function Rose({ size }: { size: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" style={{ display: "block" }}>
       {[0, 60, 120, 180, 240, 300].map((a) => (
@@ -25,7 +25,7 @@ function Rose({ size }: { size: number }) {
   );
 }
 
-function Leaf({ size, angle }: { size: number; angle: number }) {
+export function Leaf({ size, angle }: { size: number; angle: number }) {
   return (
     <svg
       width={size}
@@ -40,7 +40,7 @@ function Leaf({ size, angle }: { size: number; angle: number }) {
 }
 
 /** Tiny gold bud dots that fill out the arrangement. */
-function Bud({ size }: { size: number }) {
+export function Bud({ size }: { size: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 20 20" style={{ display: "block" }}>
       <circle cx="10" cy="10" r="7" fill={ROSE.heart} opacity="0.9" />

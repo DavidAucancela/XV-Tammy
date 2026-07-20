@@ -26,6 +26,8 @@ export default function InvitationOpener({
   const open = () => {
     if (phase !== "sealed") return;
     sessionStorage.setItem(SESSION_KEY, "1");
+    // Avisa a capas interesadas (ButterflyGame) que la invitación se abrió
+    window.dispatchEvent(new CustomEvent("xv:invite-opened"));
     setBursts([makeBurst()]);
     setPhase("opening");
     // El overlay hace exit vía AnimatePresence; "open" solo marca el estado final.
