@@ -3,6 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import PetalBurst, { makeBurst, type Burst } from "./PetalBurst";
+import EnvelopeBackground from "./EnvelopeBackground";
 
 const SESSION_KEY = "xv-invite-opened";
 
@@ -59,17 +60,19 @@ export default function InvitationOpener({
               alignItems: "center",
               justifyContent: "center",
               gap: "clamp(22px, 5vh, 40px)",
-              background:
-                "radial-gradient(circle at 50% 38%, rgba(var(--gold-rgb), 0.14) 0%, transparent 55%), var(--bg)",
+              background: "var(--bg)",
               textAlign: "center",
               padding: 24,
             }}
           >
+            <EnvelopeBackground />
             <motion.p
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
               style={{
+                position: "relative",
+                zIndex: 1,
                 fontFamily: "var(--font-playfair), Georgia, serif",
                 fontSize: "clamp(1.3rem, 4.5vw, 2rem)",
                 fontStyle: "italic",
@@ -194,7 +197,7 @@ export default function InvitationOpener({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
-              style={{ display: "flex", alignItems: "center", gap: 14 }}
+              style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 14 }}
             >
               <span
                 aria-hidden

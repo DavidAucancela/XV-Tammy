@@ -212,11 +212,13 @@ function Layer({
 
 /**
  * Escena de jardín ilustrada por capas (estilo acuarela en la paleta
- * champagne). Todo estático salvo el parallax de puntero — el movimiento
- * vivo lo ponen FallingPetals, Fireflies, Hummingbirds y las mariposas.
+ * champagne). Independiente del cursor por defecto — el movimiento vivo lo
+ * ponen FallingPetals, Fireflies, Hummingbirds y las mariposas. Pasa
+ * `parallax` para activar el desplazamiento sutil por puntero en páginas
+ * donde tenga sentido (p. ej. /recuerdos).
  */
-export default function GardenScene() {
-  const { x, y } = usePointerParallax();
+export default function GardenScene({ parallax = false }: { parallax?: boolean }) {
+  const { x, y } = usePointerParallax(parallax);
 
   return (
     <motion.div
