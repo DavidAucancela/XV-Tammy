@@ -1,16 +1,9 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "framer-motion";
 import PetalBurst, { makeBurst, type Burst } from "./PetalBurst";
 import EnvelopeBackground from "./EnvelopeBackground";
-
-// three.js pesa ~180KB — se separa del bundle principal y solo se carga en
-// el navegador (WebGL no existe en SSR), justo cuando el sello se monta.
-const GlassObject = dynamic(() => import("@/components/canvasui/GlassObject"), {
-  ssr: false,
-});
 
 const SESSION_KEY = "xv-invite-opened";
 
@@ -73,53 +66,6 @@ export default function InvitationOpener({
             }}
           >
             <EnvelopeBackground />
-
-            {/* Sobre de vidrio — Canvas UI GlassObject, extruye el rounded-rect
-                SVG en un panel de vidrio 3D que enmarca todo el contenido del
-                sello, como si la invitación reposara dentro de un sobre. */}
-            <motion.div
-              aria-hidden
-              initial={{ opacity: 0, scale: 0.94 }}
-              animate={
-                phase === "opening"
-                  ? { opacity: 0, scale: 1.08, transition: { duration: 0.6, ease: "easeOut" } }
-                  : { opacity: 1, scale: 1, transition: { duration: 0.9, ease: "easeOut", delay: 0.1 } }
-              }
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: "clamp(320px, 78vw, 520px)",
-                height: "clamp(420px, 68vh, 620px)",
-                zIndex: 0,
-                pointerEvents: "none",
-              }}
-            >
-              <GlassObject
-                src="/glass/envelope-card.svg"
-                ior={1.7}
-                thickness={3.2}
-                roughness={0.14}
-                dispersion={1.1}
-                clearcoat={0.6}
-                tint="#c6a25e"
-                tintDensity={0.55}
-                depth={0.14}
-                bevel={0.65}
-                highlight="#b4707c"
-                environmentIntensity={1.15}
-                scale={3.4}
-                floatIntensity={reducedMotion ? 0 : 0.55}
-                rotationIntensity={reducedMotion ? 0 : 0.3}
-                floatSpeed={1.3}
-                orbit={false}
-                zoom={false}
-                autoRotate={false}
-                style={{ width: "100%", height: "100%" }}
-              />
-            </motion.div>
-
             <motion.p
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -155,7 +101,6 @@ export default function InvitationOpener({
               }
               style={{
                 position: "relative",
-                zIndex: 1,
                 width: "clamp(140px, 22vh, 190px)",
                 height: "clamp(140px, 22vh, 190px)",
                 background: "transparent",
