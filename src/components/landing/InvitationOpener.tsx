@@ -82,18 +82,20 @@ export default function InvitationOpener({
             <motion.button
               onClick={open}
               aria-label="Abrir la invitación"
-              whileTap={phase === "sealed" ? { scale: 0.94 } : {}}
+              initial={{ opacity: 0, scale: 0.88 }}
               animate={
                 phase === "opening"
-                  ? { scale: 0.88, opacity: 0, y: 20 }
+                  ? { scale: 0.85, opacity: 0, y: 30 }
                   : reducedMotion
-                    ? undefined
-                    : { scale: [1, 1.02, 1], y: [0, -3, 0] }
+                    ? { opacity: 1, scale: 1 }
+                    : { opacity: 1, scale: 1 }
               }
+              whileHover={phase === "sealed" ? { scale: 1.04, y: -6 } : {}}
+              whileTap={phase === "sealed" ? { scale: 0.92 } : {}}
               transition={
                 phase === "opening"
-                  ? { duration: 0.9, ease: "easeOut" }
-                  : { duration: 3.2, repeat: Infinity, ease: "easeInOut" }
+                  ? { duration: 1, ease: "easeOut" }
+                  : { duration: 0.4, ease: "easeOut" }
               }
               style={{
                 position: "relative",
@@ -114,8 +116,27 @@ export default function InvitationOpener({
                   borderRadius: "1px",
                   border: "1.5px solid rgba(198,162,94,0.35)",
                   boxShadow: "0 10px 28px rgba(43,33,28,0.14), inset 0 1px 2px rgba(255,255,255,0.7)",
+                  overflow: "hidden",
                 }}
               >
+                {/* Destello animado que recorre el sobre */}
+                <motion.div
+                  aria-hidden
+                  animate={
+                    phase === "sealed" && !reducedMotion
+                      ? { x: [-300, 500], opacity: [0, 0.4, 0] }
+                      : {}
+                  }
+                  transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    pointerEvents: "none",
+                    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)",
+                    skewX: -20,
+                  }}
+                />
+
                 {/* Decoración sutil: flores pequeñas en las esquinas */}
                 <div
                   style={{
@@ -169,17 +190,17 @@ export default function InvitationOpener({
                   aria-hidden
                   animate={
                     phase === "sealed" && !reducedMotion
-                      ? { opacity: [0.5, 0.8, 0.5] }
+                      ? { opacity: [0.4, 0.85, 0.4], scale: [0.95, 1.1, 0.95] }
                       : {}
                   }
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+                  transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
                   style={{
                     position: "absolute",
                     inset: -20,
                     borderRadius: "50%",
                     background:
-                      "radial-gradient(circle, rgba(var(--accent-rgb),0.35) 0%, transparent 65%)",
-                    filter: "blur(12px)",
+                      "radial-gradient(circle, rgba(var(--accent-rgb),0.4) 0%, rgba(var(--gold-rgb),0.2) 40%, transparent 70%)",
+                    filter: "blur(14px)",
                   }}
                 />
 
