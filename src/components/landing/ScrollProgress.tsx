@@ -1,11 +1,7 @@
 "use client";
 
-import { motion, useScroll, useSpring } from "framer-motion";
+import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 
-/**
- * Thin fixed bar reflecting how far down /recuerdos the visitor has
- * scrolled — a quiet cue that there's more content below the fold.
- */
 export default function ScrollProgress() {
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -13,6 +9,17 @@ export default function ScrollProgress() {
     damping: 24,
     mass: 0.3,
   });
+
+  const backgroundColor = useTransform(scrollYProgress, [0, 0.5, 1], [
+    "var(--gold)",
+    "var(--accent)",
+    "var(--accent-ink)",
+  ]);
+
+  const boxShadow = useTransform(scrollYProgress, [0, 1], [
+    "0 0 8px rgba(198, 162, 94, 0)",
+    "0 0 12px rgba(180, 112, 124, 0.4)",
+  ]);
 
   return (
     <motion.div
@@ -22,10 +29,11 @@ export default function ScrollProgress() {
         top: 0,
         left: 0,
         right: 0,
-        height: 2,
+        height: 3,
         zIndex: 60,
         transformOrigin: "0% 50%",
-        background: "linear-gradient(90deg, var(--gold), var(--accent))",
+        background: backgroundColor,
+        boxShadow,
         scaleX,
       }}
     />
