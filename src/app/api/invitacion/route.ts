@@ -13,10 +13,10 @@ export async function POST(req: NextRequest) {
   }
 
   const digits = typeof telefono === "string" ? telefono.replace(/\D/g, "") : "";
-  if (digits.length < 9) {
-    return NextResponse.json({ error: "Número incompleto" }, { status: 400 });
+  if (digits.length !== 10) {
+    return NextResponse.json({ error: "El número debe tener exactamente 10 dígitos" }, { status: 400 });
   }
-  const key = digits.slice(-9);
+  const key = digits;
 
   const supabase = createAdminClient();
   const { data: guest, error } = await supabase

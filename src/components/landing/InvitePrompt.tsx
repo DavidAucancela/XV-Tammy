@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import RevealText from "./RevealText";
@@ -19,10 +19,11 @@ export default function InvitePrompt({
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [shake, setShake] = useState(false);
+  const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Validación en tiempo real
   const digits = telefono.replace(/\D/g, "");
-  const isValidLength = digits.length >= 10;
+  const isValidLength = digits.length === 10; // Exactamente 10 dígitos
   const canSubmit = isValidLength && status !== "loading";
   const validationMsg =
     digits.length === 0
@@ -31,16 +32,47 @@ export default function InvitePrompt({
         ? `${digits.length}/10 dígitos`
         : "✓ Número válido";
 
+  const handlePhoneChange = (value: string) => {
+    // Solo permite números
+    const onlyNumbers = value.replace(/\D/g, "");
+    // Exactamente 10 dígitos, no más
+    const limited = onlyNumbers.slice(0, 10);
+    setTelefono(limited);
+
+    // Limpiar error si el usuario sigue escribiendo
+    if (status === "error") {
+      if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+      setStatus("idle");
+      setErrorMsg("");
+    }
+  };
+
+  const showError = (message: string) => {
+    setStatus("error");
+    setErrorMsg(message);
+    setShake(true);
+    setTimeout(() => setShake(false), 500);
+
+    // Limpiar error después de 3 segundos
+    if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+    errorTimeoutRef.current = setTimeout(() => {
+      setStatus("idle");
+      setErrorMsg("");
+    }, 3000);
+  };
+
   const buscar = async () => {
-    if (status === "loading" || !isValidLength) {
-      setStatus("error");
-      setErrorMsg("Escribe tu número completo (ej: 0991234567)");
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
+    if (status === "loading") return;
+
+    if (!isValidLength) {
+      setTimeout(() => {
+        showError("Escribe tu número completo (exactamente 10 dígitos)");
+      }, 1000);
       return;
     }
     setStatus("loading");
-    setErrorMsg("");
+    if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+
     try {
       const res = await fetch("/api/invitacion", {
         method: "POST",
@@ -49,22 +81,20 @@ export default function InvitePrompt({
       });
       const data = await res.json();
       if (!res.ok) {
-        setStatus("error");
-        setErrorMsg(
-          res.status === 404
-            ? "No encontramos una invitación con ese número. Verifica que sea el celular donde recibiste el WhatsApp."
-            : "Algo salió mal, inténtalo de nuevo."
-        );
-        setShake(true);
-        setTimeout(() => setShake(false), 500);
+        setTimeout(() => {
+          const message =
+            res.status === 404
+              ? "No encontramos una invitación con ese número. Verifica que sea el celular donde recibiste el WhatsApp."
+              : "Algo salió mal, inténtalo de nuevo.";
+          showError(message);
+        }, 1000);
         return;
       }
       router.push(`/i/${data.token}`);
     } catch {
-      setStatus("error");
-      setErrorMsg("Algo salió mal, inténtalo de nuevo.");
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
+      setTimeout(() => {
+        showError("Algo salió mal, inténtalo de nuevo.");
+      }, 1000);
     }
   };
 
@@ -227,11 +257,9 @@ export default function InvitePrompt({
                 inputMode="tel"
                 autoComplete="tel"
                 placeholder="0991234567"
+                maxLength={10}
                 value={telefono}
-                onChange={(e) => {
-                  setTelefono(e.target.value);
-                  if (status === "error") setStatus("idle");
-                }}
+                onChange={(e) => handlePhoneChange(e.target.value)}
                 animate={{
                   borderColor:
                     status === "error"

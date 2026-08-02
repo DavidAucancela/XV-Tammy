@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import MeshBackground from "@/components/landing/MeshBackground";
 import FloatingIcons from "@/components/landing/FloatingIcons";
 import GalleryNav from "@/components/landing/GalleryNav";
@@ -8,12 +9,13 @@ import PhotoGrid from "@/components/landing/PhotoGrid";
 import FamilyMessages from "@/components/landing/FamilyMessages";
 import EventLocation from "@/components/landing/EventLocation";
 import InvitePrompt from "@/components/landing/InvitePrompt";
+import RecuerdosContent from "@/components/landing/RecuerdosContent";
 import { familyItems, venue, songUrl } from "@/data/landingContent";
 import { getEventDetails } from "@/lib/eventDetails";
 import { getGroupedPhotos } from "@/lib/photos";
 
-export default function Recuerdos() {
-  const { celebrant, dateLabel, timeLabel, lat, lng, calendarUrl } = getEventDetails();
+export default async function Recuerdos() {
+  const { celebrant, dateLabel, timeLabel, lat, lng, calendarUrl, eventDateISO } = getEventDetails();
   const photoGroups = getGroupedPhotos();
 
   return (
@@ -29,9 +31,13 @@ export default function Recuerdos() {
       <ScrollProgress />
       <GalleryNav />
       <MusicPlayer songUrl={songUrl} />
-      <PhotoGallery groups={photoGroups} />
-      <PhotoGrid groups={photoGroups} />
-      <FamilyMessages items={familyItems} />
+      <Suspense fallback={<div />}>
+        <RecuerdosContent
+          photoGroups={photoGroups}
+          familyItems={familyItems}
+          eventDateISO={eventDateISO}
+        />
+      </Suspense>
       <EventLocation
         dateLabel={dateLabel}
         timeLabel={timeLabel}
