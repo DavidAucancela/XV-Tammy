@@ -190,7 +190,11 @@ export default function PhotoGallery({ groups }: { groups: GalleryGroup[] }) {
         >
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <div style={{ position: "relative" }} ref={slideshowRef}>
-              <div
+              <motion.div
+                whileHover={{
+                  boxShadow: "0 20px 50px rgba(180, 112, 124, 0.3), 0 0 30px rgba(198, 162, 94, 0.15)",
+                }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
                 style={{
                   position: "relative",
                   aspectRatio: "4/3",
@@ -347,7 +351,7 @@ export default function PhotoGallery({ groups }: { groups: GalleryGroup[] }) {
                 >
                   {index + 1} / {count}
                 </span>
-              </div>
+              </motion.div>
 
               {/* Arrows — positioned relative to photo-area wrapper */}
               {[
@@ -395,10 +399,13 @@ export default function PhotoGallery({ groups }: { groups: GalleryGroup[] }) {
                   }}
                 >
                   {photos.map((src, i) => (
-                    <button
+                    <motion.button
                       key={i}
                       onClick={() => goTo(i)}
                       aria-label={`Ir a la foto ${i + 1}`}
+                      whileHover={i !== index ? { scale: 1.08, opacity: 1 } : {}}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{ duration: 0.2, ease: "easeOut" }}
                       style={{
                         flex: "0 0 auto",
                         width: 84,
@@ -407,16 +414,9 @@ export default function PhotoGallery({ groups }: { groups: GalleryGroup[] }) {
                         overflow: "hidden",
                         border: i === index ? "2px solid var(--accent)" : "2px solid transparent",
                         opacity: i === index ? 1 : 0.45,
-                        transition: "opacity 0.3s, border-color 0.3s",
                         cursor: "pointer",
                         padding: 0,
                         position: "relative",
-                      }}
-                      onMouseEnter={(e) => {
-                        if (i !== index) e.currentTarget.style.opacity = "0.8";
-                      }}
-                      onMouseLeave={(e) => {
-                        if (i !== index) e.currentTarget.style.opacity = "0.45";
                       }}
                     >
                       <Image
@@ -426,7 +426,7 @@ export default function PhotoGallery({ groups }: { groups: GalleryGroup[] }) {
                         sizes="84px"
                         style={{ objectFit: "cover", pointerEvents: "none" }}
                       />
-                    </button>
+                    </motion.button>
                   ))}
                 </div>
               </div>

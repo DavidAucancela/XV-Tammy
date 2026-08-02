@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ButterflyShape, WING_FILLS, type ButterflyHue } from "./Butterflies";
 import PetalBurst, { makeBurst, type Burst } from "./PetalBurst";
+import Confetti, { makeConfettiParticles, type Particle } from "./Confetti";
+import { playCatchSound, playMilestoneSound, resumeAudioContext } from "@/lib/sounds";
 
 const OPENED_KEY = "xv-invite-opened";
 const SCORE_KEY = "xv-game-score";
@@ -56,6 +58,7 @@ export default function ButterflyGame() {
   const [started, setStarted] = useState(false);
   const [flights, setFlights] = useState<CatchableFlight[]>([]);
   const [bursts, setBursts] = useState<TapBurst[]>([]);
+  const [confetti, setConfetti] = useState<Particle[]>([]);
   const [score, setScore] = useState(0);
   const [reward, setReward] = useState<number | null>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -65,6 +68,9 @@ export default function ButterflyGame() {
 
   // Arranca cuando el sello ya se abrió (esta sesión o ahora mismo)
   useEffect(() => {
+    // Resume audio context para permitir sonidos
+    resumeAudioContext();
+
     const begin = () => {
       const count = window.matchMedia("(min-width: 768px)").matches ? 5 : 4;
       setFlights(Array.from({ length: count }, makeFlight));
@@ -96,12 +102,19 @@ export default function ButterflyGame() {
 
       const { clientX, clientY } = e;
       setBursts((prev) => [...prev, { id: nextId++, x: clientX, y: clientY, burst: makeBurst() }]);
+
+      // Agregar confetti en el punto del tap
+      setConfetti((prev) => [...prev, ...makeConfettiParticles(clientX, clientY, 8)]);
+
+      // Sonido de catch
+      playCatchSound();
+
       setScore((s) => {
         const next = s + 1;
         sessionStorage.setItem(SCORE_KEY, String(next));
         if (next % REWARD_EVERY === 0) {
           setReward(next);
-          // celebración central
+          // celebración central con más confetti
           const cx = window.innerWidth / 2;
           const cy = window.innerHeight / 2;
           setBursts((prev) => [
@@ -110,6 +123,15 @@ export default function ButterflyGame() {
             { id: nextId++, x: cx + 70, y: cy - 60, burst: makeBurst() },
             { id: nextId++, x: cx, y: cy + 50, burst: makeBurst() },
           ]);
+          // Más confetti en milestone
+          setConfetti((prev) => [
+            ...prev,
+            ...makeConfettiParticles(cx, cy, 30),
+          ]);
+
+          // Sonido de milestone
+          playMilestoneSound();
+
           const t = setTimeout(() => setReward(null), 3000);
           timers.current.push(t);
         }
@@ -126,6 +148,10 @@ export default function ButterflyGame() {
 
   const endBurst = useCallback((tapId: number) => {
     setBursts((prev) => prev.filter((b) => b.id !== tapId));
+  }, []);
+
+  const endConfetti = useCallback((particleId: number) => {
+    setConfetti((prev) => prev.filter((p) => p.id !== particleId));
   }, []);
 
   if (!started) return null;
@@ -206,6 +232,9 @@ export default function ButterflyGame() {
             <PetalBurst bursts={[b.burst]} onDone={() => endBurst(b.id)} />
           </div>
         ))}
+
+        {/* Confetti particles */}
+        <Confetti particles={confetti} onDone={endConfetti} />
       </div>
 
       {/* Contador + reward */}

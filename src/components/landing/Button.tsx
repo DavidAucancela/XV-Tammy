@@ -1,6 +1,7 @@
 "use client";
 
-import { CSSProperties, ReactNode, useState } from "react";
+import { motion } from "framer-motion";
+import { CSSProperties, ReactNode } from "react";
 
 type ButtonProps = {
   children: ReactNode;
@@ -10,15 +11,7 @@ type ButtonProps = {
   style?: CSSProperties;
 };
 
-/**
- * Text/label button. "primary" is reserved for the one action that matters
- * on a given screen (e.g. confirm attendance) — everything else uses
- * "secondary" so the primary keeps its weight.
- */
 export function Button({ children, onClick, href, variant = "secondary", style }: ButtonProps) {
-  const [hover, setHover] = useState(false);
-  const [focus, setFocus] = useState(false);
-
   const base: CSSProperties = {
     display: "inline-flex",
     alignItems: "center",
@@ -30,9 +23,8 @@ export function Button({ children, onClick, href, variant = "secondary", style }
     textTransform: "uppercase",
     textDecoration: "none",
     cursor: "pointer",
-    transition: `background var(--duration-fast) ease, color var(--duration-fast) ease, border-color var(--duration-fast) ease`,
-    outline: focus ? "2px solid var(--accent)" : "none",
-    outlineOffset: 2,
+    border: "none",
+    ...style,
   };
 
   const variants: Record<string, CSSProperties> = {
@@ -41,36 +33,48 @@ export function Button({ children, onClick, href, variant = "secondary", style }
       background: "var(--accent-ink)",
       color: "var(--ivory)",
       fontWeight: 600,
-      boxShadow: hover ? "var(--shadow-md)" : "var(--shadow-sm)",
     },
     secondary: {
       border: "1px solid var(--accent-soft)",
-      background: hover ? "var(--accent-faint)" : "transparent",
-      color: hover ? "var(--text)" : "var(--accent)",
+      background: "transparent",
+      color: "var(--accent)",
     },
   };
 
-  const combined = { ...base, ...variants[variant], ...style };
+  const combined = { ...base, ...variants[variant] };
 
-  const handlers = {
-    onMouseEnter: () => setHover(true),
-    onMouseLeave: () => setHover(false),
-    onFocus: () => setFocus(true),
-    onBlur: () => setFocus(false),
+  const motionProps = {
+    whileHover: {
+      scale: 1.05,
+      boxShadow:
+        variant === "primary"
+          ? "0 12px 40px rgba(180, 112, 124, 0.25)"
+          : "0 8px 24px rgba(180, 112, 124, 0.15)",
+    },
+    whileTap: { scale: 0.95 },
+    transition: { duration: 0.2, ease: "easeOut" as const },
   };
+
+  const content = <span>{children}</span>;
 
   if (href) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" style={combined} {...handlers}>
-        {children}
-      </a>
+      <motion.a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={combined}
+        {...motionProps}
+      >
+        {content}
+      </motion.a>
     );
   }
 
   return (
-    <button onClick={onClick} style={combined} {...handlers}>
-      {children}
-    </button>
+    <motion.button onClick={onClick} style={combined} {...motionProps}>
+      {content}
+    </motion.button>
   );
 }
 
@@ -82,30 +86,25 @@ type IconButtonProps = {
   style?: CSSProperties;
 };
 
-/**
- * Circular "dark glass" control — arrows, mute, play/pause. Lives on the
- * --ink floating-widget layer, never on the page's light surface directly.
- * Never the primary action.
- */
 export function IconButton({ children, label, onClick, size = "md", style }: IconButtonProps) {
-  const [hover, setHover] = useState(false);
-  const [focus, setFocus] = useState(false);
   const dim = size === "sm" ? 38 : 46;
 
   return (
-    <button
+    <motion.button
       aria-label={label}
       onClick={onClick}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onFocus={() => setFocus(true)}
-      onBlur={() => setFocus(false)}
+      whileHover={{
+        backgroundColor: "rgba(var(--ink-rgb), 0.9)",
+        boxShadow: "0 4px 16px rgba(180, 112, 124, 0.2)",
+      }}
+      whileTap={{ scale: 0.92 }}
+      transition={{ duration: 0.15, ease: "easeOut" as const }}
       style={{
         width: dim,
         height: dim,
         borderRadius: "50%",
-        border: `1px solid ${hover ? "var(--accent)" : "var(--accent-soft)"}`,
-        background: hover ? "rgba(var(--ink-rgb), 0.8)" : "rgba(var(--ink-rgb), 0.65)",
+        border: "1px solid var(--accent-soft)",
+        background: "rgba(var(--ink-rgb), 0.65)",
         backdropFilter: "blur(8px)",
         WebkitBackdropFilter: "blur(8px)",
         color: "var(--on-ink)",
@@ -116,13 +115,11 @@ export function IconButton({ children, label, onClick, size = "md", style }: Ico
         alignItems: "center",
         justifyContent: "center",
         flexShrink: 0,
-        outline: focus ? "2px solid var(--accent)" : "none",
-        outlineOffset: 2,
-        transition: `border-color var(--duration-fast) ease, background var(--duration-fast) ease`,
+        outline: "none",
         ...style,
       }}
     >
       {children}
-    </button>
+    </motion.button>
   );
 }

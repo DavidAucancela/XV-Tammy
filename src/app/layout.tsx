@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Lato } from "next/font/google";
+import { Playfair_Display, Lato, Inter } from "next/font/google";
 import { MotionConfig } from "framer-motion";
 import { MusicProvider } from "@/context/MusicContext";
 import PageTransition from "@/components/landing/PageTransition";
 import "./globals.css";
+import { cn } from "@/lib/utils";
+
+const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -40,7 +43,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es">
+    <html lang="es" className={cn("font-sans", inter.variable)}>
       <body className={`${playfair.variable} ${lato.variable}`}>
         <MusicProvider>
           {/* Every Framer Motion animation site-wide respects the OS reduced-motion

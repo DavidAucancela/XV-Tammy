@@ -3,8 +3,8 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import PetalBurst, { makeBurst, type Burst } from "./PetalBurst";
+import EnvelopeBackground from "./EnvelopeBackground";
 
-// Shown once per session — volver desde /recuerdos no re-sella la invitación.
 const SESSION_KEY = "xv-invite-opened";
 
 export default function InvitationOpener({
@@ -26,11 +26,10 @@ export default function InvitationOpener({
   const open = () => {
     if (phase !== "sealed") return;
     sessionStorage.setItem(SESSION_KEY, "1");
-    // Avisa a capas interesadas (ButterflyGame) que la invitación se abrió
     window.dispatchEvent(new CustomEvent("xv:invite-opened"));
-    setBursts([makeBurst()]);
+    // Múltiples bursts para más drama
+    setBursts([makeBurst(), makeBurst()]);
     setPhase("opening");
-    // El overlay hace exit vía AnimatePresence; "open" solo marca el estado final.
     setTimeout(() => setPhase("open"), reducedMotion ? 300 : 1000);
   };
 
@@ -38,8 +37,6 @@ export default function InvitationOpener({
 
   return (
     <>
-      {/* El hero se monta al abrir, para que su animación de entrada
-          (medallón → título → countdown) se vea durante la revelación. */}
       {phase !== "sealed" && children}
       <AnimatePresence>
         {phase !== "open" && (
@@ -48,7 +45,11 @@ export default function InvitationOpener({
             exit={
               reducedMotion
                 ? { opacity: 0, transition: { duration: 0.3 } }
-                : { opacity: 0, y: "-8%", transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] } }
+                : {
+                    opacity: 0,
+                    y: "-8%",
+                    transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] },
+                  }
             }
             style={{
               position: "fixed",
@@ -59,14 +60,19 @@ export default function InvitationOpener({
               alignItems: "center",
               justifyContent: "center",
               gap: "clamp(22px, 5vh, 40px)",
-              background:
-                "radial-gradient(circle at 50% 38%, rgba(var(--gold-rgb), 0.14) 0%, transparent 55%), var(--bg)",
+              background: "var(--bg)",
               textAlign: "center",
               padding: 24,
             }}
           >
-            <p
+            <EnvelopeBackground />
+            <motion.p
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
               style={{
+                position: "relative",
+                zIndex: 1,
                 fontFamily: "var(--font-playfair), Georgia, serif",
                 fontSize: "clamp(1.3rem, 4.5vw, 2rem)",
                 fontStyle: "italic",
@@ -75,23 +81,22 @@ export default function InvitationOpener({
               }}
             >
               Tienes una invitación
-            </p>
+            </motion.p>
 
-            {/* Sello — mismo lenguaje visual que el medallón del hero */}
             <motion.button
               onClick={open}
               aria-label="Abrir la invitación"
-              whileTap={{ scale: 0.92 }}
+              whileTap={phase === "sealed" ? { scale: 0.92 } : {}}
               animate={
                 phase === "opening"
-                  ? { scale: 1.18, opacity: 0 }
+                  ? { scale: 1.25, opacity: 0, rotate: 12 }
                   : reducedMotion
                     ? undefined
                     : { scale: [1, 1.045, 1] }
               }
               transition={
                 phase === "opening"
-                  ? { duration: 0.55, ease: "easeOut" }
+                  ? { duration: 0.6, ease: "easeOut" }
                   : { duration: 2.6, repeat: Infinity, ease: "easeInOut" }
               }
               style={{
@@ -104,17 +109,26 @@ export default function InvitationOpener({
                 cursor: "pointer",
               }}
             >
-              <div
+              {/* Glow background mejorado */}
+              <motion.div
                 aria-hidden
+                animate={
+                  phase === "sealed" && !reducedMotion
+                    ? { opacity: [0.6, 0.9, 0.6] }
+                    : {}
+                }
+                transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
                 style={{
                   position: "absolute",
                   inset: -26,
                   borderRadius: "50%",
                   background:
-                    "radial-gradient(circle, rgba(var(--gold-rgb),0.3) 0%, rgba(var(--accent-rgb),0.22) 45%, transparent 72%)",
+                    "radial-gradient(circle, rgba(var(--gold-rgb),0.4) 0%, rgba(var(--accent-rgb),0.28) 45%, transparent 72%)",
                   filter: "blur(14px)",
                 }}
               />
+
+              {/* Seal circle */}
               <div
                 style={{
                   position: "absolute",
@@ -134,7 +148,11 @@ export default function InvitationOpener({
                     background: "var(--ivory)",
                   }}
                 >
-                  <div
+                  <motion.div
+                    animate={
+                      phase === "sealed" && !reducedMotion ? { rotate: 360 } : {}
+                    }
+                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
                     style={{
                       width: "100%",
                       height: "100%",
@@ -168,16 +186,26 @@ export default function InvitationOpener({
                     >
                       XV
                     </span>
-                  </div>
+                  </motion.div>
                 </div>
               </div>
+
               <PetalBurst bursts={bursts} onDone={(id) => setBursts((p) => p.filter((b) => b.id !== id))} />
             </motion.button>
 
-            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+              style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 14 }}
+            >
               <span
                 aria-hidden
-                style={{ width: 36, height: 1, background: "linear-gradient(90deg, transparent, var(--gold))" }}
+                style={{
+                  width: 36,
+                  height: 1,
+                  background: "linear-gradient(90deg, transparent, var(--gold))",
+                }}
               />
               <p
                 style={{
@@ -192,9 +220,13 @@ export default function InvitationOpener({
               </p>
               <span
                 aria-hidden
-                style={{ width: 36, height: 1, background: "linear-gradient(90deg, var(--gold), transparent)" }}
+                style={{
+                  width: 36,
+                  height: 1,
+                  background: "linear-gradient(90deg, var(--gold), transparent)",
+                }}
               />
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
