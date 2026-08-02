@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import RevealText from "./RevealText";
 import { Button } from "./Button";
 import LiquidButton from "./LiquidButton";
@@ -18,13 +18,25 @@ export default function InvitePrompt({
   const [telefono, setTelefono] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [shake, setShake] = useState(false);
+
+  // Validación en tiempo real
+  const digits = telefono.replace(/\D/g, "");
+  const isValidLength = digits.length >= 10;
+  const canSubmit = isValidLength && status !== "loading";
+  const validationMsg =
+    digits.length === 0
+      ? ""
+      : digits.length < 10
+        ? `${digits.length}/10 dígitos`
+        : "✓ Número válido";
 
   const buscar = async () => {
-    if (status === "loading") return;
-    const digits = telefono.replace(/\D/g, "");
-    if (digits.length < 9) {
+    if (status === "loading" || !isValidLength) {
       setStatus("error");
       setErrorMsg("Escribe tu número completo (ej: 0991234567)");
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
       return;
     }
     setStatus("loading");
@@ -43,12 +55,16 @@ export default function InvitePrompt({
             ? "No encontramos una invitación con ese número. Verifica que sea el celular donde recibiste el WhatsApp."
             : "Algo salió mal, inténtalo de nuevo."
         );
+        setShake(true);
+        setTimeout(() => setShake(false), 500);
         return;
       }
       router.push(`/i/${data.token}`);
     } catch {
       setStatus("error");
       setErrorMsg("Algo salió mal, inténtalo de nuevo.");
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
     }
   };
 
@@ -118,21 +134,33 @@ export default function InvitePrompt({
           initial={{ opacity: 0, scale: 0.94 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.55, delay: 0.45 }}
+          animate={shake ? { x: [-8, 8, -8, 8, 0] } : { x: 0 }}
+          transition={shake ? { duration: 0.4 } : { duration: 0.55, delay: 0.45 }}
           style={{
             borderRadius: 18,
             padding: 1,
             background:
-              "linear-gradient(135deg, rgba(var(--gold-rgb),0.5), rgba(var(--accent-rgb),0.4), rgba(var(--gold-rgb),0.25))",
+              status === "error"
+                ? "linear-gradient(135deg, rgba(200,85,85,0.3), rgba(200,85,85,0.2))"
+                : isValidLength
+                  ? "linear-gradient(135deg, rgba(var(--gold-rgb),0.6), rgba(var(--accent-rgb),0.5))"
+                  : "linear-gradient(135deg, rgba(var(--gold-rgb),0.5), rgba(var(--accent-rgb),0.4), rgba(var(--gold-rgb),0.25))",
             marginBottom: 28,
-            boxShadow: "var(--shadow-sm)",
+            boxShadow: status === "error" ? "0 0 16px rgba(200,85,85,0.25)" : "var(--shadow-sm)",
             width: "100%",
             maxWidth: 420,
+            transition: "all 0.3s ease",
           }}
         >
-          <div
+          <motion.div
+            animate={{
+              background:
+                status === "error"
+                  ? "rgba(255,240,240,0.95)"
+                  : "var(--surface-elevated)",
+            }}
+            transition={{ duration: 0.3 }}
             style={{
-              background: "var(--surface-elevated)",
               borderRadius: 17,
               padding: "24px 26px",
               display: "flex",
@@ -140,24 +168,60 @@ export default function InvitePrompt({
               gap: 14,
             }}
           >
-            <label
-              htmlFor="telefono-invitacion"
-              style={{
-                fontSize: 10,
-                letterSpacing: "0.26em",
-                textTransform: "uppercase",
-                color: "var(--accent-ink)",
-                textAlign: "left",
-              }}
-            >
-              Número de celular
-            </label>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <label
+                htmlFor="telefono-invitacion"
+                style={{
+                  fontSize: 10,
+                  letterSpacing: "0.26em",
+                  textTransform: "uppercase",
+                  color: status === "error" ? "#C85555" : "var(--accent-ink)",
+                  textAlign: "left",
+                  transition: "color 0.3s ease",
+                }}
+              >
+                Número de celular
+              </label>
+              {digits.length > 0 && (
+                <motion.span
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  style={{
+                    fontSize: 10,
+                    letterSpacing: "0.08em",
+                    color: isValidLength ? "#5A9F6A" : "var(--text-muted)",
+                    fontWeight: 500,
+                  }}
+                >
+                  {validationMsg}
+                </motion.span>
+              )}
+            </div>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold-solid)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden style={{ flexShrink: 0 }}>
+              <motion.svg
+                animate={{
+                  stroke:
+                    status === "error"
+                      ? "#C85555"
+                      : isValidLength
+                        ? "#5A9F6A"
+                        : "var(--gold-solid)",
+                }}
+                transition={{ duration: 0.3 }}
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+                style={{ flexShrink: 0 }}
+              >
                 <rect x="7" y="2" width="10" height="20" rx="2.5" />
                 <path d="M11 18h2" />
-              </svg>
-              <input
+              </motion.svg>
+              <motion.input
                 id="telefono-invitacion"
                 type="tel"
                 inputMode="tel"
@@ -168,42 +232,79 @@ export default function InvitePrompt({
                   setTelefono(e.target.value);
                   if (status === "error") setStatus("idle");
                 }}
+                animate={{
+                  borderColor:
+                    status === "error"
+                      ? "#C85555"
+                      : isValidLength
+                        ? "#5A9F6A"
+                        : "var(--border)",
+                  boxShadow:
+                    status === "error"
+                      ? "0 0 8px rgba(200,85,85,0.2)"
+                      : isValidLength
+                        ? "0 0 8px rgba(90,159,106,0.15)"
+                        : "none",
+                }}
+                transition={{ duration: 0.3 }}
                 style={{
                   flex: 1,
                   minWidth: 0,
                   minHeight: 44,
                   padding: "10px 14px",
                   borderRadius: 12,
-                  border: "1px solid var(--border)",
+                  border: "2px solid var(--border)",
                   background: "var(--ivory)",
                   color: "var(--text)",
                   fontSize: 16,
                   letterSpacing: "0.06em",
                   outline: "none",
+                  fontFamily: "var(--font-lato), system-ui, sans-serif",
                 }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
-                onBlur={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
+                onFocus={(e) => {
+                  if (status !== "error") {
+                    e.currentTarget.style.borderColor = isValidLength ? "#5A9F6A" : "var(--accent)";
+                  }
+                }}
+                onBlur={(e) => {
+                  if (status !== "error") {
+                    e.currentTarget.style.borderColor = isValidLength ? "#5A9F6A" : "var(--border)";
+                  }
+                }}
               />
             </div>
-            {status === "error" && (
-              <p
-                role="alert"
-                style={{
-                  fontSize: 12.5,
-                  color: "var(--accent-ink)",
-                  textAlign: "left",
-                  margin: 0,
-                  lineHeight: 1.5,
-                }}
-              >
-                {errorMsg}
-              </p>
-            )}
-            <LiquidButton
-              label={status === "loading" ? "Buscando…" : "Ver mi invitación"}
-              onClick={buscar}
-            />
-          </div>
+            <AnimatePresence mode="wait">
+              {status === "error" && errorMsg && (
+                <motion.p
+                  key="error"
+                  role="alert"
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    fontSize: 12.5,
+                    color: "#C85555",
+                    textAlign: "left",
+                    margin: 0,
+                    lineHeight: 1.5,
+                    fontWeight: 500,
+                  }}
+                >
+                  ⚠ {errorMsg}
+                </motion.p>
+              )}
+            </AnimatePresence>
+            <motion.div
+              animate={{ opacity: canSubmit ? 1 : 0.6 }}
+              style={{ pointerEvents: canSubmit ? "auto" : "none" }}
+            >
+              <LiquidButton
+                label={status === "loading" ? "Buscando…" : "Ver mi invitación"}
+                onClick={buscar}
+              />
+            </motion.div>
+          </motion.div>
         </motion.form>
 
         <motion.div
@@ -211,15 +312,49 @@ export default function InvitePrompt({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.55, delay: 0.55 }}
-          style={{ marginBottom: 56 }}
+          style={{ marginBottom: 56, width: "100%", maxWidth: 320 }}
         >
-          <Button href={calendarUrl} variant="primary">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <motion.a
+            href={calendarUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+              padding: "14px 24px",
+              borderRadius: 14,
+              background: "linear-gradient(135deg, rgba(var(--accent-rgb),0.85), rgba(var(--gold-rgb),0.3))",
+              border: "1px solid rgba(var(--accent-rgb),0.6)",
+              color: "var(--ivory)",
+              fontSize: 13,
+              fontWeight: 500,
+              letterSpacing: "0.04em",
+              textDecoration: "none",
+              cursor: "pointer",
+              boxShadow: "0 4px 16px rgba(180,112,124,0.25), inset 0 1px 0 rgba(255,255,255,0.15)",
+              backdropFilter: "blur(8px)",
+              transition: "all 0.3s ease",
+              width: "100%",
+              textAlign: "center",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = "0 8px 24px rgba(180,112,124,0.35), inset 0 1px 0 rgba(255,255,255,0.2)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = "0 4px 16px rgba(180,112,124,0.25), inset 0 1px 0 rgba(255,255,255,0.15)";
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="5" width="18" height="16" rx="2.5" />
               <path d="M3 10h18M8 3v4M16 3v4" />
             </svg>
             Agregar al calendario
-          </Button>
+          </motion.a>
         </motion.div>
 
         <motion.p

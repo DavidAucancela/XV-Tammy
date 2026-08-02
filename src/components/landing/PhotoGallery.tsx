@@ -39,10 +39,38 @@ export default function PhotoGallery({ groups }: { groups: GalleryGroup[] }) {
   const count = hasPhotos ? photos.length : PLACEHOLDER_COUNT;
 
   const [[index, direction], setSlide] = useState([0, 0]);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const reducedMotion = useRef(false);
   const slideshowRef = useRef<HTMLDivElement>(null);
   const inView = useInView(slideshowRef, { amount: 0.4 });
   const playing = inView && !reducedMotion.current;
+
+  const toggleFullscreen = async () => {
+    if (!slideshowRef.current) return;
+    try {
+      if (!isFullscreen) {
+        if (slideshowRef.current.requestFullscreen) {
+          await slideshowRef.current.requestFullscreen();
+          setIsFullscreen(true);
+        }
+      } else {
+        if (document.fullscreenElement) {
+          await document.exitFullscreen();
+          setIsFullscreen(false);
+        }
+      }
+    } catch (err) {
+      console.error("Fullscreen error:", err);
+    }
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
 
   const goTo = useCallback(
     (target: number, dir?: number) => {
@@ -293,53 +321,42 @@ export default function PhotoGallery({ groups }: { groups: GalleryGroup[] }) {
                 </IconButton>
               ))}
 
-              {/* Fullscreen + Music button — top right corner */}
+              {/* Fullscreen button — top right corner */}
               <IconButton
-                label={musicRequested ? "Música sonando" : "Reproducir música"}
-                onClick={requestMusic}
+                label={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+                onClick={toggleFullscreen}
                 style={{
                   position: "absolute",
                   top: 12,
                   right: 12,
                   fontSize: 18,
                   zIndex: 5,
-                  opacity: musicRequested ? 0.8 : 1,
                 }}
               >
-                ♪
+                {isFullscreen ? "⛶" : "⛶"}
               </IconButton>
+
+              {/* Music button — only visible in fullscreen, top right below fullscreen button */}
+              {isFullscreen && (
+                <IconButton
+                  label={musicRequested ? "Música sonando" : "Reproducir música"}
+                  onClick={requestMusic}
+                  style={{
+                    position: "absolute",
+                    top: 60,
+                    right: 12,
+                    fontSize: 18,
+                    zIndex: 5,
+                    opacity: musicRequested ? 0.8 : 1,
+                  }}
+                >
+                  ♪
+                </IconButton>
+              )}
             </div>
 
           </div>
 
-          {/* Dots */}
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "center",
-              gap: 8,
-              marginTop: 24,
-            }}
-          >
-            {Array.from({ length: count }, (_, i) => (
-              <button
-                key={i}
-                aria-label={`Ir a la foto ${i + 1}`}
-                onClick={() => goTo(i)}
-                style={{
-                  width: i === index ? 24 : 7,
-                  height: 7,
-                  borderRadius: 999,
-                  border: "none",
-                  cursor: "pointer",
-                  background: i === index ? "var(--accent)" : "rgba(var(--accent-rgb),0.25)",
-                  transition: "width 0.35s ease, background 0.35s ease",
-                  padding: 0,
-                }}
-              />
-            ))}
-          </div>
         </motion.div>
       </div>
     </section>
