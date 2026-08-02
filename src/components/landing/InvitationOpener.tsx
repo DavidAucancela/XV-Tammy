@@ -3,7 +3,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import PetalBurst, { makeBurst, type Burst } from "./PetalBurst";
-import EnvelopeBackground from "./EnvelopeBackground";
 
 const SESSION_KEY = "xv-invite-opened";
 
@@ -60,16 +59,14 @@ export default function InvitationOpener({
               alignItems: "center",
               justifyContent: "center",
               gap: "clamp(22px, 5vh, 40px)",
-              background: "var(--bg)",
               textAlign: "center",
               padding: 24,
             }}
           >
-            <EnvelopeBackground />
             <motion.p
               initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
+              animate={phase === "sealed" ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }}
+              transition={{ duration: reducedMotion ? 0.2 : 0.4, ease: "easeOut" }}
               style={{
                 position: "relative",
                 zIndex: 1,
@@ -83,32 +80,92 @@ export default function InvitationOpener({
               Tienes una invitación
             </motion.p>
 
-            <motion.button
-              onClick={open}
-              aria-label="Abrir la invitación"
-              whileTap={phase === "sealed" ? { scale: 0.92 } : {}}
-              animate={
-                phase === "opening"
-                  ? { scale: 1.25, opacity: 0, rotate: 12 }
-                  : reducedMotion
-                    ? undefined
-                    : { scale: [1, 1.045, 1] }
-              }
-              transition={
-                phase === "opening"
-                  ? { duration: 0.6, ease: "easeOut" }
-                  : { duration: 2.6, repeat: Infinity, ease: "easeInOut" }
-              }
+            <div
               style={{
                 position: "relative",
                 width: "clamp(140px, 22vh, 190px)",
                 height: "clamp(140px, 22vh, 190px)",
-                background: "transparent",
-                border: "none",
-                padding: 0,
-                cursor: "pointer",
               }}
             >
+              <div
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  left: "50%",
+                  bottom: "calc(50% - 4px)",
+                  transform: "translateX(-50%)",
+                  width: "clamp(190px, 30vh, 260px)",
+                  height: "clamp(90px, 14vh, 120px)",
+                  perspective: 900,
+                  zIndex: 1,
+                  pointerEvents: "none",
+                }}
+              >
+                <motion.div
+                  initial={false}
+                  animate={
+                    phase === "sealed"
+                      ? { rotateX: 0, opacity: 1 }
+                      : reducedMotion
+                        ? { rotateX: 0, opacity: 0 }
+                        : { rotateX: -160, opacity: 1 }
+                  }
+                  transition={
+                    reducedMotion
+                      ? { duration: 0.3, ease: "easeOut" }
+                      : { duration: 0.85, ease: [0.22, 1, 0.36, 1], delay: 0.05 }
+                  }
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    transformOrigin: "top center",
+                    transformStyle: "preserve-3d",
+                    backfaceVisibility: "hidden",
+                    clipPath: "polygon(0 0, 100% 0, 50% 100%)",
+                    background: "linear-gradient(150deg, rgba(var(--gold-rgb),0.65), rgba(var(--accent-rgb),0.45), rgba(var(--gold-rgb),0.3))",
+                    boxShadow: "0 10px 24px rgba(43,33,28,0.16)",
+                  }}
+                >
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: "1.5px",
+                      clipPath: "polygon(0 0, 100% 0, 50% 100%)",
+                      background: "linear-gradient(160deg, var(--surface-elevated) 0%, var(--surface) 100%)",
+                      backdropFilter: "blur(10px)",
+                      WebkitBackdropFilter: "blur(10px)",
+                    }}
+                  />
+                </motion.div>
+              </div>
+
+              <motion.button
+                onClick={open}
+                aria-label="Abrir la invitación"
+                whileTap={phase === "sealed" ? { scale: 0.92 } : {}}
+                animate={
+                  phase === "opening"
+                    ? { scale: 1.25, opacity: 0, rotate: 12 }
+                    : reducedMotion
+                      ? undefined
+                      : { scale: [1, 1.045, 1] }
+                }
+                transition={
+                  phase === "opening"
+                    ? { duration: 0.6, ease: "easeOut" }
+                    : { duration: 2.6, repeat: Infinity, ease: "easeInOut" }
+                }
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  height: "100%",
+                  background: "transparent",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                  zIndex: 2,
+                }}
+              >
               {/* Glow background mejorado */}
               <motion.div
                 aria-hidden
@@ -190,13 +247,14 @@ export default function InvitationOpener({
                 </div>
               </div>
 
-              <PetalBurst bursts={bursts} onDone={(id) => setBursts((p) => p.filter((b) => b.id !== id))} />
-            </motion.button>
+                <PetalBurst bursts={bursts} onDone={(id) => setBursts((p) => p.filter((b) => b.id !== id))} />
+              </motion.button>
+            </div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+              animate={phase === "sealed" ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+              transition={{ duration: reducedMotion ? 0.2 : 0.4, ease: "easeOut", delay: phase === "sealed" ? 0.2 : 0 }}
               style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 14 }}
             >
               <span
