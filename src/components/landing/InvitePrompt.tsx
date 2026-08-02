@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import RevealText from "./RevealText";
 import { Button } from "./Button";
+import LiquidButton from "./LiquidButton";
 
 export default function InvitePrompt({
   celebrant,
@@ -198,9 +199,10 @@ export default function InvitePrompt({
                 {errorMsg}
               </p>
             )}
-            <Button variant="primary" style={{ justifyContent: "center", opacity: status === "loading" ? 0.7 : 1 }}>
-              {status === "loading" ? "Buscando…" : "Ver mi invitación"}
-            </Button>
+            <LiquidButton
+              label={status === "loading" ? "Buscando…" : "Ver mi invitación"}
+              onClick={buscar}
+            />
           </div>
         </motion.form>
 
