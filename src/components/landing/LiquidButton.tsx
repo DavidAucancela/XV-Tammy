@@ -17,9 +17,10 @@ export default function LiquidButton({
   const containerRef = useRef<HTMLDivElement>(null);
   const liquidRef = useRef<LiquidInstance | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    if (!containerRef.current || isInitialized) return;
+    if (!containerRef.current || isInitialized || hasError) return;
 
     try {
       liquidRef.current = new (Liquid as any)(
@@ -44,6 +45,7 @@ export default function LiquidButton({
       setIsInitialized(true);
     } catch (err) {
       console.warn("Liquid initialization failed:", err);
+      setHasError(true);
     }
 
     return () => {
@@ -53,34 +55,78 @@ export default function LiquidButton({
         console.warn("Liquid cleanup failed:", err);
       }
     };
-  }, [isInitialized]);
+  }, [isInitialized, hasError]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current || !liquidRef.current) return;
 
     const rect = containerRef.current.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;
+
+    // Clamp values to 0-1 range
+    if (x < 0 || x > 1 || y < 0 || y > 1) return;
 
     const dx = (e.clientX - rect.left - rect.width / 2) / rect.width;
     const dy = (e.clientY - rect.top - rect.height / 2) / rect.height;
 
-    liquidRef.current.splat(x, y, dx, dy);
+    try {
+      liquidRef.current.splat(x, y, dx, dy);
+    } catch (err) {
+      console.warn("Splat error:", err);
+    }
   };
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current || !liquidRef.current) return;
 
     const rect = containerRef.current.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;
 
-    // Strong splat on click
-    liquidRef.current.splat(x, y, 0, 0);
-    liquidRef.current.splat(x, y, Math.random() - 0.5, Math.random() - 0.5);
+    // Clamp values
+    if (x < 0 || x > 1 || y < 0 || y > 1) return;
 
-    onClick?.();
+    try {
+      liquidRef.current.splat(x, y, 0, 0);
+      liquidRef.current.splat(x, y, Math.random() - 0.5, Math.random() - 0.5);
+    } catch (err) {
+      console.warn("Splat error:", err);
+    }
+
+    if (typeof onClick === "function") {
+      onClick();
+    }
   };
+
+  if (hasError) {
+    // Fallback: render como botón normal si Liquid falla
+    return (
+      <button
+        onClick={onClick}
+        style={{
+          width: "100%",
+          maxWidth: "100%",
+          minHeight: 56,
+          borderRadius: "var(--radius-pill)",
+          border: "none",
+          fontSize: 13,
+          fontWeight: 600,
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          color: "var(--ivory)",
+          backgroundColor: "var(--accent-ink)",
+          cursor: "pointer",
+        }}
+      >
+        {label}
+      </button>
+    );
+  }
 
   return (
     <div

@@ -40,8 +40,6 @@ export default function PhotoGallery({ groups }: { groups: GalleryGroup[] }) {
 
   const [[index, direction], setSlide] = useState([0, 0]);
   const reducedMotion = useRef(false);
-  const thumbnailsRef = useRef<HTMLDivElement>(null);
-  const thumbnailsMounted = useRef(false);
   const slideshowRef = useRef<HTMLDivElement>(null);
   const inView = useInView(slideshowRef, { amount: 0.4 });
   const playing = inView && !reducedMotion.current;
@@ -75,18 +73,6 @@ export default function PhotoGallery({ groups }: { groups: GalleryGroup[] }) {
     return () => clearInterval(id);
   }, [playing, index, advance]);
 
-  // Auto-scroll thumbnail strip to keep the active thumbnail visible
-  // (skip on initial mount to avoid an unwanted scroll jump on load).
-  useEffect(() => {
-    if (!thumbnailsMounted.current) {
-      thumbnailsMounted.current = true;
-      return;
-    }
-    if (thumbnailsRef.current) {
-      const child = thumbnailsRef.current.children[index] as HTMLElement | undefined;
-      child?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-    }
-  }, [index]);
 
   // Etapa a la que pertenece la foto actual
   const currentGroup = useMemo(() => {
@@ -111,74 +97,6 @@ export default function PhotoGallery({ groups }: { groups: GalleryGroup[] }) {
     <section id="galeria" style={{ padding: "120px 8px 100px", background: "var(--bg)" }}>
       <div style={{ maxWidth: "100%", margin: "0 auto", width: "100%" }}>
         <SectionHeading eyebrow="de niña a señorita" title="Mi crecimiento" />
-
-        <div style={{ display: "flex", justifyContent: "center", margin: "-8px 0 28px" }}>
-          <button
-            onClick={requestMusic}
-            disabled={musicRequested}
-            aria-label={musicRequested ? "Música sonando" : "Reproducir música"}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "8px 18px",
-              borderRadius: 999,
-              border: "1px solid var(--border)",
-              background: musicRequested ? "rgba(180,112,124,0.12)" : "var(--surface)",
-              color: "var(--accent-ink)",
-              fontSize: 12,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              cursor: musicRequested ? "default" : "pointer",
-              transition: "background 0.25s, opacity 0.25s",
-              opacity: musicRequested ? 0.75 : 1,
-            }}
-          >
-            <span aria-hidden>♪</span>
-            {musicRequested ? "Música sonando" : "Reproducir música"}
-          </button>
-        </div>
-
-        {/* Etapas — saltan a la primera foto de cada grupo */}
-        {hasPhotos && groups.length > 1 && (
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "center",
-              gap: 8,
-              margin: "0 auto 26px",
-              maxWidth: 720,
-            }}
-          >
-            {groups.map((g, i) => (
-              <button
-                key={g.title}
-                onClick={() => goTo(groupStarts[i], i >= currentGroup ? 1 : -1)}
-                aria-label={`Ir a la etapa ${g.title}`}
-                aria-current={i === currentGroup}
-                style={{
-                  padding: "9px 16px",
-                  borderRadius: 999,
-                  border:
-                    i === currentGroup
-                      ? "1px solid var(--accent)"
-                      : "1px solid var(--border)",
-                  background:
-                    i === currentGroup ? "rgba(var(--accent-rgb),0.14)" : "var(--surface)",
-                  color: i === currentGroup ? "var(--accent-ink)" : "var(--text-muted)",
-                  fontSize: 11,
-                  letterSpacing: "0.07em",
-                  textTransform: "uppercase",
-                  cursor: "pointer",
-                  transition: "background 0.25s, border-color 0.25s, color 0.25s",
-                }}
-              >
-                {g.title}
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* Slideshow */}
         <motion.div
@@ -374,63 +292,24 @@ export default function PhotoGallery({ groups }: { groups: GalleryGroup[] }) {
                   {char}
                 </IconButton>
               ))}
-            </div>
 
-            {/* Thumbnail filmstrip — horizontal, centered, clipped to the section width */}
-            {hasPhotos && (
-              <div
+              {/* Fullscreen + Music button — top right corner */}
+              <IconButton
+                label={musicRequested ? "Música sonando" : "Reproducir música"}
+                onClick={requestMusic}
                 style={{
-                  position: "relative",
-                  width: "100%",
-                  overflow: "hidden",
+                  position: "absolute",
+                  top: 12,
+                  right: 12,
+                  fontSize: 18,
+                  zIndex: 5,
+                  opacity: musicRequested ? 0.8 : 1,
                 }}
               >
-                <div
-                  ref={thumbnailsRef}
-                  className="thumbnail-filmstrip"
-                  style={{
-                    display: "flex",
-                    gap: 8,
-                    overflowX: "auto",
-                    justifyContent: count <= 6 ? "center" : "flex-start",
-                    padding: "2px 4px",
-                    scrollbarWidth: "none",
-                    WebkitOverflowScrolling: "touch",
-                  }}
-                >
-                  {photos.map((src, i) => (
-                    <motion.button
-                      key={i}
-                      onClick={() => goTo(i)}
-                      aria-label={`Ir a la foto ${i + 1}`}
-                      whileHover={i !== index ? { scale: 1.08, opacity: 1 } : {}}
-                      whileTap={{ scale: 0.95 }}
-                      transition={{ duration: 0.2, ease: "easeOut" }}
-                      style={{
-                        flex: "0 0 auto",
-                        width: 84,
-                        aspectRatio: "4/3",
-                        borderRadius: 8,
-                        overflow: "hidden",
-                        border: i === index ? "2px solid var(--accent)" : "2px solid transparent",
-                        opacity: i === index ? 1 : 0.45,
-                        cursor: "pointer",
-                        padding: 0,
-                        position: "relative",
-                      }}
-                    >
-                      <Image
-                        src={src}
-                        alt={`Miniatura ${i + 1}`}
-                        fill
-                        sizes="84px"
-                        style={{ objectFit: "cover", pointerEvents: "none" }}
-                      />
-                    </motion.button>
-                  ))}
-                </div>
-              </div>
-            )}
+                ♪
+              </IconButton>
+            </div>
+
           </div>
 
           {/* Dots */}

@@ -40,15 +40,19 @@ export function playMilestoneSound() {
 
   try {
     const now = audioContext.currentTime;
-    // Dos tonos ascendentes
-    [0, 0.15].forEach((delay, i) => {
+    // Dos tonos ascendentes, iniciados simultáneamente
+    const tones = [
+      { freq: 600, delay: 0 },
+      { freq: 900, delay: 0.08 }, // Stagger pequeño para evitar overlap
+    ];
+
+    tones.forEach(({ freq, delay }) => {
       const osc = audioContext!.createOscillator();
       const gain = audioContext!.createGain();
 
       osc.connect(gain);
       gain.connect(audioContext!.destination);
 
-      const freq = 600 + i * 300;
       osc.frequency.setValueAtTime(freq, now + delay);
       osc.frequency.exponentialRampToValueAtTime(freq * 1.3, now + delay + 0.15);
 
@@ -69,6 +73,8 @@ export function playMilestoneSound() {
 export function resumeAudioContext() {
   if (!audioContext) return;
   if (audioContext.state === "suspended") {
-    audioContext.resume();
+    audioContext.resume().catch(() => {
+      // Silenciosamente ignorar si resume falla
+    });
   }
 }

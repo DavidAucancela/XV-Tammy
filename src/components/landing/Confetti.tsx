@@ -49,9 +49,11 @@ export default function Confetti({ particles, onDone }: ConfettiProps) {
   );
 }
 
+let particleIdCounter = 0;
+
 export function makeConfettiParticles(x: number, y: number, count: number = 12): Particle[] {
-  return Array.from({ length: count }, (_, i) => ({
-    id: Math.random(),
+  return Array.from({ length: count }, () => ({
+    id: ++particleIdCounter,
     x,
     y,
   }));
