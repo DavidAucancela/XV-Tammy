@@ -26,7 +26,6 @@ export default function InvitationOpener({
     if (phase !== "sealed") return;
     sessionStorage.setItem(SESSION_KEY, "1");
     window.dispatchEvent(new CustomEvent("xv:invite-opened"));
-    // Múltiples bursts para más drama
     setBursts([makeBurst(), makeBurst()]);
     setPhase("opening");
     setTimeout(() => setPhase("open"), reducedMotion ? 300 : 1000);
@@ -80,176 +79,177 @@ export default function InvitationOpener({
               Tienes una invitación
             </motion.p>
 
-            <div
+            <motion.button
+              onClick={open}
+              aria-label="Abrir la invitación"
+              whileTap={phase === "sealed" ? { scale: 0.94 } : {}}
+              animate={
+                phase === "opening"
+                  ? { scale: 0.88, opacity: 0, y: 20 }
+                  : reducedMotion
+                    ? undefined
+                    : { scale: [1, 1.02, 1], y: [0, -3, 0] }
+              }
+              transition={
+                phase === "opening"
+                  ? { duration: 0.9, ease: "easeOut" }
+                  : { duration: 3.2, repeat: Infinity, ease: "easeInOut" }
+              }
               style={{
                 position: "relative",
-                width: "clamp(140px, 22vh, 190px)",
-                height: "clamp(140px, 22vh, 190px)",
+                width: "clamp(220px, 40vh, 300px)",
+                height: "clamp(260px, 46vh, 360px)",
+                background: "transparent",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
               }}
             >
-              <div
-                aria-hidden
-                style={{
-                  position: "absolute",
-                  left: "50%",
-                  bottom: "calc(50% - 4px)",
-                  transform: "translateX(-50%)",
-                  width: "clamp(190px, 30vh, 260px)",
-                  height: "clamp(90px, 14vh, 120px)",
-                  perspective: 900,
-                  zIndex: 1,
-                  pointerEvents: "none",
-                }}
-              >
-                <motion.div
-                  initial={false}
-                  animate={
-                    phase === "sealed"
-                      ? { rotateX: 0, opacity: 1 }
-                      : reducedMotion
-                        ? { rotateX: 0, opacity: 0 }
-                        : { rotateX: -160, opacity: 1 }
-                  }
-                  transition={
-                    reducedMotion
-                      ? { duration: 0.3, ease: "easeOut" }
-                      : { duration: 0.85, ease: [0.22, 1, 0.36, 1], delay: 0.05 }
-                  }
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    transformOrigin: "top center",
-                    transformStyle: "preserve-3d",
-                    backfaceVisibility: "hidden",
-                    clipPath: "polygon(0 0, 100% 0, 50% 100%)",
-                    background: "linear-gradient(150deg, rgba(var(--gold-rgb),0.65), rgba(var(--accent-rgb),0.45), rgba(var(--gold-rgb),0.3))",
-                    boxShadow: "0 10px 24px rgba(43,33,28,0.16)",
-                  }}
-                >
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: "1.5px",
-                      clipPath: "polygon(0 0, 100% 0, 50% 100%)",
-                      background: "linear-gradient(160deg, var(--surface-elevated) 0%, var(--surface) 100%)",
-                      backdropFilter: "blur(10px)",
-                      WebkitBackdropFilter: "blur(10px)",
-                    }}
-                  />
-                </motion.div>
-              </div>
-
-              <motion.button
-                onClick={open}
-                aria-label="Abrir la invitación"
-                whileTap={phase === "sealed" ? { scale: 0.92 } : {}}
-                animate={
-                  phase === "opening"
-                    ? { scale: 1.25, opacity: 0, rotate: 12 }
-                    : reducedMotion
-                      ? undefined
-                      : { scale: [1, 1.045, 1] }
-                }
-                transition={
-                  phase === "opening"
-                    ? { duration: 0.6, ease: "easeOut" }
-                    : { duration: 2.6, repeat: Infinity, ease: "easeInOut" }
-                }
-                style={{
-                  position: "relative",
-                  width: "100%",
-                  height: "100%",
-                  background: "transparent",
-                  border: "none",
-                  padding: 0,
-                  cursor: "pointer",
-                  zIndex: 2,
-                }}
-              >
-              {/* Glow background mejorado */}
-              <motion.div
-                aria-hidden
-                animate={
-                  phase === "sealed" && !reducedMotion
-                    ? { opacity: [0.6, 0.9, 0.6] }
-                    : {}
-                }
-                transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
-                style={{
-                  position: "absolute",
-                  inset: -26,
-                  borderRadius: "50%",
-                  background:
-                    "radial-gradient(circle, rgba(var(--gold-rgb),0.4) 0%, rgba(var(--accent-rgb),0.28) 45%, transparent 72%)",
-                  filter: "blur(14px)",
-                }}
-              />
-
-              {/* Seal circle */}
+              {/* Cuerpo del sobre (rectángulo pergamino) */}
               <div
                 style={{
                   position: "absolute",
                   inset: 0,
-                  borderRadius: "50%",
-                  padding: 3,
-                  background:
-                    "conic-gradient(from 200deg, var(--gold-solid), var(--accent), var(--gold-solid))",
+                  background: "linear-gradient(135deg, #FAF8F3 0%, #F4EDE3 50%, #EBE0D5 100%)",
+                  borderRadius: "1px",
+                  border: "1.5px solid rgba(198,162,94,0.35)",
+                  boxShadow: "0 10px 28px rgba(43,33,28,0.14), inset 0 1px 2px rgba(255,255,255,0.7)",
                 }}
               >
+                {/* Decoración sutil: flores pequeñas en las esquinas */}
                 <div
                   style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: "50%",
-                    padding: 6,
-                    background: "var(--ivory)",
+                    position: "absolute",
+                    top: 14,
+                    left: 14,
+                    fontSize: "11px",
+                    opacity: 0.45,
+                    color: "rgba(180,112,124,0.6)",
                   }}
                 >
-                  <motion.div
-                    animate={
-                      phase === "sealed" && !reducedMotion ? { rotate: 360 } : {}
-                    }
-                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  ✿
+                </div>
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 14,
+                    right: 14,
+                    fontSize: "9px",
+                    opacity: 0.35,
+                    color: "rgba(198,162,94,0.5)",
+                  }}
+                >
+                  ✤
+                </div>
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: 14,
+                    left: 14,
+                    fontSize: "9px",
+                    opacity: 0.35,
+                    color: "rgba(198,162,94,0.5)",
+                  }}
+                >
+                  ✤
+                </div>
+              </div>
+
+              {/* Sello en la esquina inferior derecha */}
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "-20px",
+                  right: "-20px",
+                  zIndex: 10,
+                }}
+              >
+                {/* Glow background del sello */}
+                <motion.div
+                  aria-hidden
+                  animate={
+                    phase === "sealed" && !reducedMotion
+                      ? { opacity: [0.5, 0.8, 0.5] }
+                      : {}
+                  }
+                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+                  style={{
+                    position: "absolute",
+                    inset: -20,
+                    borderRadius: "50%",
+                    background:
+                      "radial-gradient(circle, rgba(var(--accent-rgb),0.35) 0%, transparent 65%)",
+                    filter: "blur(12px)",
+                  }}
+                />
+
+                {/* Seal circle */}
+                <div
+                  style={{
+                    position: "relative",
+                    width: "clamp(90px, 16vh, 130px)",
+                    height: "clamp(90px, 16vh, 130px)",
+                    borderRadius: "50%",
+                    padding: 3,
+                    background:
+                      "conic-gradient(from 200deg, var(--gold-solid), var(--accent), var(--gold-solid))",
+                    boxShadow: "0 6px 18px rgba(43,33,28,0.2)",
+                  }}
+                >
+                  <div
                     style={{
                       width: "100%",
                       height: "100%",
                       borderRadius: "50%",
-                      border: "1px solid rgba(var(--gold-rgb), 0.5)",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 2,
+                      padding: 5,
+                      background: "var(--ivory)",
                     }}
                   >
-                    <span
+                    <motion.div
+                      animate={
+                        phase === "sealed" && !reducedMotion ? { rotate: 360 } : {}
+                      }
+                      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
                       style={{
-                        fontFamily: "var(--font-playfair), Georgia, serif",
-                        fontSize: "clamp(3rem, 8vh, 4.2rem)",
-                        lineHeight: 1,
-                        color: "var(--accent-ink)",
+                        width: "100%",
+                        height: "100%",
+                        borderRadius: "50%",
+                        border: "1px solid rgba(var(--gold-rgb), 0.5)",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 1,
                       }}
                     >
-                      {initial}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: 10,
-                        letterSpacing: "0.34em",
-                        textTransform: "uppercase",
-                        color: "var(--gold-solid)",
-                        marginLeft: "0.34em",
-                      }}
-                    >
-                      XV
-                    </span>
-                  </motion.div>
+                      <span
+                        style={{
+                          fontFamily: "var(--font-playfair), Georgia, serif",
+                          fontSize: "clamp(2rem, 5vh, 2.6rem)",
+                          lineHeight: 1,
+                          color: "var(--accent-ink)",
+                        }}
+                      >
+                        {initial}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: 8,
+                          letterSpacing: "0.32em",
+                          textTransform: "uppercase",
+                          color: "var(--gold-solid)",
+                          marginLeft: "0.32em",
+                        }}
+                      >
+                        XV
+                      </span>
+                    </motion.div>
+                  </div>
                 </div>
-              </div>
 
                 <PetalBurst bursts={bursts} onDone={(id) => setBursts((p) => p.filter((b) => b.id !== id))} />
-              </motion.button>
-            </div>
+              </div>
+            </motion.button>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
