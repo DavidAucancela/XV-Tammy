@@ -3,7 +3,7 @@
 // ============================================================
 
 // Foto destacada del Hero — retrato reciente, se muestra en el medallón bajo el título.
-export const heroPhoto = "/photos/inicio_1_hero.png";
+export const heroPhoto = "/photos/inicio.jpeg";
 
 // Las fotos de la galería se cargan automáticamente desde /public/photos:
 // todo archivo con nombre numérico entra, ordenado por número (orden
