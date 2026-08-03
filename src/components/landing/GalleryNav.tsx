@@ -2,36 +2,39 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useAccordion } from "./RecuerdosAccordionProvider";
 
 const NAV_LINKS = [
-  { label: "Galería", href: "galeria" },
-  { label: "Familia", href: "familia" },
-  { label: "Evento", href: "evento" },
+  { label: "Galería", id: "galeria" },
+  { label: "Álbum", id: "galeria-grid" },
+  { label: "Familia", id: "familia" },
+  { label: "Evento", id: "evento" },
+  { label: "Compartir", id: "recuerdos-compartidos" },
+  { label: "Invitación", id: "invitacion" },
 ];
 
-const SCROLLSPY_OFFSET = 120;
-
 export default function GalleryNav() {
-  const [active, setActive] = useState(NAV_LINKS[0].href);
+  const { isOpen, openPanel } = useAccordion();
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
     const onScroll = () => {
-      let current = NAV_LINKS[0].href;
-      for (const { href } of NAV_LINKS) {
-        const el = document.getElementById(href);
-        if (el && el.getBoundingClientRect().top - SCROLLSPY_OFFSET <= 0) {
-          current = href;
-        }
-      }
-      setActive(current);
+      const currentScrollY = window.scrollY;
+      setIsVisible(currentScrollY < lastScrollY || currentScrollY < 50);
+      setLastScrollY(currentScrollY);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [lastScrollY]);
 
-  const scrollTo = (id: string) =>
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  const handleNavClick = (id: string) => {
+    openPanel(id);
+    setTimeout(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    }, 350);
+  };
 
   return (
     <nav
@@ -43,10 +46,10 @@ export default function GalleryNav() {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        background: "rgba(var(--ink-rgb), 0.9)",
+        background: "var(--ink)",
         borderBottom: "1px solid rgba(var(--accent-rgb), 0.18)",
+        transform: isVisible ? "translateY(0)" : "translateY(-100%)",
+        transition: "transform 0.3s ease-in-out",
       }}
     >
       {/* Always-available way back to the landing hero */}
@@ -90,12 +93,12 @@ export default function GalleryNav() {
       </Link>
 
       <div className="gallery-nav-links" style={{ display: "flex", alignItems: "center" }}>
-        {NAV_LINKS.map(({ label, href }) => {
-          const isActive = active === href;
+        {NAV_LINKS.map(({ label, id }) => {
+          const isActive = isOpen(id);
           return (
             <button
-              key={href}
-              onClick={() => scrollTo(href)}
+              key={id}
+              onClick={() => handleNavClick(id)}
               aria-current={isActive ? "true" : undefined}
               className="gallery-nav-link"
               style={{

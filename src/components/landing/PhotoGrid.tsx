@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import SectionHeading from "./SectionHeading";
 import { IconButton } from "./Button";
 import type { GalleryGroup } from "./PhotoGallery";
 
@@ -56,9 +55,8 @@ export default function PhotoGrid({ groups }: { groups: GalleryGroup[] }) {
   if (groups.every((g) => g.photos.length === 0)) return null;
 
   return (
-    <section style={{ padding: "0 16px 120px", background: "var(--bg)" }}>
+    <div>
       <div style={{ maxWidth: "1140px", margin: "0 auto", width: "100%" }}>
-        <SectionHeading eyebrow="todos los momentos" title="Álbum de recuerdos" />
 
         {/* Pestañas de etapas */}
         <div
@@ -282,6 +280,6 @@ export default function PhotoGrid({ groups }: { groups: GalleryGroup[] }) {
           </motion.div>
         )}
       </AnimatePresence>
-    </section>
+    </div>
   );
 }
