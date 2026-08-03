@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView } from "framer-motion";
-import SectionHeading from "./SectionHeading";
 import { IconButton } from "./Button";
 import { useMusicContext } from "@/context/MusicContext";
 
@@ -122,9 +121,8 @@ export default function PhotoGallery({ groups }: { groups: GalleryGroup[] }) {
       };
 
   return (
-    <section id="galeria" style={{ padding: "120px 8px 100px", background: "var(--bg)" }}>
+    <div>
       <div style={{ maxWidth: "100%", margin: "0 auto", width: "100%" }}>
-        <SectionHeading eyebrow="de niña a señorita" title="Mi crecimiento" />
 
         {/* Slideshow */}
         <motion.div
@@ -359,6 +357,6 @@ export default function PhotoGallery({ groups }: { groups: GalleryGroup[] }) {
 
         </motion.div>
       </div>
-    </section>
+    </div>
   );
 }

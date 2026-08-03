@@ -2,7 +2,6 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import SectionHeading from "./SectionHeading";
 import { Button } from "./Button";
 
 type Venue = { name: string; address: string };
@@ -65,13 +64,10 @@ export default function EventLocation({
   ];
 
   return (
-    <section
-      ref={ref}
-      id="evento"
-      style={{ padding: "100px 24px 48px", background: "var(--bg)" }}
+    <div
+      ref={ref as React.Ref<HTMLDivElement>}
     >
       <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-        <SectionHeading title="Fecha, hora y lugar" marginBottom={52} />
 
         {/* Invitation ticket — a single unified row, never wraps.
             Entrance reads like a stamp being pressed onto the invitation. */}
@@ -219,15 +215,63 @@ export default function EventLocation({
                   />
                 </div>
               </div>
-              <div style={{ textAlign: "center", marginTop: 24 }}>
-                <Button href={`https://maps.google.com/?q=${lat},${lng}`} variant="primary">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <motion.div
+                style={{ textAlign: "center", marginTop: 40 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <motion.a
+                  href={`https://maps.google.com/?q=${lat},${lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 12,
+                    padding: "16px 40px",
+                    borderRadius: 28,
+                    background: "linear-gradient(135deg, var(--accent) 0%, var(--accent-ink) 100%)",
+                    color: "var(--ivory)",
+                    textDecoration: "none",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    boxShadow: "0 8px 24px rgba(var(--accent-rgb), 0.3)",
+                    border: "1px solid rgba(var(--ivory), 0.2)",
+                    cursor: "pointer",
+                    position: "relative",
+                    overflow: "hidden",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = "0 12px 32px rgba(var(--accent-rgb), 0.4)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = "0 8px 24px rgba(var(--accent-rgb), 0.3)";
+                  }}
+                >
+                  <motion.svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    animate={{ y: [0, -3, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  >
                     <path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11Z" />
                     <circle cx="12" cy="10" r="2.5" />
-                  </svg>
+                  </motion.svg>
                   Cómo llegar
-                </Button>
-              </div>
+                </motion.a>
+              </motion.div>
             </>
           ) : (
             <div
@@ -261,6 +305,6 @@ export default function EventLocation({
           )}
         </motion.div>
       </div>
-    </section>
+    </div>
   );
 }

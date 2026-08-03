@@ -99,44 +99,16 @@ export default function InvitePrompt({
   };
 
   return (
-    <section
+    <div
       style={{
-        padding: "100px 24px 120px",
-        background: "var(--bg)",
+        maxWidth: 480,
+        margin: "0 auto",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        textAlign: "center",
       }}
     >
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        style={{
-          maxWidth: 480,
-          margin: "0 auto",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          textAlign: "center",
-        }}
-      >
-        <div className="ornament-divider" style={{ width: 160, marginBottom: 50 }}>
-          <span>✦</span>
-        </div>
-
-        <RevealText
-          tag="h2"
-          style={{
-            fontFamily: "var(--font-playfair), Georgia, serif",
-            fontSize: "clamp(1.6rem, 5.5vw, 2.4rem)",
-            fontWeight: 400,
-            color: "var(--text)",
-            marginBottom: 20,
-            lineHeight: 1.3,
-            justifyContent: "center",
-          }}
-        >
-          ¿Tienes tu invitación?
-        </RevealText>
 
         <motion.p
           initial={{ opacity: 0, y: 16 }}
@@ -412,7 +384,6 @@ export default function InvitePrompt({
         >
           ✦ &nbsp; con cariño · {celebrant} y familia &nbsp; ✦
         </p>
-      </motion.div>
-    </section>
+    </div>
   );
 }
