@@ -265,8 +265,9 @@ export default function HomeHero({
               fontFamily: "var(--font-playfair), Georgia, serif",
               fontSize: "clamp(1.35rem, 4.8vw, 2.4rem)",
               fontStyle: "italic",
-              color: "var(--accent)",
+              color: "var(--text-muted)",
               margin: "4px 0 0",
+              textShadow: "0 2px 4px rgba(74, 55, 46, 0.15)",
             }}
           >
             de {celebrant}

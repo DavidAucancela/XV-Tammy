@@ -211,15 +211,15 @@ body {
     var(--gold) 53%,
     var(--text) 68%
   );
-  background-size: 220% 100%;
+  background-size: 280% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shimmer-sweep 4.5s ease-in-out infinite;
 }
 @keyframes shimmer-sweep {
-  from { background-position: 130% 0; }
-  to   { background-position: -130% 0; }
+  from { background-position: 140% 0; }
+  to   { background-position: -140% 0; }
 }
 
 /* ── Reduce motion ── */

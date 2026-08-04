@@ -25,12 +25,15 @@ export default function GatekeeperSection({
     return <>{children}</>;
   }
 
+  // Bloqueo desactivado — todas las secciones visibles siempre
+  return <>{children}</>;
+
+  /* Lógica anterior (desactivada):
   const isEventHere = now >= event;
   const canAccess = isEventHere || adminPreview;
-
   if (canAccess) {
     return <>{children}</>;
-  }
+  } */
 
   // Formatear tiempo restante
   const diff = Math.max(0, event.getTime() - now.getTime());
