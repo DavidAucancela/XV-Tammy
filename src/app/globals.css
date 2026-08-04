@@ -19,7 +19,7 @@ body {
   --bg-rgb: 243, 230, 214;
   --surface: rgba(234, 216, 195, 0.65);
   --surface-elevated: rgba(252, 246, 236, 0.85);
-  --border: oklch(0.922 0 0);
+  --border: #dcc7ae;
   --border-soft: rgba(220, 199, 174, 0.5);
   --text: #4a372e; /* 9.1:1 on --bg */
   --text-muted: #7a6355; /* 4.6:1 on --bg */
@@ -32,7 +32,7 @@ body {
   --on-ink-muted: rgba(243, 230, 214, 0.65);
 
   /* ── Color: accents (dusty rose) ──────────────────────────────*/
-  --accent: oklch(0.97 0 0);
+  --accent: #b4707c;
   --accent-rgb: 180, 112, 124;
   --accent-ink: #8f4e5f; /* 5.0:1 on --bg — use for text/icons, and as the primary button fill */
   --accent-ink-rgb: 143, 78, 95;
@@ -189,17 +189,22 @@ body {
   80%        { transform: translate(-3%,  6%)  scale(0.97); }
 }
 
-/* ── /recuerdos navbar: compact sizing on small phones so
-   "Volver al inicio" + the three section links fit on one row ── */
+/* ── /recuerdos navbar: on small/medium screens the six section links
+   don't fit next to "Volver al inicio", so they collapse into a
+   hamburger + dropdown panel below that breakpoint ── */
 .gallery-nav { padding: 12px clamp(14px, 3vw, 24px); gap: 16px; }
 .gallery-nav-back { font-size: 10px; letter-spacing: 0.18em; padding: 8px 14px; gap: 8px; }
 .gallery-nav-links { gap: clamp(14px, 3vw, 28px); }
 .gallery-nav-link { font-size: 10px; letter-spacing: 0.22em; }
+
+@media (max-width: 720px) {
+  .gallery-nav-links--desktop { display: none !important; }
+  .gallery-nav-hamburger { display: flex !important; }
+  .gallery-nav-mobile-panel { display: block !important; }
+}
 @media (max-width: 430px) {
   .gallery-nav { padding: 10px; gap: 8px; }
   .gallery-nav-back { font-size: 9px; letter-spacing: 0.1em; padding: 7px 10px; gap: 5px; }
-  .gallery-nav-links { gap: 10px; }
-  .gallery-nav-link { font-size: 9px; letter-spacing: 0.12em; }
 }
 
 /* ── Shimmer title: a gold/rose sheen sweeps across the hero heading ── */

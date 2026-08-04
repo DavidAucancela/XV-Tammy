@@ -175,21 +175,14 @@ export default function AccordionSection({ id, title, eyebrow, index, children }
             }}
           />
 
-          {/* Content container with grid-template-rows animation */}
+          {/* Content container — height animates to/from its measured "auto" size */}
           <motion.div
-            animate={{
-              maxHeight: open ? 9999 : 0,
-            }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            style={{
-              display: "grid",
-              gridTemplateRows: open ? "1fr" : "0fr",
-              overflow: "hidden",
-              maxHeight: open ? 9999 : 0,
-              minHeight: 0,
-            }}
+            initial={false}
+            animate={{ height: open ? "auto" : 0 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            style={{ overflow: "hidden" }}
           >
-            <div style={{ overflow: "hidden", padding: "0 clamp(20px, 4vw, 32px) clamp(20px, 4vw, 32px)" }}>
+            <div style={{ padding: "0 clamp(20px, 4vw, 32px) clamp(20px, 4vw, 32px)" }}>
               {children}
             </div>
           </motion.div>
