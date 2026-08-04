@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { createPortal } from "react-dom";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView } from "framer-motion";
 import { IconButton } from "./Button";
@@ -44,32 +45,24 @@ export default function PhotoGallery({ groups }: { groups: GalleryGroup[] }) {
   const inView = useInView(slideshowRef, { amount: 0.4 });
   const playing = inView && !reducedMotion.current;
 
-  const toggleFullscreen = async () => {
-    if (!slideshowRef.current) return;
-    try {
-      if (!isFullscreen) {
-        if (slideshowRef.current.requestFullscreen) {
-          await slideshowRef.current.requestFullscreen();
-          setIsFullscreen(true);
-        }
-      } else {
-        if (document.fullscreenElement) {
-          await document.exitFullscreen();
-          setIsFullscreen(false);
-        }
-      }
-    } catch (err) {
-      console.error("Fullscreen error:", err);
-    }
-  };
+  // Overlay CSS-based pseudo-fullscreen (not the native Fullscreen API) —
+  // Element.requestFullscreen() is unsupported on iOS Safari for non-video
+  // elements, so it silently no-ops on most mobile browsers.
+  const toggleFullscreen = () => setIsFullscreen((v) => !v);
 
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
+    if (!isFullscreen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsFullscreen(false);
     };
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, []);
+    window.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [isFullscreen]);
 
   const goTo = useCallback(
     (target: number, dir?: number) => {
@@ -133,21 +126,50 @@ export default function PhotoGallery({ groups }: { groups: GalleryGroup[] }) {
           style={{ position: "relative", width: "100%", maxWidth: "1140px", margin: "0 auto" }}
         >
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <div style={{ position: "relative" }} ref={slideshowRef}>
+            {(() => {
+              const frame = (
+            <div
+              style={
+                isFullscreen
+                  ? {
+                      position: "fixed",
+                      inset: 0,
+                      zIndex: 200,
+                      background: "var(--ink)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }
+                  : { position: "relative" }
+              }
+              ref={slideshowRef}
+            >
               <motion.div
-                whileHover={{
-                  boxShadow: "0 20px 50px rgba(180, 112, 124, 0.3), 0 0 30px rgba(198, 162, 94, 0.15)",
-                }}
+                whileHover={
+                  isFullscreen
+                    ? {}
+                    : { boxShadow: "0 20px 50px rgba(180, 112, 124, 0.3), 0 0 30px rgba(198, 162, 94, 0.15)" }
+                }
                 transition={{ duration: 0.3, ease: "easeOut" }}
-                style={{
-                  position: "relative",
-                  aspectRatio: "4/3",
-                  borderRadius: "var(--radius-lg)",
-                  overflow: "hidden",
-                  border: "1px solid var(--border)",
-                  boxShadow: "var(--shadow-lg)",
-                  background: "var(--ink)",
-                }}
+                style={
+                  isFullscreen
+                    ? {
+                        position: "relative",
+                        width: "100vw",
+                        height: "100dvh",
+                        overflow: "hidden",
+                        background: "var(--ink)",
+                      }
+                    : {
+                        position: "relative",
+                        aspectRatio: "4/3",
+                        borderRadius: "var(--radius-lg)",
+                        overflow: "hidden",
+                        border: "1px solid var(--border)",
+                        boxShadow: "var(--shadow-lg)",
+                        background: "var(--ink)",
+                      }
+                }
               >
                 <AnimatePresence initial={false} custom={direction}>
                   <motion.div
@@ -352,7 +374,11 @@ export default function PhotoGallery({ groups }: { groups: GalleryGroup[] }) {
                 </IconButton>
               )}
             </div>
-
+              );
+              return isFullscreen && typeof document !== "undefined"
+                ? createPortal(frame, document.body)
+                : frame;
+            })()}
           </div>
 
         </motion.div>
