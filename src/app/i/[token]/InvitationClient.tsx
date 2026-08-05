@@ -67,12 +67,14 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
     day: "numeric",
     month: "long",
     year: "numeric",
+    timeZone: "America/Guayaquil",
   }).format(eventDate);
 
   const timeLabel = new Intl.DateTimeFormat("es", {
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
+    timeZone: "America/Guayaquil",
   }).format(eventDate);
 
   const lat = process.env.NEXT_PUBLIC_VENUE_LAT;
