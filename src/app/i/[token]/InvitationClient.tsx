@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { dressCode } from "@/data/landingContent";
 
@@ -286,6 +287,13 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
                 <p className="text-xs text-center max-w-xs" style={{ color: "#7A6355" }}>
                   Guarda esta pantalla o descarga tu QR. Lo vas a necesitar en la entrada.
                 </p>
+                <Link
+                  href="/"
+                  className="mt-2 rounded-xl px-6 py-3 text-sm font-light tracking-widest uppercase transition-opacity hover:opacity-80"
+                  style={{ background: "#B4707C", color: "#F3E6D6" }}
+                >
+                  Ver cuenta regresiva
+                </Link>
               </motion.div>
             )}
 
