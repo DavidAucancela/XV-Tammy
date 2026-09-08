@@ -81,6 +81,21 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
   const lng = process.env.NEXT_PUBLIC_VENUE_LNG;
   const mapsUrl = lat && lng ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}` : null;
 
+  // Mensaje listo para compartir la invitación por WhatsApp
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const inviteUrl = `${appUrl}/i/${token}`;
+  const isConfirmed = step === "confirmed" || guest.rsvp_estado === "confirmado";
+  const waMessage =
+    `✦ Invitación a los XV años de ${celebrant} ✦\n\n` +
+    (isConfirmed
+      ? `Hola ${guest.nombre}, ¡tu asistencia está confirmada!\n\n` +
+        `Abre tu invitación y tu pase de entrada con código QR aquí:\n${inviteUrl}\n\n`
+      : `Hola ${guest.nombre}, estás invitado(a) a esta celebración.\n\n` +
+        `Abre tu invitación y confirma tu asistencia aquí:\n${inviteUrl}\n\n`) +
+    `${capitalize(dateLabel)} · ${timeLabel}\n` +
+    `¡Te esperamos! ✦`;
+  const waHref = `https://wa.me/?text=${encodeURIComponent(waMessage)}`;
+
   async function handleRsvp(accion: "confirmar" | "declinar") {
     setLoading(true);
     setError(null);
@@ -208,6 +223,7 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
                     No puedo
                   </button>
                 </div>
+                <WhatsAppShare href={waHref} />
               </motion.div>
             )}
 
@@ -286,6 +302,9 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
                 >
                   Descargar QR ↓
                 </a>
+
+                <WhatsAppShare href={waHref} />
+
                 <p className="text-xs text-center max-w-xs" style={{ color: "#7A6355" }}>
                   Guarda esta pantalla o descarga tu QR. Lo vas a necesitar en la entrada.
                 </p>
@@ -294,7 +313,7 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
                   className="mt-2 rounded-xl px-6 py-3 text-sm font-light tracking-widest uppercase transition-opacity hover:opacity-80"
                   style={{ background: "#B4707C", color: "#F3E6D6" }}
                 >
-                  Ver cuenta regresiva
+                  Ir al inicio
                 </Link>
               </motion.div>
             )}
@@ -334,6 +353,28 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
           ✦ &nbsp; con cariño &nbsp; ✦
         </motion.p>
       </motion.div>
+    </div>
+  );
+}
+
+function WhatsAppShare({ href }: { href: string }) {
+  return (
+    <div className="mt-2 w-full flex flex-col items-center gap-3">
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-light tracking-widest uppercase transition-opacity hover:opacity-80"
+        style={{ background: "#25D366", color: "#FFFFFF" }}
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+          <path d="M12.04 2c-5.5 0-9.96 4.46-9.96 9.96 0 1.76.46 3.48 1.34 5L2 22l5.2-1.36a9.9 9.9 0 0 0 4.84 1.24h.01c5.5 0 9.96-4.46 9.96-9.96 0-2.66-1.04-5.16-2.92-7.04A9.9 9.9 0 0 0 12.04 2Zm5.8 14.06c-.25.7-1.44 1.32-1.98 1.36-.53.05-1.03.24-3.47-.72-2.94-1.16-4.8-4.16-4.95-4.35-.14-.2-1.18-1.57-1.18-3s.75-2.12 1.02-2.41c.26-.29.57-.36.76-.36l.55.01c.18.01.42-.07.65.5.25.6.85 2.07.92 2.22.07.15.12.32.02.52-.1.2-.15.32-.3.5-.15.17-.31.39-.44.52-.15.15-.3.31-.13.6.17.29.76 1.25 1.63 2.03 1.12 1 2.07 1.31 2.36 1.46.29.15.46.12.63-.07.17-.2.72-.84.91-1.13.19-.29.39-.24.65-.14.26.1 1.65.78 1.94.92.29.15.48.22.55.34.07.12.07.7-.18 1.4Z" />
+        </svg>
+        Enviar por WhatsApp
+      </a>
+      <p className="text-[11px] text-center max-w-xs" style={{ color: "#7A6355" }}>
+        Comparte esta invitación por WhatsApp.
+      </p>
     </div>
   );
 }
