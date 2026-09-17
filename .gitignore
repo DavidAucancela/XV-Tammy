@@ -37,9 +37,14 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# seed — datos personales y output generado
+# seed / whatsapp — datos personales y output generado
 scripts/guests.csv
 scripts/links.txt
+scripts/whatsapp-invites.html
+scripts/whatsapp-reminder.html
+/INVITADOS.numbers
+/invitados_extracted.csv
+/invitados*.csv
 
 # tooling local del asistente — config personal y grafo generado, no del proyecto
 /.claude/
