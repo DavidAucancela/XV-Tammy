@@ -165,6 +165,7 @@ Copy `.env.example` to `.env.local` (dev) or `.env` (production/seed scripts).
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser-safe anon key | `eyJ...` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-only admin key, **never expose to browser** | `eyJ...` |
 | `NEXT_PUBLIC_EVENT_DATE` | ISO 8601 with TZ offset | `2026-09-19T17:00:00-05:00` |
+| `NEXT_PUBLIC_EVENT_DATE_CONFIRMED` | `"true"` once the date is official; otherwise the site shows "Próximamente" everywhere instead of date/time/countdown/calendar link | `false` |
 | `NEXT_PUBLIC_VENUE_LAT` | Venue latitude | `-0.2234` |
 | `NEXT_PUBLIC_VENUE_LNG` | Venue longitude | `-78.5123` |
 | `NEXT_PUBLIC_CELEBRANT_NAME` | Celebrant name (hero + invite) | `Tammy` |

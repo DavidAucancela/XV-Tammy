@@ -53,29 +53,36 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const dateConfirmed = process.env.NEXT_PUBLIC_EVENT_DATE_CONFIRMED === "true";
+
   useEffect(() => {
+    if (!dateConfirmed) return;
     setTime(getTimeLeft());
     const id = setInterval(() => setTime(getTimeLeft()), 1_000);
     return () => clearInterval(id);
-  }, []);
+  }, [dateConfirmed]);
 
   const eventDate = new Date(process.env.NEXT_PUBLIC_EVENT_DATE!);
   const celebrant = process.env.NEXT_PUBLIC_CELEBRANT_NAME ?? "XV Años";
 
-  const dateLabel = new Intl.DateTimeFormat("es", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "America/Guayaquil",
-  }).format(eventDate);
+  const dateLabel = dateConfirmed
+    ? new Intl.DateTimeFormat("es", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        timeZone: "America/Guayaquil",
+      }).format(eventDate)
+    : "Próximamente";
 
-  const timeLabel = new Intl.DateTimeFormat("es", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-    timeZone: "America/Guayaquil",
-  }).format(eventDate);
+  const timeLabel = dateConfirmed
+    ? new Intl.DateTimeFormat("es", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+        timeZone: "America/Guayaquil",
+      }).format(eventDate)
+    : "Por confirmar";
 
   const lat = process.env.NEXT_PUBLIC_VENUE_LAT;
   const lng = process.env.NEXT_PUBLIC_VENUE_LNG;
@@ -92,7 +99,9 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
         `Abre tu invitación y tu pase de entrada con código QR aquí:\n${inviteUrl}\n\n`
       : `Hola ${guest.nombre}, estás invitado(a) a esta celebración.\n\n` +
         `Abre tu invitación y confirma tu asistencia aquí:\n${inviteUrl}\n\n`) +
-    `${capitalize(dateLabel)} · ${timeLabel}\n` +
+    (dateConfirmed
+      ? `${capitalize(dateLabel)} · ${timeLabel}\n`
+      : `La fecha está por confirmarse — ¡te avisaremos pronto!\n`) +
     `¡Te esperamos! ✦`;
   const waHref = `https://wa.me/?text=${encodeURIComponent(waMessage)}`;
 
@@ -166,7 +175,7 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
         </motion.div>
 
         {/* ── Cada vez más cerca ── */}
-        {time !== null && (time.days > 0 || time.hours > 0 || time.minutes > 0) && (
+        {dateConfirmed && time !== null && (time.days > 0 || time.hours > 0 || time.minutes > 0) && (
           <motion.div variants={fade} className="mt-10 w-full">
             <p className="text-xs tracking-widest uppercase mb-4" style={{ color: "#7A6355" }}>
               cada vez más cerca

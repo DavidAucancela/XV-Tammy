@@ -49,12 +49,14 @@ const medallionVariant = {
 export default function HomeHero({
   celebrant,
   photo,
+  dateConfirmed,
   dateLabel,
   timeLabel,
   eventDateISO,
 }: {
   celebrant: string;
   photo?: string;
+  dateConfirmed: boolean;
   dateLabel: string;
   timeLabel: string;
   eventDateISO: string;
@@ -63,10 +65,11 @@ export default function HomeHero({
   const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
+    if (!dateConfirmed) return;
     setTime(getTimeLeft(eventDateISO));
     const id = setInterval(() => setTime(getTimeLeft(eventDateISO)), 1_000);
     return () => clearInterval(id);
-  }, [eventDateISO]);
+  }, [dateConfirmed, eventDateISO]);
 
   useEffect(() => {
     setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -275,7 +278,27 @@ export default function HomeHero({
         </div>
 
         {/* Row 2 — countdown */}
-        {time !== null && (
+        {!dateConfirmed ? (
+          <motion.div variants={fadeUp} style={{ minHeight: 0 }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+              <span aria-hidden style={{ color: "var(--gold-solid)", fontSize: 22 }}>
+                ✦
+              </span>
+              <p
+                style={{
+                  fontFamily: "var(--font-playfair), Georgia, serif",
+                  fontSize: "clamp(1.6rem, 5vw, 2.6rem)",
+                  fontStyle: "italic",
+                  color: "var(--accent-ink)",
+                  margin: 0,
+                }}
+              >
+                ¡Muy pronto anunciaremos la fecha!
+              </p>
+            </div>
+          </motion.div>
+        ) : (
+          time !== null && (
           <motion.div variants={fadeUp} style={{ minHeight: 0 }}>
             {eventArrived ? (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
@@ -422,6 +445,7 @@ export default function HomeHero({
               </>
             )}
           </motion.div>
+          )
         )}
 
         {/* Row 3 — condensed event info (la ubicación completa vive en /recuerdos) */}
@@ -437,11 +461,17 @@ export default function HomeHero({
             color: "var(--text)",
           }}
         >
-          <span style={{ textTransform: "capitalize" }}>{dateLabel}</span>
-          <span aria-hidden style={{ color: "var(--gold-solid)", opacity: 0.7 }}>
-            ·
-          </span>
-          <span>{timeLabel}</span>
+          {dateConfirmed ? (
+            <>
+              <span style={{ textTransform: "capitalize" }}>{dateLabel}</span>
+              <span aria-hidden style={{ color: "var(--gold-solid)", opacity: 0.7 }}>
+                ·
+              </span>
+              <span>{timeLabel}</span>
+            </>
+          ) : (
+            <span>Fecha y hora por confirmar</span>
+          )}
         </motion.div>
       </motion.div>
     </main>

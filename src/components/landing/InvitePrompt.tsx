@@ -307,6 +307,7 @@ export default function InvitePrompt({
           </motion.div>
         </motion.form>
 
+        {calendarUrl && (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -356,6 +357,7 @@ export default function InvitePrompt({
             Agregar al calendario
           </motion.a>
         </motion.div>
+        )}
 
         <motion.p
           initial={{ opacity: 0 }}

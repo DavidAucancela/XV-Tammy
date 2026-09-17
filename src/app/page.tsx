@@ -14,7 +14,7 @@ import { heroPhoto } from "@/data/landingContent";
 import { getEventDetails } from "@/lib/eventDetails";
 
 export default function Home() {
-  const { celebrant, dateLabel, timeLabel, eventDateISO } = getEventDetails();
+  const { celebrant, dateConfirmed, dateLabel, timeLabel, eventDateISO } = getEventDetails();
 
   return (
     <>
@@ -32,6 +32,7 @@ export default function Home() {
         <HomeHero
           celebrant={celebrant}
           photo={heroPhoto}
+          dateConfirmed={dateConfirmed}
           dateLabel={dateLabel}
           timeLabel={timeLabel}
           eventDateISO={eventDateISO}
