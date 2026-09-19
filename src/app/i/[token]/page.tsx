@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { getGuestByToken } from "@/lib/db";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import InvitationClient from "./InvitationClient";
@@ -6,9 +6,7 @@ import InvitationClient from "./InvitationClient";
 type Props = { params: Promise<{ token: string }> };
 
 async function fetchGuest(token: string) {
-  const supabase = await createClient();
-  const { data } = await supabase.rpc("get_invitation", { p_token: token });
-  return data?.[0] ?? null;
+  return getGuestByToken(token);
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

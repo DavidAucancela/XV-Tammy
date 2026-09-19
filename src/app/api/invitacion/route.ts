@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
+import { findGuestByPhoneSuffix } from "@/lib/db";
 
-// Busca la invitación asociada a un número de celular. Los números se
-// comparan por sus últimos 9 dígitos (0991234567 ≡ +593 99 123 4567), así
-// que el formato con que el invitado escribe su número no importa.
+// Busca la invitación asociada a un número de celular. Se compara por los
+// 10 dígitos ingresados como sufijo del teléfono guardado (que puede tener
+// código de país adelante), así que el formato no importa.
 export async function POST(req: NextRequest) {
   let telefono: unknown;
   try {
@@ -16,19 +16,8 @@ export async function POST(req: NextRequest) {
   if (digits.length !== 10) {
     return NextResponse.json({ error: "El número debe tener exactamente 10 dígitos" }, { status: 400 });
   }
-  const key = digits;
 
-  const supabase = createAdminClient();
-  const { data: guest, error } = await supabase
-    .from("guests")
-    .select("token, nombre")
-    .like("telefono", `%${key}`)
-    .limit(1)
-    .maybeSingle();
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+  const guest = await findGuestByPhoneSuffix(digits);
   if (!guest) {
     return NextResponse.json(
       { error: "No encontramos una invitación con ese número" },

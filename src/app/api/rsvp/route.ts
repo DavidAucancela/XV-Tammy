@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
+import { getGuestByToken, updateRsvp } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -17,15 +17,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "pases_confirmados inválido" }, { status: 400 });
   }
 
-  const supabase = createAdminClient();
-
-  const { data: guest, error: fetchError } = await supabase
-    .from("guests")
-    .select("pases")
-    .eq("token", token)
-    .single();
-
-  if (fetchError || !guest) {
+  const guest = await getGuestByToken(token);
+  if (!guest) {
     return NextResponse.json({ error: "Token inválido" }, { status: 404 });
   }
 
@@ -33,14 +26,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Excede los pases disponibles" }, { status: 400 });
   }
 
-  const update =
-    accion === "confirmar"
-      ? { rsvp_estado: "confirmado", pases_confirmados }
-      : { rsvp_estado: "rechazado", pases_confirmados: 0 };
-
-  const { error } = await supabase.from("guests").update(update).eq("token", token);
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  await updateRsvp(token, accion === "confirmar" ? "confirmado" : "rechazado", accion === "confirmar" ? pases_confirmados : 0);
 
   return NextResponse.json({ ok: true });
 }

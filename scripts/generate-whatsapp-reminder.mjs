@@ -4,7 +4,7 @@
  * del evento a los invitados CONFIRMADOS (rsvp_estado = 'confirmado').
  *
  * A diferencia de generate-whatsapp-invites.mjs (que lee guests.csv + links.txt),
- * este script lee los invitados directamente de Supabase, así refleja el estado
+ * este script lee los invitados directamente de Postgres, así refleja el estado
  * real de la BD, incluyendo confirmaciones hechas a mano.
  *
  * Uso:  node scripts/generate-whatsapp-reminder.mjs
@@ -14,7 +14,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { createClient } from "@supabase/supabase-js";
+import { Pool } from "pg";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -34,15 +34,14 @@ if (fs.existsSync(envPath)) {
     });
 }
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const DATABASE_URL = process.env.DATABASE_URL;
 const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/$/, "");
 const CELEBRANT = process.env.NEXT_PUBLIC_CELEBRANT_NAME ?? "Tammy";
 const FIRST_NAME = CELEBRANT.split(" ")[0];
 const EVENT_DATE = process.env.NEXT_PUBLIC_EVENT_DATE;
 
-if (!SUPABASE_URL || !SERVICE_KEY) {
-  console.error("❌  Faltan NEXT_PUBLIC_SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY en .env");
+if (!DATABASE_URL) {
+  console.error("❌  Falta DATABASE_URL en .env");
   process.exit(1);
 }
 
@@ -124,17 +123,20 @@ function buildReminderMessage(guestName, inviteUrl) {
 }
 
 // ── Traer invitados confirmados ────────────────────────────────────────────
-const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
+const pool = new Pool({ connectionString: DATABASE_URL });
 
-const { data: guests, error } = await supabase
-  .from("guests")
-  .select("nombre, telefono, pases, pases_confirmados, token")
-  .eq("rsvp_estado", "confirmado")
-  .order("nombre");
-
-if (error) {
-  console.error("❌  Error consultando Supabase:", error.message);
+let guests;
+try {
+  const { rows } = await pool.query(
+    `select nombre, telefono, pases, pases_confirmados, token
+     from guests where rsvp_estado = 'confirmado' order by nombre`
+  );
+  guests = rows;
+} catch (err) {
+  console.error("❌  Error consultando la base de datos:", err.message);
   process.exit(1);
+} finally {
+  await pool.end();
 }
 
 const withPhone = [];

@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import type { Guest } from "./page";
+
+const POLL_INTERVAL_MS = 4_000;
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 function fmtTime(iso: string) {
@@ -111,8 +112,7 @@ export default function AdminClient({ initialGuests }: { initialGuests: Guest[] 
   const router = useRouter();
 
   const handleSignOut = useCallback(async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    await fetch("/api/auth/signout", { method: "POST" });
     router.push("/login");
   }, [router]);
 
@@ -121,42 +121,46 @@ export default function AdminClient({ initialGuests }: { initialGuests: Guest[] 
   const progress = stats.total > 0 ? (stats.ingresados / stats.total) * 100 : 0;
 
   useEffect(() => {
-    const supabase = createClient();
+    let cancelled = false;
+    const prevById = new Map(guests.map(g => [g.id, g]));
 
-    const channel = supabase
-      .channel("admin-guests-realtime")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "guests" },
-        (payload) => {
-          if (payload.eventType === "UPDATE") {
-            const updated = payload.new as Guest;
-            setGuests(prev => prev.map(g => g.id === updated.id ? updated : g));
-            // flash highlight if just checked in
-            if (updated.checked_in_at) {
-              setNewIds(prev => new Set(prev).add(updated.id));
-              const existing = flashTimers.current.get(updated.id);
-              if (existing) clearTimeout(existing);
-              flashTimers.current.set(updated.id, setTimeout(() => {
-                setNewIds(prev => { const s = new Set(prev); s.delete(updated.id); return s; });
-                flashTimers.current.delete(updated.id);
-              }, 2000));
-            }
-          } else if (payload.eventType === "INSERT") {
-            const inserted = payload.new as Guest;
-            setGuests(prev => [...prev, inserted]);
-          } else if (payload.eventType === "DELETE") {
-            const deleted = payload.old as { id: string };
-            setGuests(prev => prev.filter(g => g.id !== deleted.id));
+    async function poll() {
+      try {
+        const res = await fetch("/api/admin/guests", { cache: "no-store" });
+        if (!res.ok) throw new Error("poll failed");
+        const { guests: fresh } = (await res.json()) as { guests: Guest[] };
+        if (cancelled) return;
+
+        setIsLive(true);
+        setGuests(fresh);
+
+        for (const guest of fresh) {
+          const prev = prevById.get(guest.id);
+          const justCheckedIn = guest.checked_in_at && (!prev || !prev.checked_in_at);
+          if (justCheckedIn) {
+            setNewIds(ids => new Set(ids).add(guest.id));
+            const existing = flashTimers.current.get(guest.id);
+            if (existing) clearTimeout(existing);
+            flashTimers.current.set(guest.id, setTimeout(() => {
+              setNewIds(ids => { const s = new Set(ids); s.delete(guest.id); return s; });
+              flashTimers.current.delete(guest.id);
+            }, 2000));
           }
+          prevById.set(guest.id, guest);
         }
-      )
-      .subscribe(status => setIsLive(status === "SUBSCRIBED"));
+      } catch {
+        if (!cancelled) setIsLive(false);
+      }
+    }
 
+    poll();
+    const id = setInterval(poll, POLL_INTERVAL_MS);
     return () => {
-      supabase.removeChannel(channel);
+      cancelled = true;
+      clearInterval(id);
       flashTimers.current.forEach(clearTimeout);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

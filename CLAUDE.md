@@ -10,8 +10,9 @@ npm run dev                    # dev server on http://localhost:3000
 npm run build                  # type-check + production build
 npm start                      # production: HOSTNAME=0.0.0.0 node .next/standalone/server.js
 npm run lint                   # ESLint
-npm run seed                   # load guests from scripts/seed.ts into Supabase
+npm run seed                   # load guests from scripts/seed.ts into Postgres
 npm run seed:dry               # preview seed without writing to DB
+npm run db:migrate             # apply scripts/db/schema.sql against DATABASE_URL
 ```
 
 No test suite configured. Validate by running `dev` and testing routes with a browser or `curl`.
@@ -24,7 +25,7 @@ No test suite configured. Validate by running `dev` and testing routes with a br
 
 ## Project Overview
 
-Digital invitation + QR check-in system for a quinceañera (50–150 guests). Next.js 15 + Supabase + Railway.
+Digital invitation + QR check-in system for a quinceañera (50–150 guests). Next.js 15 + Postgres (Railway) + Railway.
 
 **Event:** Tammy Maguana Sánchez  
 **Date:** 2026-09-19 at 17:00 (Quito, Ecuador)
@@ -44,15 +45,20 @@ Digital invitation + QR check-in system for a quinceañera (50–150 guests). Ne
 
 **Auth & Admin**
 - `/scan` — QR scanner for door staff (camera-based)
-- `/admin` — real-time check-in dashboard (authenticated only)
-- `/login` — magic link login (email OTP via Supabase)
-- `/auth/callback` — OAuth code exchange (validates `?next=` as relative path only)
+- `/admin` — check-in dashboard, polls `/api/admin/guests` every ~4s (authenticated only)
+- `/login` — magic link login (own JWT-based auth, email sent via Resend)
+- `/auth/callback` — verifies the magic-link token, sets the session cookie (validates `?next=` as relative path only)
 
-### Supabase Schema & Configuration
+**Internal**
+- `/api/admin/guests` — GET, session-cookie protected; polled by `/admin` for live updates
+- `/api/auth/request-link` — POST `{ email, next }`; only sends if `email` is in `ADMIN_ALLOWED_EMAILS`
+- `/api/auth/signout` — POST; clears the session cookie
+
+### Database (Postgres on Railway)
 
 **Table `guests`**
 ```
-id (uuid, pk)
+id (uuid, pk, default gen_random_uuid())
 nombre (text, required)
 pases (int, default 1)
 telefono (text, digits-only, nullable)
@@ -62,14 +68,10 @@ pases_confirmados (int, nullable)
 checked_in_at (timestamptz, nullable)
 created_at (timestamptz, default now())
 ```
+Schema lives in `scripts/db/schema.sql`, applied with `npm run db:migrate`.
 
-**RPC `check_in(p_token)`** — idempotent, security definer
-- Sets `checked_in_at = now()` only if null
-- Used by `/api/checkin` and `/scan` routes
-
-**RLS Policy** — must be enabled
-- Only authenticated users can read `guests` table
-- Admin operations use `createAdminClient` (service role key, server-only)
+- No RLS/RPCs — access is enforced entirely at the Next.js layer: every query goes through `src/lib/db.ts`, which is only ever imported from server-only code (API routes, Server Components). `DATABASE_URL` is never exposed to the browser, same isolation model the old `createAdminClient()` had.
+- `check_in` is a plain idempotent `UPDATE ... WHERE checked_in_at IS NULL` in `checkInGuest()` (`src/lib/db.ts`) — no stored procedure needed anymore.
 
 ## Architecture & File Structure
 
@@ -82,11 +84,14 @@ src/
 │   ├── i/[token]/page.tsx        # SSR invitation (await params before destructure)
 │   ├── scan/page.tsx / admin/page.tsx
 │   ├── login/page.tsx
-│   ├── auth/callback/route.ts
+│   ├── auth/callback/route.ts    # verifies magic-link token, sets session cookie
 │   └── api/
-│       ├── checkin/route.ts      # createAdminClient (service role only)
-│       ├── rsvp/route.ts         # createAdminClient (service role only)
-│       ├── invitacion/route.ts   # createAdminClient (service role only)
+│       ├── checkin/route.ts      # src/lib/db.ts (server-only)
+│       ├── rsvp/route.ts         # src/lib/db.ts (server-only)
+│       ├── invitacion/route.ts   # src/lib/db.ts (server-only)
+│       ├── admin/guests/route.ts # polled by /admin, session-cookie protected
+│       ├── auth/request-link/route.ts  # sends magic-link email via Resend
+│       ├── auth/signout/route.ts
 │       └── qr/route.ts           # runtime: "nodejs" (qrcode incompatible with edge)
 ├── components/landing/
 │   ├── MeshBackground.tsx / FloatingIcons.tsx
@@ -109,18 +114,22 @@ src/
 │   ├── eventDetails.ts           # getEventDetails() derives celebrant/dateLabel/timeLabel/calendarUrl/lat/lng
 │   ├── photos.ts                 # getGalleryPhotos() reads public/photos/ at build, numeric filenames sorted
 │   ├── usePointerParallax.ts     # cursor parallax hook
-│   └── supabase/
-│       ├── client.ts             # createBrowserClient (anon key, safe for "use client")
-│       └── server.ts             # createServerClient (SSR) + createAdminClient (service role)
+│   ├── db.ts                     # pg Pool (lazy) + typed query helpers, server-only
+│   ├── auth.ts                   # magic-link + session JWTs (jose), ADMIN_ALLOWED_EMAILS check
+│   └── email.ts                  # Resend client, sendMagicLink()
 └── ...
 ```
 
 ### Key Technical Patterns
 
-**Supabase clients:**
-- `client.ts` — browser (anon key), use in Client Components only
-- `server.ts` — SSR (cookie session) for Server Components / Route Handlers
-- `createAdminClient()` — service role (server-only, never in client code)
+**Data access (`src/lib/db.ts`):**
+- `getPool()` — lazy singleton `pg.Pool`, never opened at import time (safe for build)
+- Typed helpers: `getGuestByToken`, `checkInGuest`, `updateRsvp`, `findGuestByPhoneSuffix`, `listGuestsOrdered`
+- Only ever imported from server-only code (API routes, Server Components) — `DATABASE_URL` never reaches the browser
+
+**Auth (`src/lib/auth.ts`):**
+- `jose`-signed JWTs: a 15-min magic-link token (`/api/auth/request-link` → email via Resend → `/auth/callback`) and a 7-day session cookie, verified in `middleware.ts` on every `/admin` and `/scan` request
+- `isAllowedEmail()` gates who can request a link — set via `ADMIN_ALLOWED_EMAILS`
 
 **Next.js 15 async params:** Routes with `[token]` receive `params` as a `Promise`
 ```ts
@@ -161,9 +170,11 @@ Copy `.env.example` to `.env.local` (dev) or `.env` (production/seed scripts).
 
 | Variable | Purpose | Example |
 |---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | `https://xxxx.supabase.co` |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser-safe anon key | `eyJ...` |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server-only admin key, **never expose to browser** | `eyJ...` |
+| `DATABASE_URL` | Postgres connection string (Railway), server-only | `postgres://user:pass@host:5432/railway` |
+| `AUTH_SECRET` | Signs magic-link + session JWTs, server-only | random 32+ byte string |
+| `RESEND_API_KEY` | Sends magic-link emails, server-only | `re_...` |
+| `RESEND_FROM_EMAIL` | From-address for magic-link emails | `Acceso XV <acceso@tu-dominio.com>` |
+| `ADMIN_ALLOWED_EMAILS` | Comma-separated allowlist for `/login` | `a@x.com,b@x.com` |
 | `NEXT_PUBLIC_EVENT_DATE` | ISO 8601 with TZ offset | `2026-09-19T17:00:00-05:00` |
 | `NEXT_PUBLIC_EVENT_DATE_CONFIRMED` | `"true"` once the date is official; otherwise the site shows "Próximamente" everywhere instead of date/time/countdown/calendar link | `false` |
 | `NEXT_PUBLIC_VENUE_LAT` | Venue latitude | `-0.2234` |
@@ -178,8 +189,9 @@ Copy `.env.example` to `.env.local` (dev) or `.env` (production/seed scripts).
 
 | Package | Purpose | Notes |
 |---|---|---|
-| `@supabase/ssr` | SSR-aware Supabase client | Replaces `@supabase/auth-helpers-nextjs` |
-| `@supabase/supabase-js` | Used by `createAdminClient` (service role) | Server-only |
+| `pg` | Postgres driver (Railway) | Server-only, used by `src/lib/db.ts` |
+| `jose` | Sign/verify magic-link + session JWTs | `src/lib/auth.ts`, also runs in middleware (edge) |
+| `resend` | Sends magic-link emails | `src/lib/email.ts`, server-only |
 | `qrcode` | Server-side PNG generation | `/api/qr` endpoint |
 | `html5-qrcode` | Browser QR camera scanner | `/scan` page, dynamically imported |
 | `framer-motion` | Landing animations | Parallax, word-reveal, 3D tilt, glow |
@@ -215,8 +227,8 @@ Copy `.env.example` to `.env.local` (dev) or `.env` (production/seed scripts).
 - Camera-based (html5-qrcode)
 - Staff-facing, triggers guest check-in
 
-### `/admin` — Real-time check-in dashboard
-- Shows live guest list + check-in status
+### `/admin` — Check-in dashboard
+- Shows guest list + check-in status, updates via polling (`/api/admin/guests`, ~4s interval)
 - Requires authentication
 
 ### Responsive design
@@ -226,12 +238,13 @@ Copy `.env.example` to `.env.local` (dev) or `.env` (production/seed scripts).
 
 ## Security Notes
 
-- **Open redirect prevention:** `auth/callback/route.ts` validates `?next=` starts with `/` (relative path only)
+- **Open redirect prevention:** `auth/callback/route.ts` and `/api/auth/request-link` validate `?next=`/`next` starts with `/` (relative path only)
 - **RSVP validation:** `/api/rsvp` verifies token exists and `pases_confirmados ≤ guest.pases` before accepting
-- **Check-in:** `/api/checkin` validates RPC response; returns 500 on failure
+- **Check-in:** `/api/checkin` looks up the guest before calling `checkInGuest()`; returns 500 on failure
 - **CSP headers:** `next.config.ts` sets Content-Security-Policy, X-Frame-Options, X-Content-Type-Options
-- **RLS enforcement:** Admin dashboard uses browser (anon) client; Supabase RLS must restrict `guests` read to authenticated users only
-- **Service role isolation:** `createAdminClient()` only called from server-side routes; never expose `SUPABASE_SERVICE_ROLE_KEY` to browser
+- **Auth allowlist:** `/api/auth/request-link` only emails a link when the address is in `ADMIN_ALLOWED_EMAILS`; the response is identical either way so the endpoint can't be used to enumerate valid staff emails
+- **Session cookie:** httpOnly + secure + `sameSite: "lax"`, verified with `jose` in `middleware.ts` (`/admin`, `/scan`) and again inside `/api/admin/guests` (doesn't rely solely on the middleware matcher)
+- **DB isolation:** `DATABASE_URL` only read by `src/lib/db.ts`, imported exclusively from server-only code; never expose it to the browser
 
 ## Design & Colors (Editorial champagne aesthetic)
 

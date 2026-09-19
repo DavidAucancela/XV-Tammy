@@ -1,9 +1,9 @@
 /**
- * Carga invitados desde scripts/guests.csv a Supabase y genera los links.
+ * Carga invitados desde scripts/guests.csv a Postgres y genera los links.
  * Uso: npm run seed
  * Flags: --dry-run (preview sin insertar)
  */
-import { createClient } from "@supabase/supabase-js";
+import { Pool } from "pg";
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import { resolve } from "path";
 import { randomUUID } from "crypto";
@@ -25,16 +25,15 @@ if (existsSync(envPath)) {
 }
 
 // ── Validar env ────────────────────────────────────────────────────────────
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SERVICE_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const DATABASE_URL = process.env.DATABASE_URL;
 const APP_URL      = process.env.NEXT_PUBLIC_APP_URL ?? "https://tu-app.railway.app";
 
-if (!SUPABASE_URL || !SERVICE_KEY) {
-  console.error("❌  Faltan NEXT_PUBLIC_SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY en .env");
+if (!DATABASE_URL) {
+  console.error("❌  Falta DATABASE_URL en .env");
   process.exit(1);
 }
 
-const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
+const pool = new Pool({ connectionString: DATABASE_URL });
 const isDryRun = process.argv.includes("--dry-run");
 
 // ── Leer CSV ───────────────────────────────────────────────────────────────
@@ -78,18 +77,20 @@ async function main() {
   console.log(`\n✦  XV Tammy — Seed de invitados`);
   console.log(`   ${rows.length} invitados en el CSV | ${isDryRun ? "DRY RUN (sin insertar)" : "modo real"}\n`);
 
-  // Invitados que ya existen en Supabase: se actualizan (pases/teléfono) en
+  // Invitados que ya existen en la DB: se actualizan (pases/teléfono) en
   // vez de re-insertarse — así el CSV es la fuente de verdad y se puede
   // editar y re-correr el seed sin duplicar ni perder token/RSVP/check-in.
-  const { data: existingGuests, error: fetchError } = await supabase
-    .from("guests")
-    .select("id, nombre, token, pases, telefono");
-  if (fetchError) {
-    console.error(`❌  No pude leer invitados existentes: ${fetchError.message}`);
+  type ExistingGuest = { id: string; nombre: string; token: string; pases: number; telefono: string | null };
+  let existingGuests: ExistingGuest[];
+  try {
+    const { rows } = await pool.query<ExistingGuest>(`select id, nombre, token, pases, telefono from guests`);
+    existingGuests = rows;
+  } catch (err) {
+    console.error(`❌  No pude leer invitados existentes: ${(err as Error).message}`);
     process.exit(1);
   }
   const existingByName = new Map(
-    (existingGuests ?? []).map(g => [normalizeName(g.nombre), g])
+    existingGuests.map(g => [normalizeName(g.nombre), g])
   );
 
   const lines: string[] = [];
@@ -120,25 +121,23 @@ async function main() {
         continue;
       }
 
-      const { error } = await supabase
-        .from("guests")
-        .update({ pases: guest.pases, telefono: guest.telefono })
-        .eq("id", existing.id);
-
-      if (error) {
-        console.error(`  ✗  ${guest.nombre}: ${error.message}`);
-        fail++;
-      } else {
+      try {
+        await pool.query(`update guests set pases = $2, telefono = $3 where id = $1`, [
+          existing.id, guest.pases, guest.telefono,
+        ]);
         console.log(
           `  ↻  ${guest.nombre.padEnd(30)} ${existing.pases}p → ${guest.pases}p  →  ${existingLink}`
         );
         lines.push(`${guest.nombre}\t${existingLink}`);
         updated++;
+      } catch (err) {
+        console.error(`  ✗  ${guest.nombre}: ${(err as Error).message}`);
+        fail++;
       }
       continue;
     }
 
-    // Invitado nuevo — no está en Supabase todavía.
+    // Invitado nuevo — no está en la DB todavía.
     const link = `${APP_URL}/i/${guest.token}`;
 
     if (isDryRun) {
@@ -147,20 +146,17 @@ async function main() {
       continue;
     }
 
-    const { error } = await supabase.from("guests").insert({
-      nombre:   guest.nombre,
-      pases:    guest.pases,
-      telefono: guest.telefono,
-      token:    guest.token,
-    });
-
-    if (error) {
-      console.error(`  ✗  ${guest.nombre}: ${error.message}`);
-      fail++;
-    } else {
+    try {
+      await pool.query(
+        `insert into guests (nombre, pases, telefono, token) values ($1, $2, $3, $4)`,
+        [guest.nombre, guest.pases, guest.telefono, guest.token]
+      );
       console.log(`  ✓  ${guest.nombre.padEnd(30)} ${guest.pases}p (nuevo)  →  ${link}`);
       lines.push(`${guest.nombre}\t${link}`);
       inserted++;
+    } catch (err) {
+      console.error(`  ✗  ${guest.nombre}: ${(err as Error).message}`);
+      fail++;
     }
   }
 
@@ -190,4 +186,6 @@ async function main() {
   console.log("\n  Enviá cada link por WhatsApp al invitado correspondiente.\n");
 }
 
-main().catch(err => { console.error(err); process.exit(1); });
+main()
+  .catch(err => { console.error(err); process.exit(1); })
+  .finally(() => pool.end());
