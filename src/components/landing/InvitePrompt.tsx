@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import RevealText from "./RevealText";
 import { Button } from "./Button";
 import LiquidButton from "./LiquidButton";
+import { useAccordion } from "./RecuerdosAccordionProvider";
+import { SESSION_EVENT } from "./UploadRecuerdos";
 
 export default function InvitePrompt({
   celebrant,
@@ -15,6 +17,8 @@ export default function InvitePrompt({
   calendarUrl: string;
 }) {
   const router = useRouter();
+  const { openPanel } = useAccordion();
+  const [found, setFound] = useState<{ nombre: string; token: string } | null>(null);
   const [telefono, setTelefono] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
@@ -74,7 +78,7 @@ export default function InvitePrompt({
     if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
 
     try {
-      const res = await fetch("/api/invitacion", {
+      const res = await fetch("/api/recuerdos/sesion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ telefono }),
@@ -90,7 +94,10 @@ export default function InvitePrompt({
         }, 1000);
         return;
       }
-      router.push(`/i/${data.token}`);
+      // Sesión abierta: nos quedamos en /recuerdos y habilitamos la subida.
+      setFound({ nombre: data.nombre, token: data.token });
+      setStatus("idle");
+      window.dispatchEvent(new Event(SESSION_EVENT));
     } catch {
       setTimeout(() => {
         showError("Algo salió mal, inténtalo de nuevo.");
@@ -128,6 +135,28 @@ export default function InvitePrompt({
           recibiste y abre tu pase de entrada con código QR.
         </motion.p>
 
+        {found ? (
+          <div style={{ marginBottom: 28, width: "100%", maxWidth: 420, display: "flex", flexDirection: "column", gap: 14, alignItems: "center" }}>
+            <p style={{ fontSize: 15, color: "var(--text)", margin: 0 }}>
+              ¡Hola, {found.nombre.split(" ")[0]}! Ya puedes subir tus recuerdos.
+            </p>
+            <Button
+              onClick={() => {
+                openPanel("recuerdos-compartidos");
+                setTimeout(() => document.getElementById("recuerdos-compartidos")?.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
+              }}
+            >
+              Subir recuerdos
+            </Button>
+            <button
+              type="button"
+              onClick={() => router.push(`/i/${found.token}`)}
+              style={{ fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--accent-ink)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 8 }}
+            >
+              Ver mi invitación
+            </button>
+          </div>
+        ) : (
         <motion.form
           onSubmit={(e) => {
             e.preventDefault();
@@ -306,6 +335,7 @@ export default function InvitePrompt({
             </motion.div>
           </motion.div>
         </motion.form>
+        )}
 
         {calendarUrl && (
         <motion.div

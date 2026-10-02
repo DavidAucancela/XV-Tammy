@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getGuestByToken, insertRecuerdo, listRecuerdos } from "@/lib/db";
+import { insertRecuerdo, listRecuerdos } from "@/lib/db";
+import { getGuestFromRequest } from "@/lib/guestSession";
 import { MAX_BYTES, deleteObject, headObject, signDownload } from "@/lib/storage";
-
-async function guestFrom(token: string | null) {
-  return token ? getGuestByToken(token) : null;
-}
 
 /** Lista los recuerdos con URLs firmadas de lectura (el bucket es privado). */
 export async function GET(req: NextRequest) {
-  if (!(await guestFrom(req.nextUrl.searchParams.get("token")))) {
-    return NextResponse.json({ error: "Token inválido" }, { status: 401 });
+  if (!(await getGuestFromRequest(req))) {
+    return NextResponse.json({ error: "Sin sesión" }, { status: 401 });
   }
   const rows = await listRecuerdos();
   const items = await Promise.all(rows.map(async (r) => ({ ...r, url: await signDownload(r.storage_key) })));
@@ -18,9 +15,9 @@ export async function GET(req: NextRequest) {
 
 /** Registra un archivo ya subido al bucket, verificando que existe y respeta el tamaño. */
 export async function POST(req: NextRequest) {
-  const { token, key, contentType } = (await req.json()) as { token: string; key: string; contentType: string };
-  const guest = await guestFrom(token);
-  if (!guest) return NextResponse.json({ error: "Token inválido" }, { status: 401 });
+  const guest = await getGuestFromRequest(req);
+  if (!guest) return NextResponse.json({ error: "Sin sesión" }, { status: 401 });
+  const { key, contentType } = (await req.json()) as { key: string; contentType: string };
   if (!/^recuerdos\/[0-9a-f-]{36}\.\w+$/.test(key ?? "")) {
     return NextResponse.json({ error: "Clave inválida" }, { status: 400 });
   }
