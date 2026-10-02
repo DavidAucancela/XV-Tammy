@@ -1,11 +1,101 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
+
+type Item = { id: string; tipo: "foto" | "video"; url: string; autor: string };
+type Progress = { name: string; pct: number; error?: string };
+
+const TOKEN_KEY = "xv-token";
+const MAX_BYTES = 50 * 1024 * 1024;
+
+async function readError(res: Response, fallback: string) {
+  try {
+    return (await res.json()).error ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function putWithProgress(url: string, file: File, onPct: (n: number) => void) {
+  return new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("PUT", url);
+    xhr.setRequestHeader("Content-Type", file.type);
+    xhr.upload.onprogress = (e) => e.lengthComputable && onPct(Math.round((e.loaded / e.total) * 100));
+    xhr.onload = () => (xhr.status < 300 ? resolve() : reject(new Error("Falló la subida")));
+    xhr.onerror = () => reject(new Error("Falló la subida"));
+    xhr.send(file);
+  });
+}
 
 export default function UploadRecuerdos() {
   const [dragActive, setDragActive] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
+  const [items, setItems] = useState<Item[]>([]);
+  const [progress, setProgress] = useState<Record<string, Progress>>({});
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const load = useCallback(async (t: string) => {
+    const res = await fetch(`/api/recuerdos?token=${encodeURIComponent(t)}`);
+    if (res.status === 401) {
+      // Token revocado o inválido: no dejar la zona de subida activa.
+      try { localStorage.removeItem(TOKEN_KEY); } catch {}
+      setToken(null);
+      return;
+    }
+    if (res.ok) setItems((await res.json()).items);
+  }, []);
+
+  useEffect(() => {
+    try {
+      const fromUrl = new URLSearchParams(window.location.search).get("t");
+      if (fromUrl) localStorage.setItem(TOKEN_KEY, fromUrl);
+      const t = fromUrl ?? localStorage.getItem(TOKEN_KEY);
+      if (t) {
+        setToken(t);
+        load(t);
+      }
+    } catch {}
+  }, [load]);
+
+  const uploadFile = async (file: File, t: string) => {
+    const id = `${file.name}-${file.size}-${Math.random()}`;
+    const set = (p: Partial<Progress>) => setProgress((prev) => ({ ...prev, [id]: { ...{ name: file.name, pct: 0 }, ...prev[id], ...p } }));
+    set({});
+    try {
+      if (file.size > MAX_BYTES) throw new Error("Supera 50MB");
+      const pre = await fetch("/api/recuerdos/presign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: t, contentType: file.type, size: file.size }),
+      });
+      if (!pre.ok) throw new Error(await readError(pre, "No permitido"));
+      const data = await pre.json();
+      await putWithProgress(data.uploadUrl, file, (pct) => set({ pct }));
+      const reg = await fetch("/api/recuerdos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: t, key: data.key, contentType: file.type }),
+      });
+      if (!reg.ok) throw new Error(await readError(reg, "No se pudo registrar"));
+      set({ pct: 100 });
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : "Error" });
+    }
+  };
+
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || !token) return;
+    // Máx. 3 subidas simultáneas para no saturar la red del celular.
+    const queue = Array.from(files);
+    await Promise.all(
+      Array.from({ length: Math.min(3, queue.length) }, async () => {
+        for (let f = queue.shift(); f; f = queue.shift()) await uploadFile(f, token);
+      })
+    );
+    load(token);
+  };
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -21,13 +111,12 @@ export default function UploadRecuerdos() {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    // Funcionalidad pendiente
-    console.log("Archivos soltados:", e.dataTransfer.files);
+    handleFiles(e.dataTransfer.files);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Funcionalidad pendiente
-    console.log("Archivos seleccionados:", e.target.files);
+    handleFiles(e.target.files);
+    e.target.value = "";
   };
 
   return (
@@ -75,12 +164,13 @@ export default function UploadRecuerdos() {
               onDragLeave={handleDrag}
               onDragOver={handleDrag}
               onDrop={handleDrop}
-              onClick={() => inputRef.current?.click()}
+              onClick={() => token && inputRef.current?.click()}
               style={{
                 borderRadius: 16,
                 border: `2px dashed ${dragActive ? "var(--accent)" : "var(--border)"}`,
                 padding: "48px 32px",
-                cursor: "pointer",
+                cursor: token ? "pointer" : "not-allowed",
+                opacity: token ? 1 : 0.6,
                 transition: "all 0.25s ease",
                 background: dragActive
                   ? "rgba(var(--accent-rgb), 0.08)"
@@ -144,10 +234,46 @@ export default function UploadRecuerdos() {
                     fontStyle: "italic",
                   }}
                 >
-                  Formatos: JPG, PNG, MP4 (máx. 50MB por archivo)
+                  Formatos: JPG, PNG, WEBP, HEIC, MP4, MOV (máx. 50MB por archivo)
                 </p>
               </div>
             </div>
+
+            {!token && (
+              <p style={{ fontSize: 13, color: "var(--accent-ink)", marginTop: 16 }}>
+                Para subir recuerdos abre el enlace de tu invitación personal.
+              </p>
+            )}
+
+            {Object.values(progress).length > 0 && (
+              <div style={{ marginTop: 24, display: "grid", gap: 8, textAlign: "left" }}>
+                {Object.entries(progress).map(([id, p]) => (
+                  <div key={id} style={{ fontSize: 12, color: p.error ? "var(--accent-ink)" : "var(--text-muted)" }}>
+                    {p.name} — {p.error ?? (p.pct === 100 ? "listo ✓" : `${p.pct}%`)}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {items.length > 0 && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+                  gap: 8,
+                  marginTop: 32,
+                }}
+              >
+                {items.map((it) =>
+                  it.tipo === "video" ? (
+                    <video key={it.id} src={it.url} controls preload="metadata" style={{ width: "100%", aspectRatio: "1", objectFit: "cover", borderRadius: 12 }} />
+                  ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img key={it.id} src={it.url} alt={`Recuerdo de ${it.autor}`} loading="lazy" style={{ width: "100%", aspectRatio: "1", objectFit: "cover", borderRadius: 12 }} />
+                  )
+                )}
+              </div>
+            )}
 
             {/* Info Grid */}
             <div

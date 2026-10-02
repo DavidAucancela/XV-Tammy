@@ -16,3 +16,16 @@ create table if not exists guests (
 );
 
 create index if not exists guests_telefono_idx on guests (telefono);
+
+-- Recuerdos: fotos y videos que suben los invitados (archivos en el bucket S3 de Railway).
+create table if not exists recuerdos (
+  id          uuid primary key default gen_random_uuid(),
+  guest_id    uuid not null references guests(id) on delete cascade,
+  storage_key text not null unique,
+  tipo        text not null check (tipo in ('foto', 'video')),
+  content_type text not null,
+  size_bytes  bigint not null,
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists recuerdos_created_idx on recuerdos (created_at desc);
