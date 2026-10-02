@@ -373,9 +373,16 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
                 </a>
 
 
+                <a
+                  href={`/api/recuerdos/entrar?t=${token}`}
+                  className="mt-2 rounded-xl px-6 py-3 text-sm font-light tracking-widest uppercase transition-opacity hover:opacity-80"
+                  style={{ background: "#B4707C", color: "#F3E6D6" }}
+                >
+                  Compartir mis recuerdos
+                </a>
                 <Link
                   href="/"
-                  className="mt-2 rounded-xl px-6 py-3 text-sm font-light tracking-widest uppercase transition-opacity hover:opacity-80"
+                  className="rounded-xl px-6 py-3 text-sm font-light tracking-widest uppercase transition-opacity hover:opacity-80"
                   style={{ background: "#B4707C", color: "#F3E6D6" }}
                 >
                   Ir al inicio

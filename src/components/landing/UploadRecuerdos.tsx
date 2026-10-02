@@ -2,11 +2,13 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
+import { useAccordion } from "./RecuerdosAccordionProvider";
 
 type Item = { id: string; tipo: "foto" | "video"; url: string; autor: string };
 type Progress = { name: string; pct: number; error?: string };
 
-const TOKEN_KEY = "xv-token";
+export const SESSION_EVENT = "xv-guest-session";
+const UPLOAD_ID = "recuerdos-compartidos";
 const MAX_BYTES = 50 * 1024 * 1024;
 
 async function readError(res: Response, fallback: string) {
@@ -31,35 +33,53 @@ function putWithProgress(url: string, file: File, onPct: (n: number) => void) {
 
 export default function UploadRecuerdos() {
   const [dragActive, setDragActive] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
+  const [session, setSession] = useState<"loading" | "guest" | "anon">("loading");
+  const [nombre, setNombre] = useState("");
   const [items, setItems] = useState<Item[]>([]);
   const [progress, setProgress] = useState<Record<string, Progress>>({});
   const inputRef = useRef<HTMLInputElement>(null);
+  const { openPanel } = useAccordion();
+  const enabled = session === "guest";
 
-  const load = useCallback(async (t: string) => {
-    const res = await fetch(`/api/recuerdos?token=${encodeURIComponent(t)}`);
-    if (res.status === 401) {
-      // Token revocado o inválido: no dejar la zona de subida activa.
-      try { localStorage.removeItem(TOKEN_KEY); } catch {}
-      setToken(null);
-      return;
-    }
+  const load = useCallback(async () => {
+    const res = await fetch("/api/recuerdos");
+    if (res.status === 401) return setSession("anon");
     if (res.ok) setItems((await res.json()).items);
   }, []);
 
-  useEffect(() => {
+  const checkSession = useCallback(async () => {
     try {
-      const fromUrl = new URLSearchParams(window.location.search).get("t");
-      if (fromUrl) localStorage.setItem(TOKEN_KEY, fromUrl);
-      const t = fromUrl ?? localStorage.getItem(TOKEN_KEY);
-      if (t) {
-        setToken(t);
-        load(t);
-      }
-    } catch {}
+      const res = await fetch("/api/recuerdos/sesion");
+      if (!res.ok) return setSession("anon");
+      setNombre((await res.json()).nombre);
+      setSession("guest");
+      load();
+    } catch {
+      setSession("anon");
+    }
   }, [load]);
 
-  const uploadFile = async (file: File, t: string) => {
+  useEffect(() => {
+    checkSession();
+    const onSession = () => checkSession();
+    window.addEventListener(SESSION_EVENT, onSession);
+    return () => window.removeEventListener(SESSION_EVENT, onSession);
+  }, [checkSession]);
+
+  // Llegada por link (/api/recuerdos/entrar redirige con #recuerdos-compartidos): abrir y mostrar la sección.
+  useEffect(() => {
+    if (window.location.hash !== `#${UPLOAD_ID}`) return;
+    openPanel(UPLOAD_ID);
+    const t = setTimeout(() => document.getElementById(UPLOAD_ID)?.scrollIntoView({ behavior: "smooth", block: "start" }), 400);
+    return () => clearTimeout(t);
+  }, [openPanel]);
+
+  const goValidate = () => {
+    openPanel("invitacion");
+    setTimeout(() => document.getElementById("invitacion")?.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
+  };
+
+  const uploadFile = async (file: File) => {
     const id = `${file.name}-${file.size}-${Math.random()}`;
     const set = (p: Partial<Progress>) => setProgress((prev) => ({ ...prev, [id]: { ...{ name: file.name, pct: 0 }, ...prev[id], ...p } }));
     set({});
@@ -68,15 +88,19 @@ export default function UploadRecuerdos() {
       const pre = await fetch("/api/recuerdos/presign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: t, contentType: file.type, size: file.size }),
+        body: JSON.stringify({ contentType: file.type, size: file.size }),
       });
+      if (pre.status === 401) {
+        setSession("anon");
+        throw new Error("Tu sesión expiró, valida tu celular de nuevo");
+      }
       if (!pre.ok) throw new Error(await readError(pre, "No permitido"));
       const data = await pre.json();
       await putWithProgress(data.uploadUrl, file, (pct) => set({ pct }));
       const reg = await fetch("/api/recuerdos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: t, key: data.key, contentType: file.type }),
+        body: JSON.stringify({ key: data.key, contentType: file.type }),
       });
       if (!reg.ok) throw new Error(await readError(reg, "No se pudo registrar"));
       set({ pct: 100 });
@@ -86,15 +110,15 @@ export default function UploadRecuerdos() {
   };
 
   const handleFiles = async (files: FileList | null) => {
-    if (!files || !token) return;
+    if (!files || !enabled) return;
     // Máx. 3 subidas simultáneas para no saturar la red del celular.
     const queue = Array.from(files);
     await Promise.all(
       Array.from({ length: Math.min(3, queue.length) }, async () => {
-        for (let f = queue.shift(); f; f = queue.shift()) await uploadFile(f, token);
+        for (let f = queue.shift(); f; f = queue.shift()) await uploadFile(f);
       })
     );
-    load(token);
+    load();
   };
 
   const handleDrag = (e: React.DragEvent) => {
@@ -155,7 +179,7 @@ export default function UploadRecuerdos() {
                 margin: "0 0 32px",
               }}
             >
-              Comparte tus fotos y videos del día de la fiesta. Todos los invitados podrán ver y disfrutar de los momentos especiales juntos.
+              {enabled && nombre ? `Hola, ${nombre}. ` : ""}Comparte tus fotos y videos del día de la fiesta. Todos los invitados podrán ver y disfrutar de los momentos especiales juntos.
             </p>
 
             {/* Drag & Drop Zone */}
@@ -164,13 +188,13 @@ export default function UploadRecuerdos() {
               onDragLeave={handleDrag}
               onDragOver={handleDrag}
               onDrop={handleDrop}
-              onClick={() => token && inputRef.current?.click()}
+              onClick={() => enabled && inputRef.current?.click()}
               style={{
                 borderRadius: 16,
                 border: `2px dashed ${dragActive ? "var(--accent)" : "var(--border)"}`,
                 padding: "48px 32px",
-                cursor: token ? "pointer" : "not-allowed",
-                opacity: token ? 1 : 0.6,
+                cursor: enabled ? "pointer" : "not-allowed",
+                opacity: enabled ? 1 : 0.5,
                 transition: "all 0.25s ease",
                 background: dragActive
                   ? "rgba(var(--accent-rgb), 0.08)"
@@ -239,10 +263,19 @@ export default function UploadRecuerdos() {
               </div>
             </div>
 
-            {!token && (
-              <p style={{ fontSize: 13, color: "var(--accent-ink)", marginTop: 16 }}>
-                Para subir recuerdos abre el enlace de tu invitación personal.
-              </p>
+            {session === "anon" && (
+              <div style={{ marginTop: 20 }}>
+                <p style={{ fontSize: 13, color: "var(--accent-ink)", margin: "0 0 12px" }}>
+                  Solo los invitados pueden subir recuerdos. Abre el enlace de tu invitación o valida tu número de celular.
+                </p>
+                <button
+                  type="button"
+                  onClick={goValidate}
+                  style={{ fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--accent-ink)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 8 }}
+                >
+                  Validar mi celular
+                </button>
+              </div>
             )}
 
             {Object.values(progress).length > 0 && (

@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No encontramos una invitación con ese número" }, { status: 404 });
   }
 
-  const res = NextResponse.json({ nombre: firstName(guest.nombre) });
+  const res = NextResponse.json({ nombre: firstName(guest.nombre), token: guest.token });
   await setGuestCookie(res, guest.id);
   return res;
 }
