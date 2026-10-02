@@ -4,7 +4,8 @@ import { setGuestCookie } from "@/lib/guestSession";
 
 /** Entrada por link de invitación: valida el token, abre la sesión y manda a la sección de subida. */
 export async function GET(req: NextRequest) {
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? req.nextUrl.origin;
+  // En producción el origen interno del proxy no sirve; en local se queda en localhost.
+  const base = process.env.NODE_ENV === "production" ? (process.env.NEXT_PUBLIC_APP_URL ?? req.nextUrl.origin) : req.nextUrl.origin;
   const token = req.nextUrl.searchParams.get("t");
   const guest = token ? await getGuestByToken(token) : null;
 
