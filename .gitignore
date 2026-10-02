@@ -46,6 +46,9 @@ scripts/whatsapp-reminder.html
 /invitados_extracted.csv
 /invitados*.csv
 /backup - Supabase/
+*.backup
+*.dump
+*.numbers
 
 # tooling local del asistente — config personal y grafo generado, no del proyecto
 /.claude/
