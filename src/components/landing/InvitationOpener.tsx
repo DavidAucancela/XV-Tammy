@@ -106,7 +106,7 @@ export default function InvitationOpener({
                   key={i}
                   aria-hidden
                   initial={{ opacity: 0 }}
-                  animate={{ y: [0, -40, 0], opacity: [0, 0.8, 0] }}
+                  animate={sealed ? { y: [0, -40, 0], opacity: [0, 0.8, 0] } : { opacity: 0 }}
                   transition={{ duration: 5 + (i % 5), repeat: Infinity, delay: (i * 0.45) % 4, ease: "easeInOut" }}
                   style={{
                     position: "absolute",
@@ -363,8 +363,24 @@ export default function InvitationOpener({
                       </span>
                     </div>
                   </div>
-                  <PetalBurst bursts={bursts} onDone={(id) => setBursts((p) => p.filter((b) => b.id !== id))} />
                 </motion.div>
+
+                {/* Pétalos: fuera del sello, que se desvanece al abrir y los taparía */}
+                <div
+                  aria-hidden
+                  style={{
+                    position: "absolute",
+                    left: "50%",
+                    top: "58%",
+                    width: "23%",
+                    aspectRatio: "1",
+                    transform: "translate(-50%, -50%)",
+                    zIndex: 11,
+                    pointerEvents: "none",
+                  }}
+                >
+                  <PetalBurst bursts={bursts} onDone={(id) => setBursts((p) => p.filter((b) => b.id !== id))} />
+                </div>
               </motion.div>
             </motion.button>
 
