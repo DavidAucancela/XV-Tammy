@@ -37,6 +37,14 @@ Complemento de `CLAUDE.md` — solo hechos no obvios que un agente probablemente
 - Auth del staff: magic link propio con JWT (`jose`, `src/lib/auth.ts`) + Resend (`src/lib/email.ts`). La sesión es la cookie `session` (7 días), verificada en `middleware.ts` para `/admin` y `/scan`, y de nuevo dentro de `/api/admin/guests`.
 - Solo los correos en `ADMIN_ALLOWED_EMAILS` reciben el magic link. Resend sin dominio verificado solo entrega al correo de la cuenta.
 
+## Recuerdos (fotos y videos de invitados)
+
+- La sección "Carga tus recuerdos" de `/recuerdos` solo se habilita con sesión de invitado: cookie `xv_guest` (JWT `jose`, httpOnly, 30 días, `src/lib/guestSession.ts`), revalidada contra `guests` en cada petición. Se abre por el link de la invitación (`/api/recuerdos/entrar?t=<token>`, botón en `/i/[token]`) o validando el celular (`InvitePrompt` → `POST /api/recuerdos/sesion`). El token no viaja por la URL de las demás rutas ni se guarda en `localStorage`.
+- Archivos: bucket S3 privado de Railway (`recuerdos`, región sjc), subida directa del navegador con URL prefirmada (`/api/recuerdos/presign`), luego `POST /api/recuerdos` verifica el objeto (HeadObject, máx. 50MB) y lo registra en la tabla `recuerdos`. Lectura con URLs firmadas de 1 h. Código en `src/lib/storage.ts`.
+- CORS del bucket: el panel de Railway no lo ofrece; se aplica por API con `railway run -s XV-Tammy node scripts/set-bucket-cors.mjs` (orígenes: `localhost:3050` y `NEXT_PUBLIC_APP_URL`). Si cambia el dominio, volver a correrlo.
+- El CSP de `next.config.ts` permite `https://*.storageapi.dev` (img/media/connect).
+- Probar la subida en local requiere las variables `S3_*`: `railway run -s XV-Tammy -- npm run dev -- -p 3050` (ojo: `DATABASE_URL` interna de Railway no resuelve en local; exportar la del `.env`).
+
 ## Dev server
 
 - `DEV_ORIGIN` habilita `allowedDevOrigins` en `next.config.ts` para testeo mobile. Se setea en `.env`, no `.env.local`.

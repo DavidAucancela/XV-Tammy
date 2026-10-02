@@ -32,6 +32,9 @@ Invitación digital personalizada y control de acceso con QR para los XV años d
 | `/login` | Acceso por magic link | Correo en `ADMIN_ALLOWED_EMAILS` |
 | `/api/qr?token=` | PNG del QR (contiene el link `/i/<token>`) | Público |
 | `/api/invitacion` | POST `{ telefono }` → `{ token, nombre }` | Público |
+| `/api/recuerdos/entrar?t=` | Valida el token, abre la sesión de invitado (cookie `xv_guest`) y redirige a la sección de subida | Link personal |
+| `/api/recuerdos/sesion` | GET estado · POST `{ telefono }` abre sesión · DELETE la cierra | Público / cookie |
+| `/api/recuerdos`, `/api/recuerdos/presign` | GET lista (URLs firmadas) · POST registra un archivo · presign firma la subida directa al bucket | Sesión de invitado |
 | `/api/rsvp` | POST confirmar/declinar (valida `pases_confirmados ≤ pases`) | Token |
 | `/api/checkin` | POST registra la entrada (idempotente) | Sesión de staff |
 | `/api/admin/guests` | GET lista de invitados | Sesión de staff |
@@ -57,6 +60,7 @@ Variables de entorno (detalle en `CLAUDE.md`):
 | `DATABASE_URL` | Postgres. Local: URL pública del proxy TCP de Railway. Producción: `${{Postgres.DATABASE_URL}}` (privada) |
 | `AUTH_SECRET` | Firma magic links y sesión. Distinto en local y producción |
 | `RESEND_API_KEY`, `RESEND_FROM_EMAIL` | Envío del magic link |
+| `S3_ENDPOINT`, `S3_BUCKET`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Bucket de Railway (`recuerdos`) para fotos y videos de los invitados |
 | `ADMIN_ALLOWED_EMAILS` | Correos con acceso a `/login`, separados por coma |
 | `NEXT_PUBLIC_EVENT_DATE` | ISO 8601 con zona, p. ej. `2026-10-03T17:00:00-05:00` |
 | `NEXT_PUBLIC_EVENT_DATE_CONFIRMED` | `true` muestra fecha, hora y cuenta regresiva; `false` muestra "Próximamente" |
