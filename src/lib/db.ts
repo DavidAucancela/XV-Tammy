@@ -115,7 +115,7 @@ export async function insertRecuerdo(r: {
 export async function listRecuerdos(): Promise<Recuerdo[]> {
   const { rows } = await getPool().query<Recuerdo>(
     `select r.id, r.storage_key, r.tipo, r.content_type, r.size_bytes::int as size_bytes, r.created_at,
-            split_part(g.nombre, ' ', 1) as autor
+            coalesce(nullif(split_part(trim(g.nombre), ' ', 1), ''), 'un invitado') as autor
      from recuerdos r join guests g on g.id = r.guest_id
      order by r.created_at desc limit 500`
   );

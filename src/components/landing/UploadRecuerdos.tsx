@@ -9,6 +9,14 @@ type Progress = { name: string; pct: number; error?: string };
 const TOKEN_KEY = "xv-token";
 const MAX_BYTES = 50 * 1024 * 1024;
 
+async function readError(res: Response, fallback: string) {
+  try {
+    return (await res.json()).error ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 function putWithProgress(url: string, file: File, onPct: (n: number) => void) {
   return new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -30,6 +38,12 @@ export default function UploadRecuerdos() {
 
   const load = useCallback(async (t: string) => {
     const res = await fetch(`/api/recuerdos?token=${encodeURIComponent(t)}`);
+    if (res.status === 401) {
+      // Token revocado o inválido: no dejar la zona de subida activa.
+      try { localStorage.removeItem(TOKEN_KEY); } catch {}
+      setToken(null);
+      return;
+    }
     if (res.ok) setItems((await res.json()).items);
   }, []);
 
@@ -56,15 +70,15 @@ export default function UploadRecuerdos() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: t, contentType: file.type, size: file.size }),
       });
+      if (!pre.ok) throw new Error(await readError(pre, "No permitido"));
       const data = await pre.json();
-      if (!pre.ok) throw new Error(data.error ?? "No permitido");
       await putWithProgress(data.uploadUrl, file, (pct) => set({ pct }));
       const reg = await fetch("/api/recuerdos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: t, key: data.key, contentType: file.type }),
       });
-      if (!reg.ok) throw new Error((await reg.json()).error ?? "No se pudo registrar");
+      if (!reg.ok) throw new Error(await readError(reg, "No se pudo registrar"));
       set({ pct: 100 });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : "Error" });
@@ -73,7 +87,13 @@ export default function UploadRecuerdos() {
 
   const handleFiles = async (files: FileList | null) => {
     if (!files || !token) return;
-    await Promise.all(Array.from(files).map((f) => uploadFile(f, token)));
+    // Máx. 3 subidas simultáneas para no saturar la red del celular.
+    const queue = Array.from(files);
+    await Promise.all(
+      Array.from({ length: Math.min(3, queue.length) }, async () => {
+        for (let f = queue.shift(); f; f = queue.shift()) await uploadFile(f, token);
+      })
+    );
     load(token);
   };
 

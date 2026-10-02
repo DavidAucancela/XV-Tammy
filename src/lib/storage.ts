@@ -7,6 +7,9 @@ let _client: S3Client | null = null;
 
 function client() {
   if (!_client) {
+    for (const k of ["S3_ENDPOINT", "S3_BUCKET", "S3_ACCESS_KEY_ID", "S3_SECRET_ACCESS_KEY"]) {
+      if (!process.env[k]) throw new Error(`Falta la variable ${k}`);
+    }
     _client = new S3Client({
       region: process.env.S3_REGION || "auto",
       endpoint: process.env.S3_ENDPOINT!,
@@ -33,8 +36,10 @@ export async function headObject(key: string): Promise<{ size: number } | null> 
   try {
     const r = await client().send(new HeadObjectCommand({ Bucket: bucket(), Key: key }));
     return { size: r.ContentLength ?? 0 };
-  } catch {
-    return null;
+  } catch (err) {
+    // Solo "no existe" es null; permisos/red/timeout deben verse como error real.
+    if ((err as { $metadata?: { httpStatusCode?: number } }).$metadata?.httpStatusCode === 404) return null;
+    throw err;
   }
 }
 
