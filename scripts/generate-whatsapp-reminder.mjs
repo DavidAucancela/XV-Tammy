@@ -84,6 +84,11 @@ function toTitleCase(str) {
     .join(" ");
 }
 
+// Alias del invitado = solo su primer nombre ("FELIX FLORE" → "Felix")
+function alias(str) {
+  return toTitleCase(str).split(" ")[0];
+}
+
 // Teléfono → formato wa.me (Ecuador: 593XXXXXXXXX, sin +)
 function normalizePhone(tel) {
   if (!tel) return null;
@@ -98,13 +103,12 @@ function normalizePhone(tel) {
 // los emoji de 4 bytes (🎉📅📍…) se corrompen en el handoff whatsapp:// del
 // cliente de escritorio de WhatsApp en Mac.
 function buildReminderMessage(guestName, inviteUrl) {
-  const name = toTitleCase(guestName);
   return [
-    `Hola ${name},`,
+    `Hola ${alias(guestName)},`,
     ``,
     `✦ RECORDATORIO ✦`,
     ``,
-    `Ya falta poco para los quince años de ${CELEBRANT}.`,
+    `Ya falta poco para los quince años de ${FIRST_NAME}.`,
     ``,
     `✦ ${dateLabel}`,
     `✦ Hora: ${timeLabel}`,
@@ -154,7 +158,8 @@ const esc = (s) =>
   String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 const card = (g, hasWa) => `
-        <div class="guest-card">
+        <div class="guest-card" data-id="${esc(g.token)}">
+          <div class="badges"><span class="badge badge-rsvp">Confirmado</span><span class="badge badge-sent">Pendiente de enviar</span></div>
           <div class="guest-name">${esc(toTitleCase(g.nombre))}</div>
           ${hasWa ? `<div class="guest-phone">+${esc(g.waPhone)}</div>` : ""}
           <div class="guest-pases">${g.pases_confirmados ?? g.pases} confirmado${(g.pases_confirmados ?? g.pases) > 1 ? "s" : ""}</div>
@@ -162,12 +167,13 @@ const card = (g, hasWa) => `
             hasWa
               ? `<a href="https://wa.me/${g.waPhone}?text=${encodeURIComponent(
                   buildReminderMessage(g.nombre, g.inviteUrl)
-                )}" target="_blank" class="btn-whatsapp">Enviar recordatorio</a>`
+                )}" target="_blank" class="btn-whatsapp" onclick="markSent(this)">Enviar recordatorio</a>`
               : ""
           }
           <button class="btn-copy" onclick="copyMsg(this)" data-msg="${esc(
             buildReminderMessage(g.nombre, g.inviteUrl)
           )}">Copiar mensaje</button>
+          <button class="btn-sent" onclick="toggleSent(this)">Marcar como enviado</button>
         </div>`;
 
 const htmlContent = `<!DOCTYPE html>
@@ -204,6 +210,17 @@ const htmlContent = `<!DOCTYPE html>
     .btn-copy { display: block; width: 100%; padding: 0.5rem 1rem; margin-top: 0.5rem; background: #dcc7ae; color: #4a372e;
       text-align: center; border-radius: 4px; font-weight: 500; font-size: 0.85rem; cursor: pointer; border: none; }
     .btn-copy:hover { background: #c9b69a; }
+    .badges { display: flex; gap: 0.4rem; margin-bottom: 0.6rem; flex-wrap: wrap; }
+    .badge { font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.55rem; border-radius: 999px; }
+    .badge-rsvp { background: #e6f3e6; color: #2f6b34; }
+    .badge-sent { background: #f6e3e6; color: #8f4e5f; }
+    .guest-card.sent { opacity: 0.6; }
+    .guest-card.sent .badge-sent { background: #dff0ff; color: #1f5f99; }
+    .btn-sent { display: block; width: 100%; padding: 0.5rem 1rem; margin-top: 0.5rem; background: transparent; color: #7a6355;
+      border: 1px dashed #c9b69a; border-radius: 4px; font-size: 0.85rem; cursor: pointer; }
+    .filters { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .filters button { padding: 0.5rem 1rem; border-radius: 999px; border: 1px solid #c9b69a; background: white; color: #4a372e; cursor: pointer; }
+    .filters button.active { background: #b4707c; color: white; border-color: #b4707c; }
     footer { text-align: center; color: #7a6355; font-size: 0.9rem; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #dcc7ae; }
   </style>
 </head>
@@ -218,6 +235,15 @@ const htmlContent = `<!DOCTYPE html>
       <div class="stat"><div class="stat-value">${(guests ?? []).length}</div><div class="stat-label">Confirmados</div></div>
       <div class="stat"><div class="stat-value">${withPhone.length}</div><div class="stat-label">Con WhatsApp</div></div>
       <div class="stat"><div class="stat-value">${withoutPhone.length}</div><div class="stat-label">Sin teléfono</div></div>
+      <div class="stat"><div class="stat-value" id="sentCount">0</div><div class="stat-label">Enviados</div></div>
+      <div class="stat"><div class="stat-value" id="pendingCount">0</div><div class="stat-label">Por enviar</div></div>
+    </div>
+
+    <div class="filters">
+      <button data-f="all" class="active">Todos</button>
+      <button data-f="pending">Por enviar</button>
+      <button data-f="sent">Enviados</button>
+      <button id="resetSent">Reiniciar estados</button>
     </div>
 
     <div class="preview">${esc(buildReminderMessage("Nombre Invitado", `${APP_URL}/i/TOKEN`))}</div>
@@ -245,12 +271,46 @@ const htmlContent = `<!DOCTYPE html>
     <footer><p>Generado ${new Date().toLocaleString("es-EC")} · Evento: ${esc(dateLabel)}</p></footer>
   </div>
   <script>
+    const KEY = "xv-reminder-sent";
+    let sent = {};
+    try { sent = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch {}
+    let filter = "all";
+    const save = () => { try { localStorage.setItem(KEY, JSON.stringify(sent)); } catch {} };
+    function render() {
+      const cards = [...document.querySelectorAll(".guest-card")];
+      let n = 0;
+      cards.forEach((c) => {
+        const isSent = !!sent[c.dataset.id];
+        if (isSent) n++;
+        c.classList.toggle("sent", isSent);
+        c.querySelector(".badge-sent").textContent = isSent ? "Enviado" : "Pendiente de enviar";
+        c.querySelector(".btn-sent").textContent = isSent ? "Desmarcar enviado" : "Marcar como enviado";
+        c.style.display = filter === "all" || (filter === "sent") === isSent ? "" : "none";
+      });
+      document.getElementById("sentCount").textContent = n;
+      document.getElementById("pendingCount").textContent = cards.length - n;
+    }
+    function markSent(a) { sent[a.closest(".guest-card").dataset.id] = Date.now(); save(); render(); }
+    function toggleSent(b) {
+      const id = b.closest(".guest-card").dataset.id;
+      if (sent[id]) delete sent[id]; else sent[id] = Date.now();
+      save(); render();
+    }
     function copyMsg(btn) {
       navigator.clipboard.writeText(btn.dataset.msg).then(() => {
         const t = btn.textContent; btn.textContent = "Copiado";
         setTimeout(() => (btn.textContent = t), 1500);
       });
     }
+    document.querySelectorAll(".filters button[data-f]").forEach((b) => b.addEventListener("click", () => {
+      filter = b.dataset.f;
+      document.querySelectorAll(".filters button[data-f]").forEach((x) => x.classList.toggle("active", x === b));
+      render();
+    }));
+    document.getElementById("resetSent").addEventListener("click", () => {
+      if (confirm("¿Reiniciar todos los estados de envío?")) { sent = {}; save(); render(); }
+    });
+    render();
   </script>
 </body>
 </html>

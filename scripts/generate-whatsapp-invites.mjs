@@ -69,11 +69,11 @@ function toTitleCase(str) {
 
 // Generar mensaje
 function generateMessage(guestName, invitationLink) {
-  const name = toTitleCase(guestName);
+  const name = toTitleCase(guestName).split(" ")[0]; // alias = primer nombre
   // Solo símbolos del plano básico (2 bytes UTF-8) — los emoji de 4 bytes
   // (🎉📅📍, etc.) se corrompen al pasar por el handoff whatsapp:// del
   // cliente de escritorio de WhatsApp en Mac.
-  return `Hola ${name},\n\n✦ QUINCE AÑOS ✦\n\nTammy Maguana Sánchez\nte invita a celebrar su llegada a los quince años\n\n✦ 19 de septiembre de 2026\n✦ Hora: 19:00\n✦ Lugar: Servellón Urbina N58-143 y Víctor Hugo, Quito, Ecuador\n\nAccede a tu invitación personalizada:\n${invitationLink}\n\n✓ Se solicita confirmación de asistencia\n✦ Código de vestimenta: Formal`;
+  return `Hola ${name},\n\n✦ QUINCE AÑOS ✦\n\nTammy Maguana Sánchez\nte invita a celebrar su llegada a los quince años\n\n✦ Sábado 3 de octubre de 2026\n✦ Hora: 17:00\n✦ Lugar: Servellón Urbina N58-143 y Víctor Hugo, Quito, Ecuador\n\nAccede a tu invitación personalizada:\n${invitationLink}\n\n✓ Se solicita confirmación de asistencia\n✦ Código de vestimenta: Elegante`;
 }
 
 // Generar HTML
@@ -336,7 +336,7 @@ const htmlContent = `<!DOCTYPE html>
     }
 
     <footer>
-      <p>Generado automáticamente • Evento: 19 de septiembre de 2026</p>
+      <p>Generado automáticamente • Evento: 3 de octubre de 2026</p>
     </footer>
   </div>
 
