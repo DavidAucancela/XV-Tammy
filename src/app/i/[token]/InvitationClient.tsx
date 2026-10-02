@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { dressCode } from "@/data/landingContent";
+import PassCard from "@/components/landing/PassCard";
 
 type Guest = {
   id: string;
@@ -84,26 +84,20 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
       }).format(eventDate)
     : "Por confirmar";
 
+  const parts = (opts: Intl.DateTimeFormatOptions) =>
+    new Intl.DateTimeFormat("es", { timeZone: "America/Guayaquil", ...opts });
+  const weekday = capitalize(parts({ weekday: "long" }).format(eventDate));
+  const dayNum = parts({ day: "numeric" }).format(eventDate);
+  const monthName = parts({ month: "long" }).format(eventDate).toUpperCase();
+  const yearNum = parts({ year: "numeric" }).format(eventDate);
+  const timePieces = parts({ hour: "numeric", minute: "2-digit", hour12: true }).formatToParts(eventDate);
+  const pick = (t: string) => timePieces.find((x) => x.type === t)?.value ?? "";
+  const timeBig = `${pick("hour")}:${pick("minute")}`;
+  const timePeriod = pick("dayPeriod").replace(/[\s.]/g, "").toUpperCase();
+
   const lat = process.env.NEXT_PUBLIC_VENUE_LAT;
   const lng = process.env.NEXT_PUBLIC_VENUE_LNG;
   const mapsUrl = lat && lng ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}` : null;
-
-  // Mensaje listo para compartir la invitación por WhatsApp
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
-  const inviteUrl = `${appUrl}/i/${token}`;
-  const isConfirmed = step === "confirmed" || guest.rsvp_estado === "confirmado";
-  const waMessage =
-    `✦ Invitación a los XV años de ${celebrant} ✦\n\n` +
-    (isConfirmed
-      ? `Hola ${guest.nombre}, ¡tu asistencia está confirmada!\n\n` +
-        `Abre tu invitación y tu pase de entrada con código QR aquí:\n${inviteUrl}\n\n`
-      : `Hola ${guest.nombre}, estás invitado(a) a esta celebración.\n\n` +
-        `Abre tu invitación y confirma tu asistencia aquí:\n${inviteUrl}\n\n`) +
-    (dateConfirmed
-      ? `${capitalize(dateLabel)} · ${timeLabel}\n`
-      : `La fecha está por confirmarse — ¡te avisaremos pronto!\n`) +
-    `¡Te esperamos! ✦`;
-  const waHref = `https://wa.me/?text=${encodeURIComponent(waMessage)}`;
 
   async function handleRsvp(accion: "confirmar" | "declinar") {
     setLoading(true);
@@ -156,51 +150,134 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
         <motion.p variants={fade} className="mt-6 text-lg font-light" style={{ color: "#B4707C" }}>
           {guest.nombre}
         </motion.p>
-        <motion.p variants={fade} className="mt-1 text-sm" style={{ color: "#7A6355" }}>
-          {guest.pases === 1 ? "1 pase reservado" : `${guest.pases} pases reservados`}
-        </motion.p>
 
-        <motion.p variants={fade} className="mt-2 text-xs tracking-widest uppercase" style={{ color: "#B4707C" }}>
-          {dressCode}
-        </motion.p>
-
-        {/* ── Detalles del evento: Lugar y hora ── */}
-        <motion.div
-          variants={fade}
-          className="mt-10 w-full rounded-2xl p-6 flex flex-col gap-3 text-sm"
-          style={{ background: "rgba(234,216,195,0.65)", border: "1px solid #DCC7AE" }}
-        >
-          <Detail icon="✦" label={capitalize(dateLabel)} />
-          <Detail icon="✦" label={timeLabel} />
-        </motion.div>
-
-        {/* ── Cada vez más cerca ── */}
-        {dateConfirmed && time !== null && (time.days > 0 || time.hours > 0 || time.minutes > 0) && (
-          <motion.div variants={fade} className="mt-10 w-full">
-            <p className="text-xs tracking-widest uppercase mb-4" style={{ color: "#7A6355" }}>
-              cada vez más cerca
+        {/* ── Fecha y hora ── */}
+        {dateConfirmed ? (
+          <motion.div
+            variants={fade}
+            className="mt-10 w-full rounded-[28px] px-6 py-8 relative overflow-hidden"
+            style={{
+              background: "linear-gradient(165deg, rgba(252,246,236,0.95) 0%, rgba(234,216,195,0.75) 100%)",
+              border: "1px solid rgba(198,162,94,0.55)",
+              boxShadow: "0 12px 40px rgba(43,33,28,0.10)",
+            }}
+          >
+            <div aria-hidden className="absolute inset-2 rounded-[22px] pointer-events-none" style={{ border: "1px solid rgba(198,162,94,0.3)" }} />
+            <p className="text-[11px] tracking-[0.45em] uppercase" style={{ color: "#96702E" }}>
+              {weekday}
             </p>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="mt-2 flex items-center justify-center gap-5">
+              <span className="h-px flex-1" style={{ background: "linear-gradient(90deg, transparent, #C6A25E)" }} />
+              <span
+                className="text-[88px] leading-none"
+                style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#B4707C" }}
+              >
+                {dayNum}
+              </span>
+              <span className="h-px flex-1" style={{ background: "linear-gradient(270deg, transparent, #C6A25E)" }} />
+            </div>
+            <p className="mt-2 text-sm tracking-[0.5em] uppercase" style={{ color: "#4A372E" }}>
+              {monthName}
+            </p>
+            <p className="mt-1 text-xs tracking-[0.4em]" style={{ color: "#7A6355" }}>
+              {yearNum}
+            </p>
+
+            <div className="mx-auto my-6 flex items-center justify-center gap-3" style={{ color: "#C6A25E" }}>
+              <span className="h-px w-10" style={{ background: "#C6A25E", opacity: 0.6 }} />
+              <span className="text-xs">✦</span>
+              <span className="h-px w-10" style={{ background: "#C6A25E", opacity: 0.6 }} />
+            </div>
+
+            <p className="text-[10px] tracking-[0.35em] uppercase" style={{ color: "#7A6355" }}>
+              a las
+            </p>
+            <p className="mt-1 flex items-baseline justify-center gap-2">
+              <span
+                className="text-5xl"
+                style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4A372E" }}
+              >
+                {timeBig}
+              </span>
+              <span className="text-sm tracking-[0.3em]" style={{ color: "#B4707C" }}>
+                {timePeriod}
+              </span>
+            </p>
+          </motion.div>
+        ) : (
+          <motion.div
+            variants={fade}
+            className="mt-10 w-full rounded-2xl p-6 flex flex-col gap-3 text-sm"
+            style={{ background: "rgba(234,216,195,0.65)", border: "1px solid #DCC7AE" }}
+          >
+            <Detail icon="✦" label={capitalize(dateLabel)} />
+            <Detail icon="✦" label={timeLabel} />
+          </motion.div>
+        )}
+
+        {/* ── Cuenta regresiva ── */}
+        {dateConfirmed && time !== null && (time.days > 0 || time.hours > 0 || time.minutes > 0) && (
+          <motion.div
+            variants={fade}
+            className="mt-8 w-full rounded-[28px] px-4 py-8 relative overflow-hidden"
+            style={{
+              background: "radial-gradient(120% 100% at 50% 0%, #4A372E 0%, #2B211C 70%)",
+              border: "1px solid rgba(198,162,94,0.5)",
+              boxShadow: "0 16px 48px rgba(43,33,28,0.30)",
+            }}
+          >
+            <div
+              aria-hidden
+              className="absolute -top-16 left-1/2 -translate-x-1/2 h-40 w-64 rounded-full blur-3xl pointer-events-none"
+              style={{ background: "rgba(198,162,94,0.22)" }}
+            />
+            <p className="relative text-[10px] tracking-[0.45em] uppercase" style={{ color: "#C6A25E" }}>
+              ✦ &nbsp; cada vez más cerca &nbsp; ✦
+            </p>
+            <div className="relative mt-6 flex items-start justify-center gap-1.5">
               {[
-                { v: pad(time.days), l: "días" },
-                { v: pad(time.hours), l: "hrs" },
-                { v: pad(time.minutes), l: "min" },
-                { v: pad(time.seconds), l: "seg" },
-              ].map(({ v, l }) => (
-                <div
-                  key={l}
-                  className="flex flex-col items-center rounded-xl py-4"
-                  style={{ background: "rgba(234,216,195,0.65)", border: "1px solid #DCC7AE" }}
-                >
-                  <span
-                    className="text-2xl font-light tabular-nums"
-                    style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#B4707C" }}
-                  >
-                    {v}
-                  </span>
-                  <span className="text-[10px] tracking-widest uppercase mt-1" style={{ color: "#7A6355" }}>
-                    {l}
-                  </span>
+                { v: time.days, l: "días" },
+                { v: time.hours, l: "horas" },
+                { v: time.minutes, l: "min" },
+                { v: time.seconds, l: "seg" },
+              ].map(({ v, l }, i) => (
+                <div key={l} className="flex items-start">
+                  {i > 0 && (
+                    <span className="mx-1 mt-3 text-xl font-light" style={{ color: "rgba(198,162,94,0.5)" }}>
+                      :
+                    </span>
+                  )}
+                  <div className="flex flex-col items-center w-[62px]">
+                    <div
+                      className="relative h-14 w-full rounded-xl overflow-hidden flex items-center justify-center"
+                      style={{
+                        background: "linear-gradient(180deg, rgba(252,246,236,0.10) 0%, rgba(252,246,236,0.03) 100%)",
+                        border: "1px solid rgba(198,162,94,0.35)",
+                      }}
+                    >
+                      <AnimatePresence mode="popLayout" initial={false}>
+                        <motion.span
+                          key={pad(v)}
+                          initial={{ y: -18, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          exit={{ y: 18, opacity: 0 }}
+                          transition={{ duration: 0.28, ease: "easeOut" }}
+                          className="text-3xl font-light tabular-nums"
+                          style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#E8CF9B" }}
+                        >
+                          {pad(v)}
+                        </motion.span>
+                      </AnimatePresence>
+                      <span
+                        aria-hidden
+                        className="absolute inset-x-0 top-1/2 h-px"
+                        style={{ background: "rgba(43,33,28,0.55)" }}
+                      />
+                    </div>
+                    <span className="mt-2 text-[9px] tracking-[0.3em] uppercase" style={{ color: "rgba(243,230,214,0.65)" }}>
+                      {l}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -232,7 +309,6 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
                     No puedo
                   </button>
                 </div>
-                <WhatsAppShare href={waHref} />
               </motion.div>
             )}
 
@@ -281,28 +357,12 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
                 <p className="text-xs tracking-[0.3em] uppercase" style={{ color: "#B4707C" }}>
                   ✦ &nbsp; ¡Te esperamos! &nbsp; ✦
                 </p>
-                <p className="text-sm font-light" style={{ color: "#7A6355" }}>
-                  Tu pase de entrada —{" "}
-                  <span style={{ color: "#B4707C" }}>
-                    {selectedPases} {selectedPases === 1 ? "persona" : "personas"}
-                  </span>
-                </p>
-                <motion.div
-                  initial={{ scale: 0.85, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                  className="rounded-2xl overflow-hidden p-3"
-                  style={{ background: "#FCFAEF" }}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`/api/qr?token=${token}`}
-                    alt="QR de acceso"
-                    width={240}
-                    height={240}
-                    className="block"
-                  />
-                </motion.div>
+                <PassCard
+                  token={token}
+                  celebrant={celebrant}
+                  guestName={guest.nombre}
+                  dateLine={dateConfirmed ? `${dayNum} ${monthName} ${yearNum}` : undefined}
+                />
                 <a
                   href={`/api/qr?token=${token}`}
                   download={`invitacion-${guest.nombre.replace(/\s+/g, "-")}.png`}
@@ -312,11 +372,7 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
                   Descargar QR ↓
                 </a>
 
-                <WhatsAppShare href={waHref} />
 
-                <p className="text-xs text-center max-w-xs" style={{ color: "#7A6355" }}>
-                  Guarda esta pantalla o descarga tu QR. Lo vas a necesitar en la entrada.
-                </p>
                 <Link
                   href="/"
                   className="mt-2 rounded-xl px-6 py-3 text-sm font-light tracking-widest uppercase transition-opacity hover:opacity-80"
@@ -362,28 +418,6 @@ export default function InvitationClient({ guest, token }: { guest: Guest; token
           ✦ &nbsp; con cariño &nbsp; ✦
         </motion.p>
       </motion.div>
-    </div>
-  );
-}
-
-function WhatsAppShare({ href }: { href: string }) {
-  return (
-    <div className="mt-2 w-full flex flex-col items-center gap-3">
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-light tracking-widest uppercase transition-opacity hover:opacity-80"
-        style={{ background: "#25D366", color: "#FFFFFF" }}
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-          <path d="M12.04 2c-5.5 0-9.96 4.46-9.96 9.96 0 1.76.46 3.48 1.34 5L2 22l5.2-1.36a9.9 9.9 0 0 0 4.84 1.24h.01c5.5 0 9.96-4.46 9.96-9.96 0-2.66-1.04-5.16-2.92-7.04A9.9 9.9 0 0 0 12.04 2Zm5.8 14.06c-.25.7-1.44 1.32-1.98 1.36-.53.05-1.03.24-3.47-.72-2.94-1.16-4.8-4.16-4.95-4.35-.14-.2-1.18-1.57-1.18-3s.75-2.12 1.02-2.41c.26-.29.57-.36.76-.36l.55.01c.18.01.42-.07.65.5.25.6.85 2.07.92 2.22.07.15.12.32.02.52-.1.2-.15.32-.3.5-.15.17-.31.39-.44.52-.15.15-.3.31-.13.6.17.29.76 1.25 1.63 2.03 1.12 1 2.07 1.31 2.36 1.46.29.15.46.12.63-.07.17-.2.72-.84.91-1.13.19-.29.39-.24.65-.14.26.1 1.65.78 1.94.92.29.15.48.22.55.34.07.12.07.7-.18 1.4Z" />
-        </svg>
-        Enviar por WhatsApp
-      </a>
-      <p className="text-[11px] text-center max-w-xs" style={{ color: "#7A6355" }}>
-        Comparte esta invitación por WhatsApp.
-      </p>
     </div>
   );
 }
