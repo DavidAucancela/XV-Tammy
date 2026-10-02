@@ -87,3 +87,37 @@ export async function insertGuest(guest: { nombre: string; pases: number; telefo
 export async function updateGuestPasesTelefono(id: string, pases: number, telefono: string | null) {
   await getPool().query(`update guests set pases = $2, telefono = $3 where id = $1`, [id, pases, telefono]);
 }
+
+export type Recuerdo = {
+  id: string;
+  storage_key: string;
+  tipo: "foto" | "video";
+  content_type: string;
+  size_bytes: number;
+  created_at: string;
+  autor: string;
+};
+
+export async function insertRecuerdo(r: {
+  guest_id: string;
+  storage_key: string;
+  tipo: "foto" | "video";
+  content_type: string;
+  size_bytes: number;
+}) {
+  await getPool().query(
+    `insert into recuerdos (guest_id, storage_key, tipo, content_type, size_bytes)
+     values ($1, $2, $3, $4, $5) on conflict (storage_key) do nothing`,
+    [r.guest_id, r.storage_key, r.tipo, r.content_type, r.size_bytes]
+  );
+}
+
+export async function listRecuerdos(): Promise<Recuerdo[]> {
+  const { rows } = await getPool().query<Recuerdo>(
+    `select r.id, r.storage_key, r.tipo, r.content_type, r.size_bytes::int as size_bytes, r.created_at,
+            split_part(g.nombre, ' ', 1) as autor
+     from recuerdos r join guests g on g.id = r.guest_id
+     order by r.created_at desc limit 500`
+  );
+  return rows;
+}
