@@ -13,6 +13,7 @@ npm run lint                   # ESLint
 npm run seed                   # load guests from scripts/seed.ts into Postgres
 npm run seed:dry               # preview seed without writing to DB
 npm run db:migrate             # apply scripts/db/schema.sql against DATABASE_URL
+npm run whatsapp:reminder      # HTML panel of WhatsApp reminders for confirmed guests (reads Postgres)
 ```
 
 No test suite configured. Validate by running `dev` and testing routes with a browser or `curl`.
@@ -28,7 +29,7 @@ No test suite configured. Validate by running `dev` and testing routes with a br
 Digital invitation + QR check-in system for a quinceañera (50–150 guests). Next.js 15 + Postgres (Railway) + Railway.
 
 **Event:** Tammy Maguana Sánchez  
-**Date:** 2026-09-19 at 17:00 (Quito, Ecuador)
+**Date:** 2026-10-03 at 17:00 (Quito, Ecuador) — confirmed (`NEXT_PUBLIC_EVENT_DATE_CONFIRMED=true`)
 
 ### Routes
 
@@ -94,10 +95,11 @@ src/
 │       ├── auth/signout/route.ts
 │       └── qr/route.ts           # runtime: "nodejs" (qrcode incompatible with edge)
 ├── components/landing/
+│   ├── PassCard.tsx              # 3D QR card on /i/[token]
 │   ├── MeshBackground.tsx / FloatingIcons.tsx
 │   ├── GardenScene.tsx / Fireflies.tsx / Hummingbirds.tsx / PassingBirds.tsx
 │   ├── ButterflyGame.tsx / Butterflies.tsx
-│   ├── HomeHero.tsx / InvitationOpener.tsx
+│   ├── HomeHero.tsx / InvitationOpener.tsx  # InvitationOpener = entry envelope
 │   ├── PhotoGallery.tsx / PhotoGrid.tsx / GalleryNav.tsx
 │   ├── FamilyMessages.tsx / EventLocation.tsx
 │   ├── InvitePrompt.tsx
@@ -175,8 +177,8 @@ Copy `.env.example` to `.env.local` (dev) or `.env` (production/seed scripts).
 | `RESEND_API_KEY` | Sends magic-link emails, server-only | `re_...` |
 | `RESEND_FROM_EMAIL` | From-address for magic-link emails | `Acceso XV <acceso@tu-dominio.com>` |
 | `ADMIN_ALLOWED_EMAILS` | Comma-separated allowlist for `/login` | `a@x.com,b@x.com` |
-| `NEXT_PUBLIC_EVENT_DATE` | ISO 8601 with TZ offset | `2026-09-19T17:00:00-05:00` |
-| `NEXT_PUBLIC_EVENT_DATE_CONFIRMED` | `"true"` once the date is official; otherwise the site shows "Próximamente" everywhere instead of date/time/countdown/calendar link | `false` |
+| `NEXT_PUBLIC_EVENT_DATE` | ISO 8601 with TZ offset (`NEXT_PUBLIC_*` are baked at build: changing them on Railway triggers a redeploy) | `2026-10-03T17:00:00-05:00` |
+| `NEXT_PUBLIC_EVENT_DATE_CONFIRMED` | `"true"` once the date is official (currently `true` in `.env` and Railway); otherwise the site shows "Próximamente" everywhere instead of date/time/countdown/calendar link | `true` |
 | `NEXT_PUBLIC_VENUE_LAT` | Venue latitude | `-0.2234` |
 | `NEXT_PUBLIC_VENUE_LNG` | Venue longitude | `-78.5123` |
 | `NEXT_PUBLIC_CELEBRANT_NAME` | Celebrant name (hero + invite) | `Tammy` |
@@ -218,10 +220,16 @@ Copy `.env.example` to `.env.local` (dev) or `.env` (production/seed scripts).
 
 ### `/i/[token]` — Personalized invitation (SSR)
 - Champagne + rose gold color scheme matching landing
-- RSVP flow: select guests → confirm → QR display
-- Downloadable QR for mobile check-in
-- Event details (date/time/location)
+- Hero: celebrant name + guest name. No "pases reservados" line, no dress code, no WhatsApp share button (removed on purpose)
+- Date/time card (weekday, big day number, month/year, time) and a dark "cada vez más cerca" countdown with rolling digits. When the date is not confirmed it falls back to "Próximamente / Por confirmar"
+- RSVP flow: select guests → confirm → QR
+- After confirming, the QR lives in `PassCard` (`src/components/landing/PassCard.tsx`): a 3D card that tilts with the cursor on desktop, auto-sways on touch devices (`hover: none`), and stays still with `prefers-reduced-motion`. Downloadable QR link below it
+- The QR encodes `${NEXT_PUBLIC_APP_URL}/i/<token>` (see `/api/qr`). A phone's native camera only opens the invitation; check-in only happens from `/scan`
+- "¿Cómo llegar?" link to Google Maps is kept as-is; a full feature is planned for later
 - MusicPlayer component
+
+### Entry envelope (on `/`)
+- `InvitationOpener` (`src/components/landing/InvitationOpener.tsx`): animated envelope (flap, letter, wax seal) shown once per session (`sessionStorage` key `xv-invite-opened`). Tap the seal → flap opens, letter rises, petals burst (petals live outside the seal because the seal fades out), overlay fades after ~1.7 s
 
 ### `/scan` — Door QR scanner
 - Camera-based (html5-qrcode)
@@ -299,3 +307,12 @@ This project has a knowledge graph at `graphify-out/` (community structure, cros
 - **Broad review:** `graphify-out/GRAPH_REPORT.md` for architecture overview (only if queries don't surface enough)
 
 **Keep it current:** After significant code changes, run `graphify update .` (AST-based, no API calls).
+
+## Operations
+
+- **Deploys:** Railway auto-deploys on every merge to `main` and on every variable change. Branches/PRs do not deploy. Until the event (2026-10-03) avoid merging to `main` except for urgent fixes; see `docs/EVENTO.md`.
+- **Event-day runbook** (door check-in, pending guests, test cleanup, post-event tasks): `docs/EVENTO.md`.
+- **WhatsApp messages:** `scripts/generate-whatsapp-invites.mjs` (invitations; reads `guests.csv` + `links.txt`) and `scripts/generate-whatsapp-reminder.mjs` (reminders for confirmed guests; reads Postgres). Both greet with the guest's alias (first name only). The reminder panel keeps the "sent" state per guest in the browser's localStorage. Outputs (`*.html`, `guests.csv`, `links.txt`) contain PII and are gitignored.
+- **Railway:** project `XV-Tammy` (`e2e96ae0-55ed-42fe-b097-899992783002`), services `XV-Tammy` (app) and `Postgres`. The Supabase variables were removed. The Postgres public TCP Proxy is still open for local scripts — close it when no longer needed.
+- **Known tooling gap:** `npm run lint` fails (ESLint 9 has no flat config); rely on `tsc --noEmit` / `npm run build`.
+- **Local dev server:** `next dev` can take minutes to start on a loaded machine; port 3000 may be taken by another project (use `-p 3050`).

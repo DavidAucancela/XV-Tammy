@@ -1,209 +1,128 @@
 # XV Años — Tammy
 
-Sistema digital de invitaciones personalizadas y control de acceso con QR para una quinceañera. Construido con Next.js 15, Supabase y desplegado en Railway.
+Invitación digital personalizada y control de acceso con QR para los XV años de Tammy Maguana Sánchez.
+
+- **Evento:** sábado 3 de octubre de 2026, 5:00 pm (Quito, Ecuador)
+- **Producción:** https://xv-tammy-production.up.railway.app
+- **Escala:** 50–150 invitados
 
 ## Stack
 
 | Capa | Tecnología |
 |---|---|
-| Framework | Next.js 15 (App Router) |
-| Base de datos | Supabase (PostgreSQL + Realtime) |
+| Framework | Next.js 15 (App Router, `output: "standalone"`) |
+| Base de datos | PostgreSQL nativo de Railway (`pg`, acceso solo server-side) |
+| Auth del staff | Magic link propio: JWT con `jose` + email por Resend |
 | Estilos | Tailwind CSS v4 |
-| Animaciones | Framer Motion v12 |
-| Scanner QR | html5-qrcode |
-| Generación QR | qrcode (server-side PNG) |
-| Deploy | Railway |
+| Animaciones | Framer Motion |
+| QR | `qrcode` (genera el PNG) · `html5-qrcode` (escáner en puerta) |
+| Deploy | Railway (auto-deploy desde `main`) |
+
+> Supabase ya no se usa. Ver [`MIGRATION.md`](MIGRATION.md) para la historia de la migración.
 
 ## Rutas
 
 | Ruta | Descripción | Acceso |
 |---|---|---|
-| `/` | Landing page con countdown, galería, mensajes, video, mapa | Público |
-| `/i/[token]` | Invitación personalizada con QR | Público (token requerido) |
-| `/scan` | Escáner de QR para staff en puerta | Staff (dispositivo físico) |
-| `/admin` | Dashboard de check-in en tiempo real | Staff autenticado |
-| `/login` | Login por magic link (email OTP) | Staff |
-| `/api/qr?token=<token>` | Genera PNG del QR del invitado | Server-side |
-| `/api/checkin` | POST — registra ingreso del invitado | Server-side |
-| `/api/rsvp` | POST — confirma o declina RSVP | Server-side |
+| `/` | Landing de una sola pantalla: sobre de apertura, jardín con minijuego, cuenta regresiva | Público |
+| `/recuerdos` | Galería de fotos, mensajes de la familia, ubicación y calendario | Público |
+| `/i/[token]` | Invitación personalizada: fecha, cuenta regresiva, RSVP y tarjeta 3D con el QR | Link personal (token) |
+| `/scan` | Escáner de QR para la puerta (cámara) | Staff con sesión |
+| `/admin` | Panel de check-in en vivo (polling cada ~4 s) | Staff con sesión |
+| `/login` | Acceso por magic link | Correo en `ADMIN_ALLOWED_EMAILS` |
+| `/api/qr?token=` | PNG del QR (contiene el link `/i/<token>`) | Público |
+| `/api/invitacion` | POST `{ telefono }` → `{ token, nombre }` | Público |
+| `/api/rsvp` | POST confirmar/declinar (valida `pases_confirmados ≤ pases`) | Token |
+| `/api/checkin` | POST registra la entrada (idempotente) | Sesión de staff |
+| `/api/admin/guests` | GET lista de invitados | Sesión de staff |
+| `/api/auth/request-link`, `/auth/callback`, `/api/auth/signout` | Flujo del magic link | — |
+
+## Cómo funciona el QR
+
+El QR de cada invitado codifica su link personal `…/i/<token>`. **La cámara normal del celular solo abre la invitación y no registra nada.** El check-in se hace únicamente desde `/scan`, que lee el token y llama a `/api/checkin`. Guía completa en [`docs/EVENTO.md`](docs/EVENTO.md).
 
 ## Setup local
 
-### 1. Variables de entorno
-
-Copiar `.env.example` a `.env.local` y completar:
-
-```bash
-cp .env.example .env.local
-```
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-SUPABASE_SERVICE_ROLE_KEY=eyJ...        # solo server, nunca al browser
-
-NEXT_PUBLIC_EVENT_DATE=2026-12-31T20:00:00-05:00
-NEXT_PUBLIC_VENUE_LAT=-0.1234
-NEXT_PUBLIC_VENUE_LNG=-78.5678
-NEXT_PUBLIC_CELEBRANT_NAME=Tammy
-
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-DEV_ORIGIN=                             # opcional: IP local para probar en móvil
-```
-
-### 2. Schema de Supabase
-
-```sql
-create table guests (
-  id               uuid primary key default gen_random_uuid(),
-  nombre           text not null,
-  pases            int  not null default 1,
-  token            text not null unique,
-  rsvp_estado      text,
-  pases_confirmados int,
-  checked_in_at    timestamptz,
-  created_at       timestamptz default now()
-);
-
--- RPC idempotente de check-in (security definer)
-create or replace function check_in(p_token text)
-returns void language plpgsql security definer as $$
-begin
-  update guests
-  set checked_in_at = coalesce(checked_in_at, now())
-  where token = p_token;
-end;
-$$;
-```
-
-Habilitar RLS y agregar política para que solo usuarios autenticados lean `guests`.
-
-### 3. Instalar y correr
-
 ```bash
 npm install
-npm run dev        # http://localhost:3000
+cp .env.example .env        # los scripts leen .env (no .env.local)
+npm run db:migrate          # aplica scripts/db/schema.sql contra DATABASE_URL
+npm run dev                 # http://localhost:3000
 ```
+
+Variables de entorno (detalle en `CLAUDE.md`):
+
+| Variable | Para qué |
+|---|---|
+| `DATABASE_URL` | Postgres. Local: URL pública del proxy TCP de Railway. Producción: `${{Postgres.DATABASE_URL}}` (privada) |
+| `AUTH_SECRET` | Firma magic links y sesión. Distinto en local y producción |
+| `RESEND_API_KEY`, `RESEND_FROM_EMAIL` | Envío del magic link |
+| `ADMIN_ALLOWED_EMAILS` | Correos con acceso a `/login`, separados por coma |
+| `NEXT_PUBLIC_EVENT_DATE` | ISO 8601 con zona, p. ej. `2026-10-03T17:00:00-05:00` |
+| `NEXT_PUBLIC_EVENT_DATE_CONFIRMED` | `true` muestra fecha, hora y cuenta regresiva; `false` muestra "Próximamente" |
+| `NEXT_PUBLIC_VENUE_LAT`, `NEXT_PUBLIC_VENUE_LNG` | Coordenadas del salón |
+| `NEXT_PUBLIC_CELEBRANT_NAME` | Nombre de la quinceañera |
+| `NEXT_PUBLIC_APP_URL` | URL canónica (se usa en el QR y en los mensajes) |
+| `DEV_ORIGIN` | Opcional: IP local para probar en móvil |
+
+> Las variables `NEXT_PUBLIC_*` se incrustan al compilar: cambiarlas en Railway dispara un redeploy.
 
 ## Scripts
 
 ```bash
-npm run seed       # carga invitados de scripts/seed.ts a Supabase
-npm run seed:dry   # previsualiza sin escribir en DB
-npm run build      # type-check + build de producción
-npm run lint       # ESLint
+npm run dev | build | start | lint
+npm run db:migrate           # aplica el schema
+npm run seed:dry             # previsualiza la carga de invitados
+npm run seed                 # carga scripts/guests.csv a Postgres y escribe scripts/links.txt
+npm run whatsapp:reminder    # panel HTML de recordatorios para los confirmados
+node scripts/generate-whatsapp-invites.mjs   # panel de invitaciones (guests.csv + links.txt)
+./scripts/optimize-photos.sh <carpeta>       # optimiza y agrega fotos a public/photos/
 ```
 
-## Personalizar contenido
+Los HTML de WhatsApp, `guests.csv` y `links.txt` contienen datos personales y están en `.gitignore`.
 
-Editar `src/data/landingContent.ts` para cambiar fotos, mensajes, música y ubicación:
+### Mensajes por WhatsApp
 
-```ts
-// Fotos de la galería "Mi crecimiento" (paths en /public/photos/)
-export const photos: string[] = [
-  "/photos/foto1.jpg",    // aparecerá en slideshow
-  "/photos/foto2.jpg",
-];
+Ambos scripts generan un panel HTML con un botón por invitado que abre WhatsApp con el mensaje listo. El saludo usa el **alias** del invitado (solo su primer nombre). El panel de recordatorios (`whatsapp:reminder`) lee los confirmados directo de Postgres y guarda en el navegador (localStorage) qué mensajes ya se enviaron, con filtros y contadores. Ese estado vive solo en ese navegador. Para refrescar RSVPs hay que volver a correr el script.
 
-// Mensajes de la familia: texto + video
-export const familyItems = [
-  // Texto (abre como panel)
-  { id: "mama-papa", type: "text", nombre: "Mamá y Papá", text: "..." },
-  { id: "abuela", type: "text", nombre: "Abuela María", text: "..." },
-  
-  // Video (abre iframe con pausa de música)
-  { id: "tia-rosa", type: "video", nombre: "Tía Rosa", videoUrl: "..." },
-];
+## Contenido editable
 
-// Música de fondo del landing
-export const songUrl = "https://example.com/mi-princesa.mp3";
+Todo en `src/data/landingContent.ts`: mensajes y videos de la familia, música, salón, código de vestimenta y foto del hero. Las fotos de la galería se descubren solas desde `public/photos/` (nombres numéricos, orden numérico; `2.1.jpeg` va entre `2.jpg` y `3.jpg`).
 
-// Detalles del evento
-export const venue = {
-  name: "Salón Elegance",
-  address: "Av. Principal 123, Quito, Ecuador",
-};
+Pendiente de contenido: 3 de los 6 items de `familyItems` son videos de YouTube de relleno; se reemplazarán con videos grabados en la fiesta.
 
-// Foto del hero (medallón)
-export const heroPhoto = "/photos/tammy-portrait.jpg";
-```
-
-**Secciones actualizadas:**
-- "Mi crecimiento" — galería de fotos con Ken Burns + filmstrip
-- "Cada vez más cerca" — countdown timer
-- "Mensajes de tu familia" — accordion (texto + video)
-- "Lugar y hora" — fecha, hora, mapa
-
-## Estructura del proyecto
+## Estructura
 
 ```
 src/
-├── app/
-│   ├── layout.tsx              # fuentes + metadata OG
-│   ├── globals.css             # keyframes del mesh + color-scheme
-│   ├── page.tsx                # landing (Server Component orquestador)
-│   ├── i/[token]/page.tsx      # invitación personalizada (SSR)
-│   ├── scan/page.tsx           # escáner QR
-│   ├── admin/page.tsx          # dashboard (requiere sesión)
-│   ├── login/page.tsx          # magic link login
-│   ├── auth/callback/route.ts  # intercambio de código OAuth
-│   └── api/
-│       ├── checkin/route.ts    # POST — check-in
-│       ├── rsvp/route.ts       # POST — confirmar/declinar
-│       └── qr/route.ts         # GET  — PNG del QR
-├── components/
-│   └── landing/
-│       ├── MeshBackground.tsx  # 5 blobs animados, gradientes suaves
-│       ├── FloatingIcons.tsx   # 12 iconos decorativos flotantes (stars/diamonds)
-│       ├── StickyNav.tsx       # nav glassmorphism en --ink
-│       ├── HeroSection.tsx     # hero 220×220px medallion centered + parallax
-│       ├── CountdownSection.tsx # "Cada vez más cerca"
-│       ├── PhotoGallery.tsx    # Ken Burns slideshow + thumbnails
-│       ├── FamilyMessages.tsx  # accordion de texto/video con MusicContext
-│       ├── EventLocation.tsx   # "Lugar y hora" — 2-col grid + maps
-│       ├── InvitePrompt.tsx    # CTA + Add to Calendar
-│       ├── MusicPlayer.tsx     # reproductor fijo con pausa automática
-│       ├── RevealText.tsx      # kinetic word-reveal
-│       ├── TiltCard.tsx        # tilt 3D + cursor glow
-│       ├── SectionHeading.tsx  # headers consistentes
-│       └── Button.tsx          # botones reutilizables
-├── data/
-│   └── landingContent.ts       # fotos, mensajes, video, venue
-└── lib/supabase/
-    ├── client.ts               # browser client (anon key)
-    └── server.ts               # SSR client + createAdminClient
+├── app/                    # rutas (ver tabla) y layout
+├── components/landing/     # hero, sobre de apertura, galería, PassCard (tarjeta 3D del QR), etc.
+├── context/MusicContext.tsx
+├── data/landingContent.ts  # contenido editable
+├── lib/
+│   ├── db.ts               # pool pg perezoso + consultas tipadas (solo server)
+│   ├── auth.ts             # magic link + sesión (jose), allowlist
+│   ├── email.ts            # Resend
+│   ├── eventDetails.ts     # fecha/hora/calendario derivados de env
+│   └── photos.ts
+└── middleware.ts           # protege /admin y /scan
+scripts/                    # db, seed, WhatsApp, optimización de fotos
+docs/EVENTO.md             # guía operativa del evento
 ```
 
-## Diseño visual
+## Despliegue (Railway)
 
-**Paleta editorial (champagne + rose gold):**
-- Fondo: champán claro (#F3E6D6)
-- Texto principal: taupe oscuro (#4A372E)
-- Acentos: rosa viejo (#B4707C) + dorado suave (#C6A25E)
-- Widgets flotantes: vidrio oscuro (#2B211C)
-
-**Características:**
-- Animated gradient mesh: 5 blobs con opacidades de 22–25%
-- Floating icons: 12 elementos decorativos (stars/diamonds) con parallax
-- Centered layouts: hero medallion, texto, botones — todo simétrico
-- Responsive: mobile 375px+, tablet 768px+, desktop 1024px+
-- Glassmorphism nav y player (blur + transparency)
-
-**Animaciones:**
-- Framer Motion: parallax, word-reveal, floating icons, countdown
-- Smooth transitions: 150–400ms durations
-- Respeta `prefers-reduced-motion`
+- Proyecto `XV-Tammy`, ambiente `production`, servicios `XV-Tammy` (app) y `Postgres`.
+- **Auto-deploy desde `main`**: cada merge a `main` reconstruye y publica. Las ramas y PRs no despliegan.
+- `npm start` debe conservar `HOSTNAME=0.0.0.0` (Railway fija `HOSTNAME` al ID del contenedor y rompe el proxy).
+- El build copia `public/` y `.next/static/` al bundle standalone (`postbuild`).
+- Cambiar variables en Railway también dispara un redeploy.
 
 ## Seguridad
 
-- Auth callback valida que `?next=` sea un path relativo (evita open redirect)
-- `createAdminClient` solo se llama desde server-side (service role key)
-- CSP headers configurados en `next.config.ts` (frame-src, connect-src, etc.)
-- RLS en Supabase: verificar que la tabla `guests` solo sea legible por usuarios autenticados
-
-## Deploy en Railway
-
-1. Conectar el repositorio en Railway
-2. Agregar todas las variables de entorno del `.env.example`
-3. Definir `NEXT_PUBLIC_APP_URL` con el dominio de Railway
-4. Railway detecta Next.js y corre `npm run build` + `npm start` automáticamente
+- `DATABASE_URL` solo la lee `src/lib/db.ts`, importado únicamente desde código de servidor.
+- Cookie de sesión `httpOnly` + `secure` + `sameSite=lax`, 7 días, verificada en `middleware.ts` y dentro de `/api/admin/guests`.
+- `/api/auth/request-link` responde igual exista o no el correo (no permite enumerar el personal).
+- `?next=` solo acepta rutas relativas (evita open redirect).
+- CSP, `X-Frame-Options` y `X-Content-Type-Options` en `next.config.ts`.
+- Los archivos con datos personales (`guests.csv`, `links.txt`, HTML de WhatsApp, backups, hojas de invitados) están en `.gitignore`.

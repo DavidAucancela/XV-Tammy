@@ -7,6 +7,8 @@ Complemento de `CLAUDE.md` — solo hechos no obvios que un agente probablemente
 - `npm run build` == `next build` (type-check + build). No existe `tsc` separado.
 - Seed: `npm run seed` lee **`.env`** (no `.env.local`), insume `scripts/guests.csv`, escribe `scripts/links.txt`. `.env` está en `.gitignore`.
 - Seed script usa `npx tsx` internamente, no `ts-node` ni `tsc`.
+- `npm run lint` hoy falla (ESLint 9 sin config flat): validar con `npx tsc --noEmit` o `npm run build`.
+- `next dev` puede tardar minutos en arrancar en una máquina cargada; el puerto 3000 puede estar ocupado por otro proyecto (usar `-p 3050`).
 - `npm run seed:dry` previsualiza sin escribir en DB.
 
 ## Imports
@@ -19,14 +21,21 @@ Complemento de `CLAUDE.md` — solo hechos no obvios que un agente probablemente
 - PostCSS plugin: `@tailwindcss/postcss` (v4), no `tailwindcss` (v3).
 - Variables CSS custom (champagne palette) en `:root` de `globals.css` — colores, sombras, radius, motion.
 
-## QR route
+## QR
 
 - `/api/qr/route.ts` exporta `runtime = "nodejs"` porque `qrcode` no funciona en edge runtime. No cambiar a edge.
+- El QR codifica `${NEXT_PUBLIC_APP_URL}/i/<token>`, no el token suelto. La cámara normal solo abre la invitación; el check-in solo ocurre desde `/scan` (`/api/checkin`).
+- En `/i/[token]` el QR se muestra dentro de `PassCard` (tarjeta 3D, `src/components/landing/PassCard.tsx`).
 
-## Clientes Supabase
+## Deploy
 
-- `createAdminClient` (`lib/supabase/server.ts`) usa `autoRefreshToken: false, persistSession: false` — es service role, no maneja sesiones de usuario.
-- `createClient` (SSR) usa cookie store via `next/headers`; en Server Components los `setAll` call se tragan silenciosamente (los cookies se setean en middleware).
+- Railway despliega en cada merge a `main` y en cada cambio de variables. Ramas y PRs no despliegan. Antes del evento (2026-10-03) no mergear a `main` salvo urgencias. Ver `docs/EVENTO.md`.
+
+## Base de datos y auth (sin Supabase)
+
+- Supabase ya no existe en el proyecto. Todo acceso a datos pasa por `src/lib/db.ts` (pool `pg` perezoso, solo importable desde código de servidor). No hay RLS ni RPCs.
+- Auth del staff: magic link propio con JWT (`jose`, `src/lib/auth.ts`) + Resend (`src/lib/email.ts`). La sesión es la cookie `session` (7 días), verificada en `middleware.ts` para `/admin` y `/scan`, y de nuevo dentro de `/api/admin/guests`.
+- Solo los correos en `ADMIN_ALLOWED_EMAILS` reciben el magic link. Resend sin dominio verificado solo entrega al correo de la cuenta.
 
 ## Dev server
 
@@ -36,7 +45,7 @@ Complemento de `CLAUDE.md` — solo hechos no obvios que un agente probablemente
 
 - `src/context/MusicContext.tsx` provee `MusicProvider` y hook `useMusic()`. Se monta en `layout.tsx` envolviendo toda la app.
 - `MusicPlayer` se renderiza en `/recuerdos` y en `/i/[token]`. Se auto-pausa cuando se reproduce un video de familia (`FamilyMessages`).
-- La música de fondo y el `dressCode` se definen en `src/data/landingContent.ts`.
+- La música de fondo y el `dressCode` se definen en `src/data/landingContent.ts` (el `dressCode` ya no se muestra en `/i/[token]`; sí en los mensajes de WhatsApp).
 
 ## Animaciones y componentes decorativos
 

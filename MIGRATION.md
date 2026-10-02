@@ -53,7 +53,7 @@ Ver `.env.example` y la tabla en `CLAUDE.md` → Environment Variables. Resumen:
 | `RESEND_API_KEY` / `RESEND_FROM_EMAIL` | Envío del magic-link. Sin dominio verificado en Resend, `onboarding@resend.dev` solo entrega al email con el que se creó la cuenta de Resend — hoy alcanza porque solo David entra a `/admin` |
 | `ADMIN_ALLOWED_EMAILS` | Allowlist de `/login` — hoy solo `david102002@hotmail.com` |
 
-Variables de Supabase (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) quedaron **removidas** de `.env`/`.env.example`; en Railway (producción) siguen listadas en el servicio pero sin uso — se pueden borrar cuando se confirme que todo sigue estable.
+Variables de Supabase (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) **removidas** de `.env`, `.env.example` y también del servicio `XV-Tammy` en Railway (2026-10-02; el borrado disparó un redeploy sin cambios de código).
 
 ## Verificación hecha
 
@@ -63,8 +63,8 @@ Variables de Supabase (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KE
 
 ## Pendiente / seguimiento
 
-- [ ] Confirmar en vivo que el magic-link a `/login` llega al correo y el login completo funciona en producción (no solo probado con un JWT generado a mano).
+- [x] Login por magic link, `/scan` y `/admin` probados en producción (2026-10-02).
 - [ ] Decidir si cerrar el TCP Proxy público del Postgres una vez que ya no haga falta para desarrollo local.
-- [ ] Borrar las variables de Supabase que quedaron sin uso en el servicio `XV-Tammy` de Railway.
-- [ ] Si en algún momento se suma otro staff con otro email a `/admin`/`/scan`, hay que verificar un dominio propio en Resend (el modo sandbox actual solo entrega a un destinatario).
+- [x] Variables de Supabase borradas de Railway.
+- [ ] Si en algún momento se suma otro staff con otro email a `/admin`/`/scan`, hay que verificar un dominio propio en Resend (el modo sandbox actual solo entrega a un destinatario). Para el evento solo entra David, así que no hace falta.
 - [ ] Configurar backups periódicos del Postgres nuevo (Railway lo permite desde el dashboard del servicio) — lección aprendida de este incidente.
