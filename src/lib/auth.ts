@@ -53,3 +53,25 @@ export async function verifySessionToken(token: string): Promise<{ email: string
 }
 
 export const SESSION_COOKIE_NAME = SESSION_COOKIE;
+
+/** Sesión del invitado en /recuerdos — cookie propia, vive 30 días. */
+export const GUEST_COOKIE_NAME = "xv_guest";
+export const GUEST_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
+
+export async function createGuestSessionToken(guestId: string): Promise<string> {
+  return new SignJWT({ guestId, purpose: "guest" })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("30d")
+    .sign(secretKey());
+}
+
+export async function verifyGuestSessionToken(token: string): Promise<{ guestId: string } | null> {
+  try {
+    const { payload } = await jwtVerify(token, secretKey());
+    if (payload.purpose !== "guest" || typeof payload.guestId !== "string") return null;
+    return { guestId: payload.guestId };
+  } catch {
+    return null;
+  }
+}

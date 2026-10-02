@@ -30,6 +30,15 @@ export async function getGuestByToken(token: string): Promise<Guest | null> {
   return rows[0] ?? null;
 }
 
+export async function getGuestById(id: string): Promise<Guest | null> {
+  const { rows } = await getPool().query<Guest>(
+    `select id, nombre, pases, telefono, token, rsvp_estado, pases_confirmados, checked_in_at, created_at
+     from guests where id = $1`,
+    [id]
+  );
+  return rows[0] ?? null;
+}
+
 /** Idempotente: solo marca check-in si todavía no estaba. */
 export async function checkInGuest(token: string): Promise<{ checked_in_at: string } | null> {
   const { rows } = await getPool().query<{ checked_in_at: string }>(
