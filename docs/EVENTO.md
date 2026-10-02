@@ -47,12 +47,19 @@ Railway despliega en cada merge a `main` (y al cambiar variables). Hasta pasado 
 
 - Trabajar y hacer push en ramas es libre: no despliega.
 - **No hacer merge a `main`** salvo un arreglo urgente. Si hace falta: rama pequeña, merge, esperar el deploy (el anterior sigue sirviendo hasta que el nuevo pase a `SUCCESS`); se puede volver al deploy previo desde el panel de Railway.
-- Pendientes para mergear después: PR de limpieza `chore/limpieza-repo`, videos reales, "¿Cómo llegar?" completo.
+- Ya mergeado: limpieza del repo y subida de recuerdos (PR #28 y #29). Pendientes: videos reales, "¿Cómo llegar?" completo.
+
+## Recuerdos (fotos y videos de invitados)
+
+- Cada invitado entra por el botón "Compartir mis recuerdos" de su invitación o validando su celular en `/recuerdos`. Sin sesión la sección sale bloqueada.
+- Si alguien reporta que no puede subir: probar su link `/api/recuerdos/entrar?t=<token>`; ver consola del navegador (error de CORS ⇒ re-correr `scripts/set-bucket-cors.mjs`; 401 ⇒ sesión expirada).
+- Límite: 50MB por archivo (JPG, PNG, WEBP, HEIC, MP4, MOV, WEBM).
 
 ## Después del evento
 
-- Mensaje por WhatsApp para visitar `/recuerdos` (fotos y más). Requiere reabrir el acceso público al Postgres o correr el script con una `DATABASE_URL` accesible.
+- Mensaje por WhatsApp para visitar `/recuerdos` y subir/ver recuerdos: usar el link personal `https://<dominio>/api/recuerdos/entrar?t=<token>` (abre la sesión del invitado y lleva directo a la sección de subida). Requiere reabrir el acceso público al Postgres o correr el script con una `DATABASE_URL` accesible.
 - Agregar los videos grabados en la fiesta a `familyItems` (`src/data/landingContent.ts`).
+- Recuerdos subidos por los invitados: viven en el bucket `recuerdos` de Railway (pestaña **Files** del bucket para verlos/descargarlos) y su registro en la tabla `recuerdos`. Descargar una copia antes de borrar nada; el bucket cuesta ~$0.015/GB-mes.
 - Cerrar el TCP Proxy público del Postgres en Railway si ya no se necesita.
 - Mover a un lugar seguro los archivos con datos personales de la raíz (`backup - Supabase/`, `INVITADOS.numbers`, `invitados_extracted.csv`).
 - Configurar backups periódicos del Postgres desde el panel de Railway.

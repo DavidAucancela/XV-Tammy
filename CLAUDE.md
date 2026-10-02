@@ -37,12 +37,17 @@ Digital invitation + QR check-in system for a quinceañera (50–150 guests). Ne
 - `/` — single-viewport hero (no scroll): seal intro, garden scene + minigame, countdown, event preview → link to `/recuerdos`
 - `/recuerdos` — scrollable: photo gallery, family messages, full location + map, invite/calendar CTA
 - `/i/[token]` — personalized invitation with RSVP flow (SSR, token-gated)
+- `/recuerdos` also hosts the guest photo/video upload section (needs the `xv_guest` session; see "Recuerdos upload" below)
 
 **APIs**
 - `/api/qr?token=<token>` — PNG generation (nodejs runtime only; immutable cache)
 - `/api/invitacion` — POST `{ telefono }` → `{ token, nombre }` (phone lookup)
 - `/api/rsvp` — POST RSVP confirm/decline (validates `pases_confirmados ≤ pases`)
 - `/api/checkin` — POST guest entry (admin only)
+- `/api/recuerdos/entrar?t=<token>` — GET: validates the invitation token, sets the `xv_guest` cookie, redirects to `/recuerdos#recuerdos-compartidos`
+- `/api/recuerdos/sesion` — GET session state (`{nombre}` or 401) · POST `{ telefono }` opens a session · DELETE closes it
+- `/api/recuerdos` — GET list with signed read URLs · POST registers an uploaded object (HeadObject + 50MB check); both need the `xv_guest` cookie
+- `/api/recuerdos/presign` — POST `{ contentType, size }` → `{ key, uploadUrl }` (signed PUT to the bucket); needs the `xv_guest` cookie
 
 **Auth & Admin**
 - `/scan` — QR scanner for door staff (camera-based)
@@ -72,6 +77,8 @@ created_at (timestamptz, default now())
 Schema lives in `scripts/db/schema.sql`, applied with `npm run db:migrate`.
 
 - No RLS/RPCs — access is enforced entirely at the Next.js layer: every query goes through `src/lib/db.ts`, which is only ever imported from server-only code (API routes, Server Components). `DATABASE_URL` is never exposed to the browser, same isolation model the old `createAdminClient()` had.
+**Table `recuerdos`**: `id`, `guest_id` (→ guests, cascade), `storage_key` (unique), `tipo` (`foto`|`video`), `content_type`, `size_bytes`, `created_at`. Metadata of the files stored in the Railway bucket.
+
 - `check_in` is a plain idempotent `UPDATE ... WHERE checked_in_at IS NULL` in `checkInGuest()` (`src/lib/db.ts`) — no stored procedure needed anymore.
 
 ## Architecture & File Structure
@@ -166,6 +173,14 @@ export default async function Page(props: { params: Promise<{ token: string }> }
 - `MusicPlayer` renders on `/recuerdos` + `/i/[token]` only
 - Auto-pauses during family video playback
 
+### Recuerdos upload (guest photos/videos)
+
+- **Access:** only guests with a session. `xv_guest` cookie = `jose` JWT (httpOnly, 30 days) built in `src/lib/guestSession.ts` / `src/lib/auth.ts`, revalidated against `guests` on every request (a deleted guest loses access immediately). Opened via the invitation link (`/api/recuerdos/entrar?t=`, button on `/i/[token]`) or by validating the phone (`InvitePrompt` → `POST /api/recuerdos/sesion`). Without a session the section renders dimmed with a notice (`UploadRecuerdos.tsx`).
+- **Storage:** private S3 bucket `recuerdos` on Railway (sjc), ~$0.015/GB-month, free egress/operations. Browser uploads straight to it via presigned PUT; the server never proxies the file (keeps the standalone container small). `src/lib/storage.ts`.
+- **CORS:** not configurable in the Railway dashboard. Applied by API: `railway run -s XV-Tammy node scripts/set-bucket-cors.mjs` (origins: `localhost:3050` + `NEXT_PUBLIC_APP_URL`). Re-run if the domain changes.
+- **CSP:** `next.config.ts` allows `https://*.storageapi.dev` in `img-src`, `media-src`, `connect-src`.
+- **Local testing:** `railway run -s XV-Tammy -- npm run dev -- -p 3050` injects `S3_*`; the internal `DATABASE_URL` does not resolve locally, so export the one from `.env`.
+
 ## Environment Variables
 
 Copy `.env.example` to `.env.local` (dev) or `.env` (production/seed scripts).
@@ -177,6 +192,7 @@ Copy `.env.example` to `.env.local` (dev) or `.env` (production/seed scripts).
 | `RESEND_API_KEY` | Sends magic-link emails, server-only | `re_...` |
 | `RESEND_FROM_EMAIL` | From-address for magic-link emails | `Acceso XV <acceso@tu-dominio.com>` |
 | `ADMIN_ALLOWED_EMAILS` | Comma-separated allowlist for `/login` | `a@x.com,b@x.com` |
+| `S3_ENDPOINT`, `S3_BUCKET`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Railway bucket `recuerdos` (server-only). In Railway they are references to the bucket (`${{recuerdos.ENDPOINT}}`…) | `https://t3.storageapi.dev` |
 | `NEXT_PUBLIC_EVENT_DATE` | ISO 8601 with TZ offset (`NEXT_PUBLIC_*` are baked at build: changing them on Railway triggers a redeploy) | `2026-10-03T17:00:00-05:00` |
 | `NEXT_PUBLIC_EVENT_DATE_CONFIRMED` | `"true"` once the date is official (currently `true` in `.env` and Railway); otherwise the site shows "Próximamente" everywhere instead of date/time/countdown/calendar link | `true` |
 | `NEXT_PUBLIC_VENUE_LAT` | Venue latitude | `-0.2234` |
